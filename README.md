@@ -30,6 +30,8 @@ Chen, K. T., Ngo, Q. Q., Kurzhals, K., Marriott, K., Dwyer, T., Sedlmair, M., & 
 
 Pozdniakov, S., Martinez-Maldonado, R., Tsai, Y. S., Echeverria, V., Srivastava, N., & Gasevic, D. (2023, March). How Do Teachers Use Dashboards Enhanced with Data Storytelling Elements According to their Data Visualization Literacy Skills?. In LAK23: 13th International Learning Analytics and Knowledge Conference (pp. 89-99).
 
+Wang, Y., Jiang, Y., Hu, Z., Ruhdorfer, C., Bâce, M., Bulling, A. (2024, June). VisRecall++: Analysing and Predicting Visualisation Recallability from Gaze Behaviour. in Proceedings of the ACM on Human-Computer Interaction (PACM HCI), vol. 8, no. ETRA, Art. 239.
+
 ## Media
   * Visual eye tracking data analysis using Gazealytics was featured by [Merve Keskin](https://drmervekeskin.wordpress.com/) in [Geomob Podcast - 186. Merve Keskin: Map Usability](https://thegeomob.com/podcast/episode-186) (30:07 - 34:05) in producing more insightful outcomes with straightforward visualizations and interactions than traditional eye tracking data analysis methods.
 
@@ -38,7 +40,7 @@ Pozdniakov, S., Martinez-Maldonado, R., Tsai, Y. S., Echeverria, V., Srivastava,
   * Python 3.5 or above (web server scripting)
 
 ## Tutorial
-There are some videos for getting started with gazealytics (whose previous release was named as webVETA).
+There are some videos for getting started with Gazealytics (whose previous release was named as webVETA).
 
   * The [features video](https://www.youtube.com/watch?v=TihdrjG0B8g&feature=youtu.be) of Gazealytics
   * The [setup video](https://www.youtube.com/watch?v=-vfOij3I3tc) which describes how to set up AOIs, TWIs, workspace etc
