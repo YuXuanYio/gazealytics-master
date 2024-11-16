@@ -173,9 +173,10 @@ This starts a server in development mode at http://localhost:8080/.
 pyopencl is not required unless working with saccade bundling visualizations
 
 ## Team 
-The toolkit is developed by:
-  * Kun-Ting Chen (Centre for Research on Engineering Software Technologies, University of Adelaide)
+The toolkit is developed and maintained by:
+  * Kun-Ting Chen (University of Stuttgart)
   * Yao Wang (University of Stuttgart)
+  * Sita Vriend (University of Stuttgart)
   * Sarah Goodwin (Monash University)
 
 Past developers:
