@@ -24,13 +24,15 @@ Please reference using the reference below:
 }
 
 ## Used by
-Cai, M., Zheng, B., & Demmans Epp, C. (2022, July). Towards Supporting Adaptive Training of Injection Procedures: Detecting Differences in the Visual Attention of Nursing Students and Experts. In Proceedings of the 30th ACM Conference on User Modeling, Adaptation and Personalization (pp. 286-294).
+Vriend, S. A., Vidyapu, S., Rama, A., Chen, K. T., & Weiskopf, D. (2024, June). Which Experimental Design is Better Suited for VQA Tasks?: Eye Tracking Study on Cognitive Load, Performance, and Gaze Allocations. In Proceedings of the 2024 Symposium on Eye Tracking Research and Applications (pp. 1-7).
+
+Wang, Y., Jiang, Y., Hu, Z., Ruhdorfer, C., Bâce, M., Bulling, A. (2024, June). VisRecall++: Analysing and Predicting Visualisation Recallability from Gaze Behaviour. in Proceedings of the ACM on Human-Computer Interaction (PACM HCI), vol. 8, no. ETRA, Art. 239.
 
 Chen, K. T., Ngo, Q. Q., Kurzhals, K., Marriott, K., Dwyer, T., Sedlmair, M., & Weiskopf, D. (2023, May). Reading Strategies for Graph Visualizations that Wrap Around in Torus Topology. In Proceedings of the 2023 Symposium on Eye Tracking Research and Applications (pp. 1-7).
 
 Pozdniakov, S., Martinez-Maldonado, R., Tsai, Y. S., Echeverria, V., Srivastava, N., & Gasevic, D. (2023, March). How Do Teachers Use Dashboards Enhanced with Data Storytelling Elements According to their Data Visualization Literacy Skills?. In LAK23: 13th International Learning Analytics and Knowledge Conference (pp. 89-99).
 
-Wang, Y., Jiang, Y., Hu, Z., Ruhdorfer, C., Bâce, M., Bulling, A. (2024, June). VisRecall++: Analysing and Predicting Visualisation Recallability from Gaze Behaviour. in Proceedings of the ACM on Human-Computer Interaction (PACM HCI), vol. 8, no. ETRA, Art. 239.
+Cai, M., Zheng, B., & Demmans Epp, C. (2022, July). Towards Supporting Adaptive Training of Injection Procedures: Detecting Differences in the Visual Attention of Nursing Students and Experts. In Proceedings of the 30th ACM Conference on User Modeling, Adaptation and Personalization (pp. 286-294).
 
 ## Media
   * Visual eye tracking data analysis using Gazealytics was featured by [Merve Keskin](https://drmervekeskin.wordpress.com/) in [Geomob Podcast - 186. Merve Keskin: Map Usability](https://thegeomob.com/podcast/episode-186) (30:07 - 34:05) in producing more insightful outcomes with straightforward visualizations and interactions than traditional eye tracking data analysis methods.
