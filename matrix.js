@@ -42,6 +42,7 @@ let button;
 let videoinput;
 let toi_start_timestamp_button = null;
 let toi_end_timestamp_button = null;
+let useFrameButton = null;
 let setvideotime;
 let videomoderadio;
 let videoloaded = false;
@@ -1015,6 +1016,7 @@ let matrixsketch = (p) => {
 		}
 	};
 
+	// MARK: - video_draw
 	p.video_draw = () => {
 		p.textFont(fb); p.textAlign(p.LEFT);
 		if( selected_data == -1){ 
@@ -1071,6 +1073,7 @@ let matrixsketch = (p) => {
 		document.getElementById("selecteddataset").innerHTML = DATASETS[selected_data].name;
 	};
 
+	// MARK: - set_twi_start_time
 	p.set_twi_start_time = () => {
 		if(selected_data != -1 && VIDEOS[selected_data] != null && VIDEOS[selected_data] != undefined && DATASETS[selected_data] != undefined &&
 			DATASETS[selected_data].fixs.length >= 2){
@@ -1079,15 +1082,63 @@ let matrixsketch = (p) => {
 		}
 	};
 
+	// MARK: - set_twi_end_time
 	p.set_twi_end_time = () => {
 		if(selected_data != -1 && VIDEOS[selected_data] != null && VIDEOS[selected_data] != undefined && DATASETS[selected_data] != undefined &&
 			DATASETS[selected_data].fixs.length >= 2){
 			document.getElementById(selected_data+'_right').value = format_time(VIDEOS[selected_data].videoobj.time());
 			update_timeslider(selected_data);			
 		}
-		
 	};
 
+	// MARK: - extractCurrentFrame
+	p.extractCurrentFrame = () => {
+		console.log("extractCurrentFrame started."); 
+	
+		if (selected_data === -1 || !VIDEOS[selected_data] || !VIDEOS[selected_data].videoobj) {
+			console.error("womp womp");
+			return;
+		}
+	
+		const videoElement = VIDEOS[selected_data].videoobj.elt || VIDEOS[selected_data].videoobj;
+	
+		if (!(videoElement instanceof HTMLVideoElement)) {
+			console.error("video error");
+			return;
+		}
+	
+		// Get the current playback time
+		const currentTime = videoElement.currentTime || VIDEOS[selected_data].videoobj.time();
+		console.log("current playback time:", currentTime);
+	
+		const videoWidth = videoElement.videoWidth;
+		const videoHeight = videoElement.videoHeight;
+	
+		if (!videoWidth || !videoHeight) {
+			console.error("womp womp womp");
+			return;
+		}
+	
+		// temp canvas to draw the video frame and extract the image data
+		const frameCanvas = document.createElement('canvas');
+		frameCanvas.width = videoWidth;
+		frameCanvas.height = videoHeight;
+		const frameContext = frameCanvas.getContext('2d');
+	
+		frameContext.drawImage(videoElement, 0, 0, videoWidth, videoHeight);
+	
+		const frameDataUrl = frameCanvas.toDataURL();
+	
+		image_url = frameDataUrl;
+		image_changed = true;
+		loaded = false;
+
+		console.log("extractCurrentFrame finished.");
+	};
+	
+	
+
+	// MARK: - load_video
 	p.load_video = (file) => {
 		videoloaded = true;
 		if(currentVideoObj != undefined && currentVideoObj != null )
@@ -1120,9 +1171,15 @@ let matrixsketch = (p) => {
 			toi_end_timestamp_button.mousePressed(p.set_twi_end_time);
 			toi_end_timestamp_button.parent("selectfileinput");
 		}
+		if (useFrameButton == null) {
+			useFrameButton = p.createButton('Use Frame As BG');
+			useFrameButton.mousePressed(p.extractCurrentFrame);
+			useFrameButton.parent("selectfileinput");
+		}
 	};
 };
 
+// MARK: - delete_video
 let delete_video = () => {
 	if(mat_type == "video" && selected_data != -1 && VIDEOS[selected_data] != null && VIDEOS[selected_data] != undefined && VIDEOS[selected_data].videoobj != null &&
 		VIDEOS[selected_data].videoobj != undefined) {
