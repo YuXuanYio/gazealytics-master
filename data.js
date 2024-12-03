@@ -1507,3 +1507,60 @@ let updateTwiSelected = (selectedDataset) => {
 		document.getElementById('extract_video_button').style.display = 'block';
 	}
 }
+
+let importNotes = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.tsv';
+
+    input.onchange = function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const content = e.target.result;
+                processNotesTSV(content);
+            };
+            
+            reader.readAsText(file);
+        }
+    };
+
+    input.click();
+}
+
+let processNotesTSV = (notesContent) => {
+    const lines = notesContent.trim().split('\n');
+    const headers = lines[0].split('\t');
+    const rows = lines.slice(1);
+
+    const dataByParticipant = {};
+
+    rows.forEach((line) => {
+        const values = line.split('\t');
+        const rowData = {};
+        
+        headers.forEach((header, index) => {
+            rowData[header] = values[index] || null;
+        });
+
+        const participantID = rowData['ParticipantID'];
+        if (!dataByParticipant[participantID]) {
+            dataByParticipant[participantID] = { events: [] };
+        }
+
+		dataByParticipant[participantID].startTime = rowData['StartTime'];
+
+        dataByParticipant[participantID].events.push({
+            eventDetails: rowData['EventDetails'],
+            type: rowData['Type'],
+            location: rowData['Location'],
+            timestamp: rowData['Timestamp'],
+            observer: rowData['Observer'],
+        });
+    });
+
+    importedNotes = dataByParticipant;
+	console.log(importedNotes);
+}
