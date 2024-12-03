@@ -280,6 +280,7 @@ function new_file(){
 			background_changed = true; timeline_changed = true; matrix_changed = true;
 			make_note_dataset_selectors();
 			if(newdata.fixs.length < 2){cluster_warn+= '   ' +newdata.name+'\n'}
+			updateDataSelected(DATASETS.length-1);	
 		}
 		fileCounter += 1;
 		document.getElementById("dataset_load_txt").innerHTML = '';
@@ -505,6 +506,7 @@ function select_data(id){
 		update_topos = true;
 	// background_changed |= SHOW_FIX||SHOW_TOPO;
 	// if(SHOW_TOPO) image_changed = true;
+	updateDataSelected(id);
 }
 function select_twi(id){
 	list = document.getElementById('twilist').children;
@@ -692,6 +694,7 @@ function new_toi(data_id, t0, t1, type, name) {
 		else
 			add_toi(data_id, t0, t1, "", toi_name, 0, 0);
 	}	
+	updateDataSelected(data_id);
 }
 function add_toi(data_id, t0, t1, type, name, t0_real, t1_real){
 	ltoi = document.getElementById(data_id+"_toi");
@@ -1442,3 +1445,65 @@ function bundle(){
 }
 
 
+let updateDataSelected = (id) => {
+	datasetsSelection = document.getElementById('datasets_selection')
+	datasetsSelection.innerHTML = '';
+	document.getElementById('dataset_selection').style.display = 'block';
+
+	DATASETS.forEach((option, index) => {
+		const opt = document.createElement('option');
+		opt.value = index;
+		opt.textContent = option.name;
+		datasetsSelection.appendChild(opt);
+	});
+
+	datasetsSelection.value = id;
+
+	updateTwiSelected(id);
+    datasetsSelection.addEventListener('change', () => {
+        const selectedDataset = document.getElementById('datasets_selection').value;
+		select_data(selectedDataset);
+		updateTwiSelected(selectedDataset);
+    });
+}
+
+
+let updateTwiSelected = (selectedDataset) => {
+	document.getElementById('videotwi_selection').style.display = 'block';
+	twiSelection = document.getElementById('videotwis_selection')
+	twiSelection.innerHTML = '';
+	let optExcluded = false;
+	DATASETS[selectedDataset].tois.forEach((option, index) => {
+		const opt = document.createElement('option');
+		opt.value = index;
+		if (option.name === "0") {
+			optExcluded = true;
+		} else {
+			optExcluded = false;
+			opt.textContent = option.name;
+		}
+
+		if (!optExcluded) {
+			twiSelection.appendChild(opt);
+		}
+	});
+	let currToiIndex = DATASETS[selectedDataset].toi_id;
+	if( currToiIndex === -1 ){
+		currToiIndex = 0;
+	}
+	
+	selectedTwiName = DATASETS[selectedDataset].tois[currToiIndex].name;
+	twiSelection.value = currToiIndex;
+	twiSelection.addEventListener('change', () => {
+		const selectedTwi = document.getElementById('videotwis_selection').value;
+		select_twi(parseInt(selectedTwi));
+		if (selectedTwi !== '0') {
+			document.getElementById('extract_video_button').style.display = 'block';
+		}
+	});
+	if (currToiIndex === 0) {
+		document.getElementById('extract_video_button').style.display = 'none';
+	} else {
+		document.getElementById('extract_video_button').style.display = 'block';
+	}
+}

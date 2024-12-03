@@ -1132,8 +1132,6 @@ let matrixsketch = (p) => {
 		image_url = frameDataUrl;
 		image_changed = true;
 		loaded = false;
-
-		console.log("extractCurrentFrame finished.");
 	};
 	
 	
