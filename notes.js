@@ -8,6 +8,7 @@ notebox =  '<div></div>'
 
 base_notes = [];
 order_notes = [];
+importedNotes = {};
 selected_note = -1;
 var LINE_CHAR = "\n";
 
