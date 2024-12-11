@@ -285,6 +285,7 @@ function new_file(){
 		fileCounter += 1;
 		document.getElementById("dataset_load_txt").innerHTML = '';
 		document.getElementById("dataset_button").disabled = false;
+		document.getElementById("load_notes").disabled = false;
 		if(fileCounter < filelist.length){ new_file(); }
 		else{ 
 			if(err_msg.length>0){alert('Not all data was formatted as required. Please note:\n' + err_msg);}
@@ -292,6 +293,7 @@ function new_file(){
 			fileCounter = 0; filelist = document.getElementById('new_f').value = ""; 
 			err_msg = '';
 			cluster_warn = '';
+			addSamplesToNotesFilter();
 		}
 	}
 	reader.readAsText(filelist[fileCounter]);
@@ -1532,7 +1534,7 @@ let importNotes = () => {
 
 let processNotesTSV = (notesContent) => {
     const lines = notesContent.trim().split('\n');
-    const headers = lines[0].split('\t');
+    const headers = lines[0].split('\t').map(header => header.replace(/\s+/g, '').toLowerCase());
     const rows = lines.slice(1);
 
     const dataByParticipant = {};
@@ -1545,22 +1547,32 @@ let processNotesTSV = (notesContent) => {
             rowData[header] = values[index] || null;
         });
 
-        const participantID = rowData['ParticipantID'];
+        const participantID = rowData['participantid'];
         if (!dataByParticipant[participantID]) {
             dataByParticipant[participantID] = { events: [] };
         }
 
-		dataByParticipant[participantID].startTime = rowData['StartTime'];
+		if (!dataByParticipant[participantID].startTime) {
+			dataByParticipant[participantID].startTime = rowData['sessionstarttimeactual'];
+		}
 
         dataByParticipant[participantID].events.push({
-            eventDetails: rowData['EventDetails'],
-            type: rowData['Type'],
-            location: rowData['Location'],
-            timestamp: rowData['Timestamp'],
-            observer: rowData['Observer'],
+            eventDetails: rowData['eventdetails'],
+            type: rowData['type'],
+            location: rowData['location'],
+            timestamp: rowData['timestamp'],
+            observer: rowData['observer'],
         });
     });
 
     importedNotes = dataByParticipant;
-	console.log(importedNotes);
+
+	DATASETS.forEach((dataset) => {
+		const participantID = dataset.name;
+		if (importedNotes[participantID]) {
+			dataset.notes = importedNotes[participantID];
+		}
+	});
+
+	loadNotesFromTSV();
 }

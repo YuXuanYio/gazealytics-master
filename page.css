@@ -153,13 +153,12 @@ button {
 	border-width: 1px;
 	margin-bottom: 3px;
 }
-.note_item{
-	display: grid;
-	grid-template-columns: 15px 220px;
-	width: 236px;
-	height: auto;
-	border-width: 1px;
-	margin-bottom: 3px;
+.note_item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    width: auto;
 }
 .note_dataset {
 	width : 150px;
