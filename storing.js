@@ -34,30 +34,16 @@ function load_file(id){
 	reader.readAsText(f);
 }
 
-function load_media() {
-    const fileInput = document.getElementById('im_f');
-    const file = fileInput.files[0];
-    fileInput.value = null; // Clear the input for subsequent uploads
-
-    if (!file) return;
-
-    const isVideo = file.type.startsWith('video/');
-    const reader = new FileReader();
-	console.log(isVideo);
+function load_image(){
+	f = document.getElementById('im_f').files[0];
+	document.getElementById('im_f').value = null;
+	var reader = new FileReader();
     reader.onload = function(event) {
-        if (isVideo) {
-            video_url = reader.result;
-            video_changed = true;
-            image_changed = false;
-            loaded = false;
-        } else {
-            image_url = reader.result;
-            image_changed = true;
-            video_changed = false;
-            loaded = false;
-        }
-    };
-    reader.readAsDataURL(file);
+		image_url = reader.result; 
+		image_changed = true;
+		loaded = false;
+    }
+	reader.readAsDataURL(f);
 }
 
 // saving a dataset
