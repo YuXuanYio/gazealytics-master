@@ -3,6 +3,55 @@ let TIMELINE_CANVAS;
 let TIMELINE_draggableRecty = 0;
 let TIMELINE_draggingY = false; // Is the object being dragged?
 let datname;
+let squares = [];
+let canvasWidth;
+
+let mockData = {
+    "P02": {
+        "events": [
+            {
+                "eventDetails": "Went for lunch break",
+                "type": "General",
+                "location": "12345",
+                "timestamp": "28/11/2024 15:23",
+				"time_ms": "2098232",
+                "observer": "Zoey Liang"
+            },
+            {
+                "eventDetails": "Took a long call",
+                "type": "Technical",
+                "location": "12345",
+                "timestamp": "28/11/2024 16:22",
+				"time_ms": "2099232",
+                "observer": "Zoey Liang"
+            },
+        ],
+        "startTime": "28/11/2024 15:22",
+		"start_ms": "2096057",
+    }, 
+	"P03": {
+        "events": [
+            {
+                "eventDetails": "rest",
+                "type": "General",
+                "location": "12345",
+                "timestamp": "28/11/2024 15:23",
+				"time_ms": "2956970",
+                "observer": "Zoey Liang"
+            },
+            {
+                "eventDetails": "10min break",
+                "type": "Technical",
+                "location": "12345",
+                "timestamp": "28/11/2024 16:22",
+				"time_ms": "2963220",
+                "observer": "Zoey Liang"
+            }
+        ],
+        "startTime": "28/11/2024 15:22",
+		"start_ms": "2956437",
+    }
+}
 
 let timelinesketch = (p) => {
 	//PFont  f; PFont  fb; // the font used for general text writing applications. defined in setup
@@ -34,8 +83,7 @@ let timelinesketch = (p) => {
 
 	p.setup = () => {
 		// put setup code here		
-		timeline_canvas_height = p.windowHeight * (1-SPATIAL_CANVAS_HEIGHT_PERCENTAGE-0.04);
-		
+		timeline_canvas_height = p.windowHeight * (1-SPATIAL_CANVAS_HEIGHT_PERCENTAGE-0.04);		
 		document.getElementById('pj2').style.height = Math.floor(timeline_canvas_height)+'px';
 		TIMELINE_CANVAS = p.createCanvas(Math.floor(spatial_width), Math.floor(timeline_canvas_height));
 		
@@ -51,9 +99,7 @@ let timelinesketch = (p) => {
 				TIMELINE_draggingY = true;
 				// If so, keep track of relative location of click to corner of rectangle
 				p.offsetY = TIMELINE_draggableRecty-(timeline_canvas_height-p.mouseY);
-		
 			}
-
 			p.mouseIsPressed_timeline = true; 
 			beginX = p.mouseX; 
 			currentPressedX = p.mouseX;
@@ -71,10 +117,30 @@ let timelinesketch = (p) => {
 				if(min_id != data.toi_id){ press_toi = min_id; }
 				else{ press_toi = -1; }				
 			}
+
+			for (let i = 0; i <squares.length; i++) {
+				let square = squares[i];
+				// console.log('square: ' + squares);	
+				// console.log('one square: ' + JSON.stringify(square));
+							
+				console.log('p.mouseX:'+p.mouseX);
+				console.log('p.mouseY:'+p.mouseY);
+				console.log('square.x: ' + square.x);
+				console.log('square.y: ' + square.y);				
+				if(p.mouseX >= square.x && p.mouseX <= square.x + square.size && p.mouseY >= square.y && p.mouseY <= square.y + square.size) {
+					console.log('mouse pressed on square');					
+				}
+			}		
 		});
 
 		TIMELINE_CANVAS.mouseOver(() => {
 			p.mouseIsOver_timeline = true;
+			// Check here
+			console.log('mouseOver timeline');
+			console.log('canvas width: ' + canvasWidth);
+			console.log('TIMELINE canvas width: ' + TIMELINE_CANVAS.width);
+			console.log('timeline: ' + TimeLine.width);
+			
 		});
 
 		TIMELINE_CANVAS.mouseOut(() => { p.mouseIsOver_timeline = false; });
@@ -161,9 +227,13 @@ let timelinesketch = (p) => {
 		let longdur = 0;
 		for(let v=0; v<VALUED.length; v++){
 			let dat = DATASETS[VALUED[v]];
+			// console.log('dataset: ' + JSON.stringify(dat, null, 2));
+
 			longdur = Math.max(longdur, dat.tmax - dat.tmin);
 		}
 		longest_duration = longdur;
+		// console.log('longest_duration: ' + JSON.stringify(longest_duration));
+		
 		TIMELINE.longest_duration = longest_duration; //assigning the value to global variable of longest_duration so that it can be accessed from all files
 		
 		try{
@@ -178,14 +248,24 @@ let timelinesketch = (p) => {
 				TimeLine.background(black(100));
 				if(TIME_DATA=='lens'){
 					draw_time_lens(TimeLine);
+					console.log('lens');
+					
 				}else if(TIME_DATA=='data'){
 					draw_time_data(TimeLine);
+					console.log('data');
+
 				}else if(TIME_DATA=='all'|| TIME_DATA=='group'){
 					draw_time_all(TimeLine);
+					console.log('time_data');
+					
 				}else if(TIME_DATA=='saccades'){
-					draw_time_saccades(TimeLine);					
+					draw_time_saccades(TimeLine);
+					console.log('saccades');
+
 				}else if(TIME_DATA=='saccadetype'){
 					draw_time_saccadetype(TimeLine);
+					console.log('time_saccadetype');
+					
 				}	
 			}
 			p.image(TimeLine, 200, 0);
@@ -433,7 +513,7 @@ let timelinesketch = (p) => {
 				let datname='';
 				let toiname='';
 				let row = 0;
-				let k=0;
+				let k=0;				
 				if( selected_data != -1 ){
 					data = DATASETS[selected_data];
 				}
@@ -519,10 +599,14 @@ let timelinesketch = (p) => {
 				p.line( 200 + (spatial_width-300)*tl, timeline_highlight_position, 100 + (spatial_width-200)*tr, timeline_highlight_position);
 				p.strokeWeight(0); 
 			}
-			if(SPATIAL.mouseIsOver_spatial){ p.do_spatial_overlay(); }
+			if(SPATIAL.mouseIsOver_spatial) { 
+				p.do_spatial_overlay(); 
+				console.log('spatial_overlay');
+			 }
 		}catch (error) { console.error(error); timeline_changed = true; }
 	};
 
+	// tested
 	p.do_spatial_overlay = () => {
 		if( selected_data == -1 || DATASETS[ selected_data ] == undefined){ return; }
 		let dat = DATASETS[ selected_data ]; fixs = dat.fixs; toi = dat.tois[ dat.toi_id ];
@@ -530,6 +614,8 @@ let timelinesketch = (p) => {
 		p.noStroke();
 		if(dat.toi_id == -1) return;
 		for(let i= toi.j_min; i< toi.j_max; i++){
+			console.log('tot i ' + i);
+			
 			if(fixs[i] != undefined) {
 				let dist = (fixs[i].x*(spatial_width/WIDTH) - SPATIAL.mouseX)**2 + (fixs[i].y*(spatial_height/HEIGHT) - SPATIAL.mouseY)**2;
 				let size = Math.exp(FIX_SIZE) * Math.sqrt(fixs[i].dt);
@@ -550,9 +636,13 @@ let timelinesketch = (p) => {
 						if(td > 1){
 							p.noStroke(); 
 							p.rect( 100 + ts, timeline_highlight_position, td, 10 );
+							console.log('rectangle: ' + timeline_highlight_position + ' x ' + ts);
+
 						}else{
 							p.stroke(cy(80, dat.group)); 
 							p.line(100 + ts, timeline_highlight_position, 100+ts, timeline_highlight_position+10);
+							console.log('vertical stroke: ' + timeline_highlight_position + ' x ' + ts);
+							
 						}
 					}
 				}
@@ -941,8 +1031,10 @@ let draw_time_all = (canvas) => {
 			h2 = canvas.height/TIMELINE_CANVAS.num_of_rows; 			
 
 			for(let k=0, row=0; k<VALUED.length && row<TIMELINE_CANVAS.num_of_rows; k++){
-				let data = DATASETS[VALUED[k]]; 
-	
+				let data = DATASETS[VALUED[k]]; // data.name == PID
+				// console.log('dataaa: ' + JSON.stringify(data, null, 2));
+				// console.log('PID: ' + data.name);
+				
 				if(data == undefined || !data.included)
 					continue;
 				if(DAT_MODE == 1 && data.group != selected_grp)
@@ -1005,6 +1097,110 @@ let draw_time_all = (canvas) => {
 							}					
 						}
 						
+						// if (mockData[data.name]) {
+						// 	add_bookmark(data, h2top, h2, canvas);
+						// }
+
+						if (mockData[data.name]) {
+							add_bookmark_button(data, h2top, h2, canvas);
+						}
+
+						// if (mockData[data.name]) {															
+						// 	let participantData = mockData[data.name];
+						// 	let start_time = data.t[0];
+						// 	let end_time = data.t[data.t.length - 1];
+						// 	let max_duration = end_time - start_time;
+						  
+						// 	// Clear `squares` and buttons before loading new data
+						// 	squares = []; 
+						// 	document.querySelectorAll(".timeline-button").forEach((btn) => btn.remove());
+						  
+						// 	for (let i = 0; i < participantData.events.length; i++) {
+						// 	  let event = participantData.events[i];
+						// 	  let ts = (canvas.width * (event.time_ms - start_time)) / max_duration;
+						  
+						// 	  if (ts >= 0 && ts <= canvas.width) {
+						// 		let start_y = h2top;
+						// 		let end_y = h2top + h2;
+						// 		let center_y = start_y + (end_y - start_y) / 2;
+						  
+						// 		// Add button instead of bookmark
+						// 		let button = document.createElement("button");
+						// 		button.className = "timeline-button";
+						// 		button.style.position = "absolute";
+						  
+						// 		// Adjust position relative to the canvas
+						// 		const canvasRect = TIMELINE_CANVAS.elt.getBoundingClientRect(); // Get canvas position
+						// 		let diff = (TIMELINE_CANVAS.width - canvas.width) / 3;
+						// 		button.style.left = `${canvasRect.left + ts - 7.5}px`; // Adjust left position
+						// 		button.style.top = `${canvasRect.top + center_y - 7.5}px`; // Adjust top position
+						  
+						// 		button.style.width = "15px";
+						// 		button.style.height = "15px";
+						// 		button.style.background = "red";
+						// 		button.style.border = "none";
+						// 		button.style.cursor = "pointer";
+						// 		button.title = event.eventDetails; // Tooltip with event details
+						  
+						// 		// Add onclick event listener
+						// 		button.addEventListener("click", () => {
+						// 		  console.log("Button clicked for event:", event.eventDetails);
+						// 		});
+						  
+						// 		// Append button to the document body
+						// 		document.body.appendChild(button);
+						  
+						// 		// Add to squares array for reference (optional)
+						// 		squares.push({
+						// 		  x: ts - 7.5, // Button's top-left X (matches button left)
+						// 		  y: center_y - 7.5, // Button's top-left Y (matches button top)
+						// 		  size: 15, // Button size
+						// 		  details: event.eventDetails // Event details
+						// 		});
+						// 	  }
+						// 	}
+						//}
+						  
+						// if(mockData[data.name]) {															
+						// 	let participantData = mockData[data.name];
+						// 	let start_time = data.t[0];
+						// 	let end_time = data.t[data.t.length - 1];
+						// 	let max_duration = end_time - start_time;
+						// 		for(let i=0; i<participantData.events.length; i++) {
+						// 			let event = participantData.events[i];									
+						// 			let ts = (canvas.width * (event.time_ms - start_time)) / max_duration;											
+						// 			if (ts >= 0 && ts <= canvas.width) {
+						// 				let start_y = h2top;
+						// 				let end_y = h2top + h2;
+						// 				let center_y = start_y + (end_y - start_y) / 2;
+						// 				let squareSize = 15;
+
+						// 				canvasWidth = canvas.width;
+						// 				console.log('event: ' + i);
+						// 				console.log('x:' + ts - squareSize/2);
+						// 				console.log('y:' + center_y - squareSize/2);										
+										
+						// 				canvas.stroke(145, 15, 15); // bookmark line
+						// 				canvas.fill(255, 100, 100);
+						// 				canvas.line(ts, start_y, ts, end_y); // vertical line											
+						// 				canvas.rect(ts - squareSize / 2, center_y - squareSize / 2, squareSize, squareSize);
+						// 				canvas.textAlign(canvas.CENTER);
+						// 				canvas.fill(0, 0, 0);
+						// 				canvas.text(event.eventDetails, ts, (start_y + center_y)/2); // label at the top
+
+						// 				let exists = squares.some((sq) => sq.x === ts - squareSize / 2 && sq.y === center_y - squareSize / 2);
+						// 				if(!exists) {
+						// 					squares.push({
+						// 						x: ts - squareSize/2, // Top-left X
+						// 						y: center_y - squareSize/2, // Top-left Y
+						// 						size: squareSize, // Size of the square
+						// 						details: event.eventDetails // Event details
+						// 					});
+						// 				} 										
+						// 			}									
+						// 		}	
+						// 	}
+						
 						// colours
 						for(let j = toi.j_min; j < toi.j_max; j++){
 							if(data.fixs[j] != undefined && (data.fixs[j].t - toi.tmin)/toi_longest_duration < TIME_ANIMATE){
@@ -1045,6 +1241,26 @@ let draw_time_all = (canvas) => {
 		}
 	}
 };
+
+// TIMELINE_CANVAS.mousePressed(() => {
+//     for (let i = 0; i < squares.length; i++) {
+//         let square = squares[i];
+//         // check if mouse is inside the square
+//         if (
+//             mouseX >= square.x &&
+//             mouseX <= square.x + square.size &&
+//             mouseY >= square.y &&
+//             mouseY <= square.y + square.size
+//         ) {
+//             // event details
+//             console.log(`Clicked on: ${square.details}`);
+//             // show the text on the canvas
+//             canvas.fill(0);
+//             canvas.textAlign(canvas.CENTER);
+//             canvas.text(square.details, square.x + square.size / 2, square.y - 10);
+//         }
+//     }
+// });
 
 let draw_time_saccadetype = (canvas) => {
 	canvas.fill(black(100)); canvas.noStroke(); canvas.rect(0, 0, canvas.width, canvas.height); canvas.strokeWeight(1);
@@ -1578,3 +1794,151 @@ let do_matrix_timeline_overlay = (p) => {
 		aggregate_histogram_across_dat_twi(p, data, false, null);
 	}
 };
+
+function add_bookmark(data, h2top, h2, canvas) {
+	if(mockData[data.name]) {															
+	let participantData = mockData[data.name];
+	let start_time = data.t[0];
+	let end_time = data.t[data.t.length - 1];
+	let max_duration = end_time - start_time;
+		for(let i=0; i<participantData.events.length; i++) {
+			let event = participantData.events[i];									
+			let ts = (canvas.width * (event.time_ms - start_time)) / max_duration;											
+			if (ts >= 0 && ts <= canvas.width) {
+				let start_y = h2top;
+				let end_y = h2top + h2;
+				let center_y = start_y + (end_y - start_y) / 2;
+				let squareSize = 15;
+
+				canvasWidth = canvas.width;
+				console.log('event: ' + i);
+				console.log('x:' + ts - squareSize/2);
+				console.log('y:' + center_y - squareSize/2);										
+				
+				canvas.stroke(145, 15, 15); // bookmark line
+				canvas.fill(255, 100, 100);
+				canvas.line(ts, start_y, ts, end_y); // vertical line											
+				canvas.rect(ts - squareSize / 2, center_y - squareSize / 2, squareSize, squareSize);
+				canvas.textAlign(canvas.CENTER);
+				canvas.fill(0, 0, 0);
+				canvas.text(event.eventDetails, ts, (start_y + center_y)/2); // label at the top
+
+				let exists = squares.some((sq) => sq.x === ts - squareSize / 2 && sq.y === center_y - squareSize / 2);
+				if(!exists) {
+					squares.push({
+						x: ts - squareSize/2, // Top-left X
+						y: center_y - squareSize/2, // Top-left Y
+						size: squareSize, // Size of the square
+						details: event.eventDetails // Event details
+					});
+				} 										
+			}									
+		}	
+	}
+}
+
+function add_bookmark_button(data, h2top, h2, canvas) {
+	if (mockData[data.name]) {															
+		let participantData = mockData[data.name];
+		let start_time = data.t[0];
+		let end_time = data.t[data.t.length - 1];
+		let max_duration = end_time - start_time;
+
+        let datasetClass = `timeline-bookmark-${data.name}`;
+		let lineClass = `timeline-line-${data.name}`;
+
+		document.querySelectorAll(`.${lineClass}`).forEach((line) => line.remove());
+        document.querySelectorAll(`.${datasetClass}`).forEach((btn) => btn.remove());
+
+		for (let i = 0; i < participantData.events.length; i++) {
+			let event = participantData.events[i];
+			let ts = (canvas.width * (event.time_ms - start_time)) / max_duration;
+
+			if (ts >= 0 && ts <= canvas.width) {
+			let start_y = h2top;
+			let end_y = h2top + h2;
+			let center_y = start_y + (end_y - start_y) / 2;										
+			
+			const canvasRect = TIMELINE_CANVAS.elt.getBoundingClientRect(); // canvas position	
+			let diff = (TIMELINE_CANVAS.width - canvas.width) / 3;
+
+			let line = document.createElement("div");
+			line.className = `timeline-line-${data.name}`;
+			line.style.position = "absolute";	
+
+			line.style.left = `${canvasRect.left + (diff * 2) + ts}px`;
+			line.style.top = `${canvasRect.top + start_y}px`;
+			line.style.width = "1px";
+			line.style.height = `${end_y - start_y}px`;
+			line.style.backgroundColor = "black";
+			line.style.zIndex = "1";
+
+			let button = document.createElement("button");
+			button.className = `timeline-bookmark-${data.name}`;
+			button.style.position = "absolute";	
+
+			button.style.left = `${canvasRect.left + (diff * 2) + ts - 7.5}px`;
+			button.style.top = `${canvasRect.top + center_y - 7.5}px`;
+			button.style.width = "15px";
+			button.style.height = "15px";
+			button.style.background = "red";
+			button.style.border = "none";
+			button.style.cursor = "pointer";
+			button.style.borderRadius = "5px";
+			button.style.zIndex = "2";
+
+			let tooltip = document.createElement("tooltip");
+			tooltip.className = "tooltip";
+			tooltip.style.position = "absolute";
+			tooltip.style.padding = "10px 10px";
+			tooltip.style.color = "black";
+			tooltip.style.borderRadius = "5px";
+			tooltip.style.fontSize = "14px";
+			tooltip.style.fontWeight = "bold";
+			tooltip.style.fontFamily = "Calibri";
+			tooltip.style.visibility = "hidden";
+			tooltip.style.transition = "opacity 0.3s";
+			tooltip.style.opacity = "0";
+			tooltip.style.zIndex = "1000";
+			tooltip.style.backgroundColor = "white";
+			tooltip.innerHTML = `Type: ${event.type}<br>Details: ${event.eventDetails}`;
+
+			button.addEventListener("mouseenter", () => {
+				tooltip.style.visibility = "visible";
+				button.style.outline = "2px solid yellow";
+				tooltip.style.opacity = "1";
+				tooltip.style.left = `${parseFloat(button.style.left) + 20}px`;
+				tooltip.style.top = `${parseFloat(button.style.top) - 10}px`;
+			  });
+	  
+			  button.addEventListener("mouseleave", () => {
+				button.style.outline = "none";
+				tooltip.style.visibility = "hidden";
+				tooltip.style.opacity = "0";
+			  });
+
+				document.body.appendChild(line);
+				document.body.appendChild(button);
+				document.body.appendChild(tooltip);
+			}
+		}
+	}
+}
+
+function toggle_notes() {
+    let toggleButton = document.getElementById("note-control");
+    let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
+	let lines = document.querySelectorAll("[class^='timeline-line-']");
+    
+    if (toggleButton.dataset.toggle === "on") {
+        bookmarks.forEach((btn) => btn.style.display = "none");
+		lines.forEach((line) => line.style.display = "none");
+        toggleButton.dataset.toggle = "off";
+        toggleButton.innerText = "Show Notes";
+    } else {
+        bookmarks.forEach((btn) => btn.style.display = "block");
+		lines.forEach((line) => line.style.display = "block");
+        toggleButton.dataset.toggle = "on";
+        toggleButton.innerText = "Hide Notes";
+    }
+}
