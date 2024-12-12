@@ -311,7 +311,8 @@
 				<div class="tabbut" type="button" id="cont3_button" onclick="view_panel(3)">AOIs  <button type="button" id="control_aoi" class="toggler toggle-on data_pane_button" onclick="control_state('aoi');if(event.stopPropagation){event.stopPropagation();}event.cancelBubble=true;"> <i class="far fa-edit"></i> </button> </div> 
 				<div class="tabbut" type="button" id="cont4_button" onclick="view_panel(4)">Notes <button type="button" id="control_notes" class="toggler data_pane_button" onclick="control_state('notes');if(event.stopPropagation){event.stopPropagation();}event.cancelBubble=true;"> <i class="far fa-edit"></i> </button> </div>
 				<div class="tabbut" type="button" id="cont5_button" onclick="view_panel(5)">Colouring</div>				
-				<div class="tabbut" type="button" id="cont6_button" onclick="view_panel(6)">Export</div>				
+				<div class="tabbut" type="button" id="cont6_button" onclick="view_panel(6)">Export</div>		
+				<div class="tabbut" type="button" id="cont7_button" onclick="view_panel(7)">Observer Notes</div>		
 			</div>
 			<div id='cont1' class='data_content' style='display: block'>
 				<center>
@@ -475,6 +476,13 @@
 					<span> Export metric canvas</span>
 				</div>
 			</div>	
+			<div id='cont7' class='data_content' >
+				<center>
+					<div class="tool"><button type="button" id="observer_notes" class="toggler toggle-on" onclick="toggle_notes();"> <i class="fas fa-eye"></i> </button><span class="tip">Toggle visibility of notes on the timeline</span></div>
+					<div class="tool"><button href="help.html" target="popup" onclick="window.open('help.html#notes','name','width=600,height=400')"><i class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
+				</center>
+				<ul id='notelist' class="data_list"></ul>
+			</div>
 		</div>
 		
 		<div class='matrix_wrapper' onclick="matrix_metric_update()">

@@ -15,7 +15,7 @@ let mockData = {
                 "location": "12345",
                 "timestamp": "28/11/2024 15:23",
 				"time_ms": "2098232",
-                "observer": "Zoey Liang"
+                "observer": "James"
             },
             {
                 "eventDetails": "Took a long call",
@@ -23,7 +23,7 @@ let mockData = {
                 "location": "12345",
                 "timestamp": "28/11/2024 16:22",
 				"time_ms": "2099232",
-                "observer": "Zoey Liang"
+                "observer": "James"
             },
         ],
         "startTime": "28/11/2024 15:22",
@@ -32,20 +32,20 @@ let mockData = {
 	"P03": {
         "events": [
             {
-                "eventDetails": "rest",
+                "eventDetails": "10 min break",
                 "type": "General",
                 "location": "12345",
                 "timestamp": "28/11/2024 15:23",
 				"time_ms": "2956970",
-                "observer": "Zoey Liang"
+                "observer": "James"
             },
             {
-                "eventDetails": "10min break",
+                "eventDetails": "Fixed some apps in screen",
                 "type": "Technical",
                 "location": "12345",
                 "timestamp": "28/11/2024 16:22",
 				"time_ms": "2963220",
-                "observer": "Zoey Liang"
+                "observer": "Anna"
             }
         ],
         "startTime": "28/11/2024 15:22",
@@ -1837,6 +1837,8 @@ function add_bookmark(data, h2top, h2, canvas) {
 	}
 }
 
+const observers = {};
+
 function add_bookmark_button(data, h2top, h2, canvas) {
 	if (mockData[data.name]) {															
 		let participantData = mockData[data.name];
@@ -1853,6 +1855,13 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 		for (let i = 0; i < participantData.events.length; i++) {
 			let event = participantData.events[i];
 			let ts = (canvas.width * (event.time_ms - start_time)) / max_duration;
+			let observerName = event.observer;
+		
+			if(!observers[observerName]) {
+				const alphaValue = Math.round(Math.random()*255) + 75;
+				const angleValue = Math.random()*2*Math.PI;
+				observers[observerName] = color_wheel(alphaValue, angleValue)
+			}			
 
 			if (ts >= 0 && ts <= canvas.width) {
 			let start_y = h2top;
@@ -1881,7 +1890,7 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 			button.style.top = `${canvasRect.top + center_y - 7.5}px`;
 			button.style.width = "15px";
 			button.style.height = "15px";
-			button.style.background = "red";
+			button.style.background = observers[observerName];
 			button.style.border = "none";
 			button.style.cursor = "pointer";
 			button.style.borderRadius = "5px";
@@ -1901,7 +1910,7 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 			tooltip.style.opacity = "0";
 			tooltip.style.zIndex = "1000";
 			tooltip.style.backgroundColor = "white";
-			tooltip.innerHTML = `Type: ${event.type}<br>Details: ${event.eventDetails}`;
+			tooltip.innerHTML = `Type: ${event.type}<br>Details: ${event.eventDetails}<br>Observer: ${event.observer}`;
 
 			button.addEventListener("mouseenter", () => {
 				tooltip.style.visibility = "visible";
@@ -1926,7 +1935,7 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 }
 
 function toggle_notes() {
-    let toggleButton = document.getElementById("note-control");
+    let toggleButton = document.getElementById("observer_notes");
     let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
 	let lines = document.querySelectorAll("[class^='timeline-line-']");
     
@@ -1934,11 +1943,17 @@ function toggle_notes() {
         bookmarks.forEach((btn) => btn.style.display = "none");
 		lines.forEach((line) => line.style.display = "none");
         toggleButton.dataset.toggle = "off";
-        toggleButton.innerText = "Show Notes";
+        toggleButton.innerHTML = "<i class='fas fa-eye-slash'></i>";
     } else {
         bookmarks.forEach((btn) => btn.style.display = "block");
 		lines.forEach((line) => line.style.display = "block");
         toggleButton.dataset.toggle = "on";
-        toggleButton.innerText = "Hide Notes";
+        toggleButton.innerHTML = "<i class='fas fa-eye'></i>";
     }
+}
+
+function color_wheel(a, x){
+	var dir = (Math.floor((x*4)/Math.PI + 0.5) + 8) % 8;
+	if( legval!=-1 && legval!=(10+dir)){ a=0; }
+	return makeColor( a, DIRECTIONS[dir]);
 }
