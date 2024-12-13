@@ -1838,7 +1838,6 @@ function add_bookmark(data, h2top, h2, canvas) {
 }
 
 const observers = {};
-
 function add_bookmark_button(data, h2top, h2, canvas) {
 	if (mockData[data.name]) {															
 		let participantData = mockData[data.name];
@@ -1861,7 +1860,11 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 				const alphaValue = Math.round(Math.random()*255) + 75;
 				const angleValue = Math.random()*2*Math.PI;
 				observers[observerName] = color_wheel(alphaValue, angleValue)
-			}			
+			}		
+			
+			if(Object.keys(observers).length !== 0) {
+				colour_match_observer(observers);
+			}
 
 			if (ts >= 0 && ts <= canvas.width) {
 			let start_y = h2top;
@@ -1956,4 +1959,44 @@ function color_wheel(a, x){
 	var dir = (Math.floor((x*4)/Math.PI + 0.5) + 8) % 8;
 	if( legval!=-1 && legval!=(10+dir)){ a=0; }
 	return makeColor( a, DIRECTIONS[dir]);
+}
+
+function colour_match_observer(observers) {
+    let container = document.getElementById('legend_container');
+    container.innerHTML = "";
+
+    let title = document.createElement('h3');
+    title.textContent = "Observer Legend";
+    title.style.textAlign = "center";
+    title.style.marginBottom = "10px";
+    container.appendChild(title);
+
+    let legendRow = document.createElement('ul');
+	legendRow.style.display = "flex";
+	legendRow.style.flexDirection = "row";
+	legendRow.style.gap = "15px";
+    Object.entries(observers).forEach(([observerName, color]) => {
+        let observerDiv = document.createElement('div');
+		observerDiv.style.display = "flex";
+        observerDiv.style.alignItems = "center";
+        observerDiv.style.marginBottom = "5px";
+		observerDiv.style.justifyContent = "center";
+
+        let colorIndicator = document.createElement('div');
+        colorIndicator.style.width = "15px";
+        colorIndicator.style.height = "15px";
+        colorIndicator.style.borderRadius = "5px"; 
+        colorIndicator.style.background = color; 
+        colorIndicator.style.marginRight = "10px";
+        observerDiv.style.alignItems = "center";
+		observerDiv.style.justifyContent = "center";
+        let observerText = document.createElement('span');
+        observerText.textContent = observerName;
+
+        observerDiv.appendChild(colorIndicator);
+        observerDiv.appendChild(observerText);
+        legendRow.appendChild(observerDiv);
+    });
+
+    container.appendChild(legendRow);
 }
