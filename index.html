@@ -16,6 +16,7 @@
 <script type="text/javascript" src="nouislider.js"></script>
 <script type="text/javascript" src="jszip.min.js"></script>
 <script type="text/javascript" src="FileSaver.min.js"></script>
+<script type="text/javascript" src="ffmpeg.min.js"></script>
 
 <script type="text/javascript" src="colours.js"></script>
 <script type="text/javascript" src="page.js"></script>
@@ -31,7 +32,10 @@
 <script type="text/javascript" src="matrix.js"></script>
 <script type="text/javascript" src="app.js"></script>
 
+
 <body>
+	<!-- MARK: control_box L1
+	-->
 	<div class="control_box" onmouseenter="reset_legend_mouseovers()">	
 	
 
@@ -40,13 +44,18 @@
 		<div class="tool" style='display: inline'><button href="help.html" target="popup" onclick="window.open('help.html#overview','name','width=600,height=400')"><i class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 		<button type="button" class="tabbut2" id="tab2" onclick='collapse(2)'> Saccades </button>
 		<button type="button" class="tabbut2" id="tab3" onclick='collapse(3)'> Timeline </button>
+		<button type="button" class="tabbut2" id="tab4" onclick='collapse(4)'> Video Controls </button>
 		<hr >
+		<!-- MARK: Overview
+		-->
 		<div class="collapsing" id='part0' style='display: block'>
 			<div class="tool"><button id='save_button' onclick="save_zip()">Save Project</button><span class="tip">Save the current project to a .zip file. This can take some time</span></div>
 			<input id="state_f" type="file" name="name" style="display: none;" onchange="load_zip()"/>
 			<div class="tool"><button id="load_button" onclick=click_loadfile()>Load Project</button><span class="tip">Load a zipped project</span></div><br>
 			<div id="project_txt"></div>
 			<br>
+			<!-- MARK: bg image loading
+			-->
 			<input id="im_f" type="file" name="name" style="display: none;" onchange="load_image()"/>
 			<div class="tool2"><button onclick="document.getElementById('im_f').click()">Load Background</button><span class="tip">Load a context background image</span></div><br >
 			<div class="tool2"><div class="text_pattern">Background Brightness: </div><div id="back_sl" class="slider"></div><span class="tip">Controls Brightness of the background image</span></div><br >
@@ -85,6 +94,8 @@
 			<th><input type="number" class="num2" id='HEIGHT'  step=1 value=0 onchange="crop_resize()"></th><tr></table>
 			<span class="tip">The cropped area for analysis on the canvas starting at the &quot;from&quot; x and y coordinate, continuing for the &quot;span&quot; width and height values which are noted in relation to the data values</span></div><br >
 		</div>
+		<!-- MARK: Fixation
+		-->
 		<div class="collapsing" id='part1' style='display: none'>
 			<div class="tool"><button type="button" id="fixs" class="toggler toggle-on" onclick="click_fixs();">Fixations: Shown</button><span class="tip">Toggles showing the background fixations. Colour depends on sample group, size is proportional to duration</span></div>
 			<div class="tool" style='display:inline'><button href="help.html" target="popup" onclick="window.open('help.html#fixation','name','width=600,height=400')"><i class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
@@ -139,6 +150,8 @@
 			<hr >
 		</div>
 		
+		<!-- MARK: Saccades
+		-->
 		<div class="collapsing" id='part2'>
 			<div class="tool">
 			<button type="button" id="sacs" class="toggler" onclick="click_sacs();">Saccades: Hidden</button>
@@ -219,6 +232,9 @@
 			Heat:<div id="H_sl" class="slider"></div>
 			<script>noUiSlider.create(document.getElementById('H_sl'),{ start:[0], step:0.01, range:{'min':-6, 'max':2} });</script>			
 		</div>
+
+		<!-- MARK: Timeline
+		-->
 		<div class="collapsing" id='part3'>
 			<div class="tool">
 			Timeline Mode:
@@ -246,8 +262,29 @@
 				<button type="button" id="time_play" class="toggler" onclick="click_time_play();">Play</button>
 				<span class="tip">Allows for filtering and animating spatial and timeline canvases over time. Does not effect metrics or other viz features</span>
 			</div>
+			<!-- TODO: Potentially move this into Video Controls below -->
 			<div class="tool2" id="video_controls" style="display: inline">
 				<button type="button" id="control_video" class="toggler" onclick="toggle_videocursors()">Linking Video</button><span class="tip">Toggles video linking visualization</span>
+			</div>
+		</div>
+		<!-- MARK: Video Controls
+		-->
+		<div class="collapsing" id='part4'>
+			<div class="tool">
+			Video Controls:
+			</div>	
+			<div class="tool" style="display:inline"><button href="help.html" target="popup" onclick="window.open('help.html#video_controls','name','width=600,height=400')"><i class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
+			<br><br>
+			<div class="tool" id="dataset_selection" style="display:none">Data Selected:
+				<select id="datasets_selection"></select>
+			</div>
+			<br>
+			<div class="tool" id="videotwi_selection" style="display:none">TWI Selected:
+				<select id="videotwis_selection"></select>
+			</div>
+			<br>
+			<div class="tool2" id="extract_video_button" style="display:none">
+				<button type="button" id="extract_video" class="toggler" onclick="download_video()">Extract Video</button><span class="tip">Export/Download video associated with selected dataset and TWI selected</span>
 			</div>
 		</div>
 		<br >
@@ -316,8 +353,26 @@
 			</div>
 			<div id='cont4' class='data_content' >
 				<center>
+					<div class="tool"><button id="load_notes" type="button" onclick="importNotes()" disabled>Load .tsv </button><span class="tip">Load notes for each sample after loading samples</span></div>
 					<div class="tool"><button type="button" id="notes" class="toggler toggle-on" onclick="click_notes();"> <i class="fas fa-eye"></i> </button><span class="tip">Toggle visibility of notes on spatial canvas</span></div>
 					<div class="tool"><button href="help.html" target="popup" onclick="window.open('help.html#notes','name','width=600,height=400')"><i class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
+					<br>
+					Filter By:
+					<div class="dropdown">
+						<button>Select Type</button>
+						<div class="dropdown-content" id="note_type_dropdown">
+						  <label><input type="checkbox" name="note_type" value="general"> General</label>
+						  <label><input type="checkbox" name="note_type" value="break"> Break</label>
+						  <label><input type="checkbox" name="note_type" value="alarm"> Alarm</label>
+						  <label><input type="checkbox" name="note_type" value="technical"> Technical</label>
+						  <label><input type="checkbox" name="note_type" value="others"> Others</label>
+						</div>
+					</div>
+					<div class="dropdown">
+						<button>Select Sample</button>
+						<div class="dropdown-content" id="note_sample_dropdown">
+						</div>
+					</div>
 				</center>
 				<ul id='notelist' class="data_list"></ul>
 			</div>
@@ -447,6 +502,8 @@
 				<br >
 				<div id="video_top_controls" class="hidden">
 					<span class="tool">Selected sample dataset: </span><span class="tool" id="selecteddataset"></span><span class="tool" style="margin-left: 10px">File name: </span><span class="tool" id="videofilename"></span>
+					<!-- MARK: Video Deletion
+					-->
 					<div class="tool inner_button"><button  id="#_x" onclick="delete_video();"> <i class="far fa-trash-alt"></i> </button><span class="tip">Delete the video</span></div>
 					<div class="tool inner_button" id="selectfileinput"></div>
 
@@ -579,6 +636,8 @@
 		</div>
 	</div>
 	<div></div>
+	<!-- MARK: Canvas (p5js)
+	-->
 	<div class="canvas_box" id="canvas_box">
 		<div>
 			<span style="background-color: aqua; font-size:12; font-family: Arial, sans-serif">Data filtering:</span>

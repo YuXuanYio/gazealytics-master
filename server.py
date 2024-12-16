@@ -28,6 +28,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def _set_headers(self, code=200):
         self.send_response(code)
         self.send_header('Content-type', 'text/html')
+        self.send_header('Cross-Origin-Opener-Policy', 'same-origin')
+        self.send_header('Cross-Origin-Embedder-Policy', 'require-corp')
         self.end_headers()
 
     # GET requests: returns either the webpage of the favicon
@@ -47,6 +49,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_response(200)
             c = {'js': 'text/javascript', 'css': 'text/css', 'html': 'text/html', 'png':'image/png', 'ttf':'text/ttf'}[self.path.split('.')[-1]]
             self.send_header('Content-type', c)
+            self.send_header('Cross-Origin-Opener-Policy', 'same-origin')
+            self.send_header('Cross-Origin-Embedder-Policy', 'require-corp')
             self.end_headers()
             self.wfile.write(open(DIRECTORY + self.path[1:], 'rb').read())
             return
