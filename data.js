@@ -1556,11 +1556,13 @@ let processNotesTSV = (notesContent) => {
 			dataByParticipant[participantID].startTime = rowData['sessionstarttimeactual'];
 		}
 
-        dataByParticipant[participantID].events.push({
+		dataByParticipant[participantID].events.push({
             eventDetails: rowData['eventdetails'],
             type: rowData['type'],
             location: rowData['location'],
             timestamp: rowData['timestamp'],
+			timestamp_ms: calculateTimeDifferenceInMs(rowData['sessionstarttimeactual'], rowData['timestamp']),
+			occured_timestamp: calculateTimeDifference(rowData['sessionstarttimeactual'], rowData['timestamp']),
             observer: rowData['observer'],
         });
     });

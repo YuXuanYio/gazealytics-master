@@ -360,6 +360,7 @@ let loadNotesFromTSV = () => {
 			});
 		}
 	});
+	draw_time_all(TimeLine);
 };
 
 function addSamplesToNotesFilter() {
@@ -439,6 +440,19 @@ function calculateTimeDifference(dateStr1, dateStr2) {
 	].join(":");
 
 	return formatted;
+}
+
+function calculateTimeDifferenceInMs(dateStr1, dateStr2) {
+    const parseDate = (dateStr) => {
+        const [day, month, year, time] = dateStr.split(/[\/\s]/);
+        const [hours, minutes, seconds] = time.split(":");
+        return new Date(year, month - 1, day, hours, minutes, seconds);
+    };
+
+    const date1 = parseDate(dateStr1);
+    const date2 = parseDate(dateStr2);
+
+    return Math.abs(date2 - date1);
 }
 
 function toggle_note_lock(id) {

@@ -14,7 +14,7 @@ let mockData = {
                 "type": "General",
                 "location": "12345",
                 "timestamp": "28/11/2024 15:23",
-				"time_ms": "2098232",
+				"timestamp_ms": "2098232",
                 "observer": "James"
             },
             {
@@ -22,7 +22,7 @@ let mockData = {
                 "type": "Technical",
                 "location": "12345",
                 "timestamp": "28/11/2024 16:22",
-				"time_ms": "2099232",
+				"timestamp_ms": "2099232",
                 "observer": "James"
             },
         ],
@@ -36,7 +36,7 @@ let mockData = {
                 "type": "General",
                 "location": "12345",
                 "timestamp": "28/11/2024 15:23",
-				"time_ms": "2956970",
+				"timestamp_ms": "2956970",
                 "observer": "James"
             },
             {
@@ -44,7 +44,7 @@ let mockData = {
                 "type": "Technical",
                 "location": "12345",
                 "timestamp": "28/11/2024 16:22",
-				"time_ms": "2963220",
+				"timestamp_ms": "2963220",
                 "observer": "Anna"
             }
         ],
@@ -601,7 +601,7 @@ let timelinesketch = (p) => {
 			}
 			if(SPATIAL.mouseIsOver_spatial) { 
 				p.do_spatial_overlay(); 
-				console.log('spatial_overlay');
+				// console.log('spatial_overlay');
 			 }
 		}catch (error) { console.error(error); timeline_changed = true; }
 	};
@@ -1100,8 +1100,8 @@ let draw_time_all = (canvas) => {
 						// if (mockData[data.name]) {
 						// 	add_bookmark(data, h2top, h2, canvas);
 						// }
-
-						if (mockData[data.name]) {
+						
+						if (data.notes) {
 							add_bookmark_button(data, h2top, h2, canvas);
 						}
 
@@ -1117,7 +1117,7 @@ let draw_time_all = (canvas) => {
 						  
 						// 	for (let i = 0; i < participantData.events.length; i++) {
 						// 	  let event = participantData.events[i];
-						// 	  let ts = (canvas.width * (event.time_ms - start_time)) / max_duration;
+						// 	  let ts = (canvas.width * (event.timestamp_ms - start_time)) / max_duration;
 						  
 						// 	  if (ts >= 0 && ts <= canvas.width) {
 						// 		let start_y = h2top;
@@ -1168,7 +1168,7 @@ let draw_time_all = (canvas) => {
 						// 	let max_duration = end_time - start_time;
 						// 		for(let i=0; i<participantData.events.length; i++) {
 						// 			let event = participantData.events[i];									
-						// 			let ts = (canvas.width * (event.time_ms - start_time)) / max_duration;											
+						// 			let ts = (canvas.width * (event.timestamp_ms - start_time)) / max_duration;											
 						// 			if (ts >= 0 && ts <= canvas.width) {
 						// 				let start_y = h2top;
 						// 				let end_y = h2top + h2;
@@ -1795,144 +1795,100 @@ let do_matrix_timeline_overlay = (p) => {
 	}
 };
 
-function add_bookmark(data, h2top, h2, canvas) {
-	if(mockData[data.name]) {															
-	let participantData = mockData[data.name];
+const observers = {};
+function add_bookmark_button(data, h2top, h2, canvas) {
+	let participantData = data.notes;
 	let start_time = data.t[0];
 	let end_time = data.t[data.t.length - 1];
 	let max_duration = end_time - start_time;
-		for(let i=0; i<participantData.events.length; i++) {
-			let event = participantData.events[i];									
-			let ts = (canvas.width * (event.time_ms - start_time)) / max_duration;											
-			if (ts >= 0 && ts <= canvas.width) {
-				let start_y = h2top;
-				let end_y = h2top + h2;
-				let center_y = start_y + (end_y - start_y) / 2;
-				let squareSize = 15;
 
-				canvasWidth = canvas.width;
-				console.log('event: ' + i);
-				console.log('x:' + ts - squareSize/2);
-				console.log('y:' + center_y - squareSize/2);										
-				
-				canvas.stroke(145, 15, 15); // bookmark line
-				canvas.fill(255, 100, 100);
-				canvas.line(ts, start_y, ts, end_y); // vertical line											
-				canvas.rect(ts - squareSize / 2, center_y - squareSize / 2, squareSize, squareSize);
-				canvas.textAlign(canvas.CENTER);
-				canvas.fill(0, 0, 0);
-				canvas.text(event.eventDetails, ts, (start_y + center_y)/2); // label at the top
+	let datasetClass = `timeline-bookmark-${data.name}`;
+	let lineClass = `timeline-line-${data.name}`;
 
-				let exists = squares.some((sq) => sq.x === ts - squareSize / 2 && sq.y === center_y - squareSize / 2);
-				if(!exists) {
-					squares.push({
-						x: ts - squareSize/2, // Top-left X
-						y: center_y - squareSize/2, // Top-left Y
-						size: squareSize, // Size of the square
-						details: event.eventDetails // Event details
-					});
-				} 										
-			}									
-		}	
-	}
-}
+	document.querySelectorAll(`.${lineClass}`).forEach((line) => line.remove());
+	document.querySelectorAll(`.${datasetClass}`).forEach((btn) => btn.remove());
 
-const observers = {};
-function add_bookmark_button(data, h2top, h2, canvas) {
-	if (mockData[data.name]) {															
-		let participantData = mockData[data.name];
-		let start_time = data.t[0];
-		let end_time = data.t[data.t.length - 1];
-		let max_duration = end_time - start_time;
-
-        let datasetClass = `timeline-bookmark-${data.name}`;
-		let lineClass = `timeline-line-${data.name}`;
-
-		document.querySelectorAll(`.${lineClass}`).forEach((line) => line.remove());
-        document.querySelectorAll(`.${datasetClass}`).forEach((btn) => btn.remove());
-
-		for (let i = 0; i < participantData.events.length; i++) {
-			let event = participantData.events[i];
-			let ts = (canvas.width * (event.time_ms - start_time)) / max_duration;
-			let observerName = event.observer;
+	for (let i = 0; i < participantData.events.length; i++) {
+		let event = participantData.events[i];
+		let ts = (canvas.width * (event.timestamp_ms - start_time)) / max_duration;
+		let observerName = event.observer;
+	
+		if(!observers[observerName]) {
+			const alphaValue = Math.round(Math.random()*255) + 75;
+			const angleValue = Math.random()*2*Math.PI;
+			observers[observerName] = color_wheel(alphaValue, angleValue)
+		}		
 		
-			if(!observers[observerName]) {
-				const alphaValue = Math.round(Math.random()*255) + 75;
-				const angleValue = Math.random()*2*Math.PI;
-				observers[observerName] = color_wheel(alphaValue, angleValue)
-			}		
-			
-			if(Object.keys(observers).length !== 0) {
-				colour_match_observer(observers);
-			}
+		if(Object.keys(observers).length !== 0) {
+			colour_match_observer(observers);
+		}
 
-			if (ts >= 0 && ts <= canvas.width) {
-			let start_y = h2top;
-			let end_y = h2top + h2;
-			let center_y = start_y + (end_y - start_y) / 2;										
-			
-			const canvasRect = TIMELINE_CANVAS.elt.getBoundingClientRect(); // canvas position	
-			let diff = (TIMELINE_CANVAS.width - canvas.width) / 3;
+		if (ts >= 0 && ts <= canvas.width) {
+		let start_y = h2top;
+		let end_y = h2top + h2;
+		let center_y = start_y + (end_y - start_y) / 2;										
+		
+		const canvasRect = TIMELINE_CANVAS.elt.getBoundingClientRect(); // canvas position	
+		let diff = (TIMELINE_CANVAS.width - canvas.width) / 3;
 
-			let line = document.createElement("div");
-			line.className = `timeline-line-${data.name}`;
-			line.style.position = "absolute";	
+		let line = document.createElement("div");
+		line.className = `timeline-line-${data.name}`;
+		line.style.position = "absolute";	
 
-			line.style.left = `${canvasRect.left + (diff * 2) + ts}px`;
-			line.style.top = `${canvasRect.top + start_y}px`;
-			line.style.width = "1px";
-			line.style.height = `${end_y - start_y}px`;
-			line.style.backgroundColor = "black";
-			line.style.zIndex = "1";
+		line.style.left = `${canvasRect.left + (diff * 2) + ts}px`;
+		line.style.top = `${canvasRect.top + start_y}px`;
+		line.style.width = "1px";
+		line.style.height = `${end_y - start_y}px`;
+		line.style.backgroundColor = "black";
+		line.style.zIndex = "1";
 
-			let button = document.createElement("button");
-			button.className = `timeline-bookmark-${data.name}`;
-			button.style.position = "absolute";	
+		let button = document.createElement("button");
+		button.className = `timeline-bookmark-${data.name}`;
+		button.style.position = "absolute";	
 
-			button.style.left = `${canvasRect.left + (diff * 2) + ts - 7.5}px`;
-			button.style.top = `${canvasRect.top + center_y - 7.5}px`;
-			button.style.width = "15px";
-			button.style.height = "15px";
-			button.style.background = observers[observerName];
-			button.style.border = "none";
-			button.style.cursor = "pointer";
-			button.style.borderRadius = "5px";
-			button.style.zIndex = "2";
+		button.style.left = `${canvasRect.left + (diff * 2) + ts - 7.5}px`;
+		button.style.top = `${canvasRect.top + center_y - 7.5}px`;
+		button.style.width = "15px";
+		button.style.height = "15px";
+		button.style.background = observers[observerName];
+		button.style.border = "none";
+		button.style.cursor = "pointer";
+		button.style.borderRadius = "5px";
+		button.style.zIndex = "2";
 
-			let tooltip = document.createElement("tooltip");
-			tooltip.className = "tooltip";
-			tooltip.style.position = "absolute";
-			tooltip.style.padding = "10px 10px";
-			tooltip.style.color = "black";
-			tooltip.style.borderRadius = "5px";
-			tooltip.style.fontSize = "14px";
-			tooltip.style.fontWeight = "bold";
-			tooltip.style.fontFamily = "Calibri";
+		let tooltip = document.createElement("tooltip");
+		tooltip.className = "tooltip";
+		tooltip.style.position = "absolute";
+		tooltip.style.padding = "10px 10px";
+		tooltip.style.color = "black";
+		tooltip.style.borderRadius = "5px";
+		tooltip.style.fontSize = "14px";
+		tooltip.style.fontWeight = "bold";
+		tooltip.style.fontFamily = "Calibri";
+		tooltip.style.visibility = "hidden";
+		tooltip.style.transition = "opacity 0.3s";
+		tooltip.style.opacity = "0";
+		tooltip.style.zIndex = "1000";
+		tooltip.style.backgroundColor = "white";
+		tooltip.innerHTML = `Timestamp: ${event.occured_timestamp}<br>Type: ${event.type}<br>Details: ${event.eventDetails}<br>Observer: ${event.observer}`;
+
+		button.addEventListener("mouseenter", () => {
+			tooltip.style.visibility = "visible";
+			button.style.outline = "2px solid yellow";
+			tooltip.style.opacity = "1";
+			tooltip.style.left = `${parseFloat(button.style.left) + 20}px`;
+			tooltip.style.top = `${parseFloat(button.style.top) - 10}px`;
+			});
+	
+			button.addEventListener("mouseleave", () => {
+			button.style.outline = "none";
 			tooltip.style.visibility = "hidden";
-			tooltip.style.transition = "opacity 0.3s";
 			tooltip.style.opacity = "0";
-			tooltip.style.zIndex = "1000";
-			tooltip.style.backgroundColor = "white";
-			tooltip.innerHTML = `Type: ${event.type}<br>Details: ${event.eventDetails}<br>Observer: ${event.observer}`;
+			});
 
-			button.addEventListener("mouseenter", () => {
-				tooltip.style.visibility = "visible";
-				button.style.outline = "2px solid yellow";
-				tooltip.style.opacity = "1";
-				tooltip.style.left = `${parseFloat(button.style.left) + 20}px`;
-				tooltip.style.top = `${parseFloat(button.style.top) - 10}px`;
-			  });
-	  
-			  button.addEventListener("mouseleave", () => {
-				button.style.outline = "none";
-				tooltip.style.visibility = "hidden";
-				tooltip.style.opacity = "0";
-			  });
-
-				document.body.appendChild(line);
-				document.body.appendChild(button);
-				document.body.appendChild(tooltip);
-			}
+			document.body.appendChild(line);
+			document.body.appendChild(button);
+			document.body.appendChild(tooltip);
 		}
 	}
 }
