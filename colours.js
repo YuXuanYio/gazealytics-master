@@ -10,6 +10,7 @@ LENS_COLOURS = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c"
 "#7f7f7f", "#bcbd22", "#17becf","#98e2bb","#f3d1aa","#fdaaf3","#fbffc2","#ecacac","#a1b7f7","#dbd643"];
 ORDERED = ["#e9741c","#ffff7c","#74f05c"]; // before, middle, after
 MATCOL = ["#FFFFFF","#cb181d","#2171b5"];
+OBSERVERS = ["#98e2bb","#f3d1aa","#b7a9ea","#fdaaf3","#17becf"];
 WHITE = '#FFFFFF'; GREY = '#888888'; DARK="#BBBBBB"; BLACK = '#000000';
 SELECTED = '#00FF00'; // the colour we use when an item is selected, currently green
 SACC_GRP = []; SACC_COUNT = []; // for sacc export
@@ -24,6 +25,7 @@ function update_selector_colours(){
 	for(i=0; i< SACC_TYPES.length; i++){ document.getElementById('sacc_'+i).value = SACC_TYPES[i]; }
 	for(i=0; i< ORDERED.length; i++){ document.getElementById('order_'+i).value = ORDERED[i]; }
 	for(i=0; i< MATCOL.length; i++){ document.getElementById('matrix_'+i).value = MATCOL[i]; }
+	for(i=0; i< OBSERVERS.length; i++){ document.getElementById('obsv_'+i).value = OBSERVERS[i]; }
 	update_group_colors(); update_filter_colors(); update_lens_colors(); 
 }
 

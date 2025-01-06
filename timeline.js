@@ -1749,6 +1749,8 @@ let do_matrix_timeline_overlay = (p) => {
 
 const observers = {};
 const grouped_events = {};
+let observerColourIndex = 0;
+
 function add_bookmark_button(data, h2top, h2, canvas) {
 	let participantData = data.notes;
 	let start_time = data.t[0];
@@ -1768,13 +1770,11 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 		let event = participantData.events[i];
 		let ts = (canvas.width * (event.timestamp_ms - start_time)) / max_duration;
 		let observerName = event.observer;
-	
-		// get a colour for a observer
-		if(!observers[observerName]) {
-			const alphaValue = Math.round(Math.random()*255) + 75;
-			const angleValue = Math.random()*2*Math.PI;
-			observers[observerName] = color_wheel(alphaValue, angleValue)
-		}	
+
+		if (!observers[observerName]) {
+            observers[observerName] = OBSERVERS[observerColourIndex % OBSERVERS.length];
+            observerColourIndex++;
+        }
 		
 		// create an empty array if there is a timestanp for a note
 		if(!grouped_events[event.occured_timestamp]) {
@@ -1821,6 +1821,8 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 		button.style.width = "15px";
 		button.style.height = "15px";
 		button.style.background = observers[observerName];
+		console.log('background: ' + button.style.background);
+		
 		button.style.border = "none";
 		button.style.cursor = "pointer";
 		button.style.borderRadius = "5px";
@@ -1908,11 +1910,11 @@ function toggle_notes() {
     }
 }
 
-function color_wheel(a, x){
-	var dir = (Math.floor((x*4)/Math.PI + 0.5) + 8) % 8;
-	if( legval!=-1 && legval!=(10+dir)){ a=0; }
-	return makeColor( a, DIRECTIONS[dir]);
-}
+// function color_wheel(a, x){
+// 	var dir = (Math.floor((x*4)/Math.PI + 0.5) + 8) % 8;
+// 	if( legval!=-1 && legval!=(10+dir)){ a=0; }
+// 	return makeColor( a, DIRECTIONS[dir]);
+// }
 
 // to match all the observers to the observer legend
 function colour_match_observer(observers) {
