@@ -1770,6 +1770,9 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 		let event = participantData.events[i];
 		let ts = (canvas.width * (event.timestamp_ms - start_time)) / max_duration;
 		let observerName = event.observer;
+		let selectedBookmark;
+		event.eventId = i;
+		selectedBookmark = event.eventId;
 
 		if (!observers[observerName]) {
             observers[observerName] = OBSERVERS[observerColourIndex % OBSERVERS.length];
@@ -1821,7 +1824,6 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 		button.style.width = "15px";
 		button.style.height = "15px";
 		button.style.background = observers[observerName];
-		console.log('background: ' + button.style.background);
 		
 		button.style.border = "none";
 		button.style.cursor = "pointer";
@@ -1832,10 +1834,11 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 		if(grouped_events[event.occured_timestamp].length > 1) {
 			let toggleButton = document.createElement('button');
 			toggleButton.className = `timeline-toggle-${data.name}`;
-			toggleButton.innerHTML = '<i class="fa-solid fa-angles-right fa-2xs"></i>';
+			// toggleButton.innerHTML = '<i class="fa-solid fa-angles-right fa-2xs"></i>';
+			toggleButton.innerHTML = grouped_events[event.occured_timestamp].length;
 			toggleButton.style.position = "absolute";
 			toggleButton.style.left = `${canvasRect.left + (diff * 2) + ts - 8.5}px`;
-			toggleButton.style.top = `${canvasRect.top + center_y - 30}px`;
+			toggleButton.style.top = `${canvasRect.top + center_y - 35}px`;
 			toggleButton.style.zIndex = "3";
 			document.body.appendChild(toggleButton);
 
@@ -1844,7 +1847,8 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 				// to get the notes in the sequence on click of the toggle button
 				noteIndex = (noteIndex + 1) % grouped_events[event.occured_timestamp].length;
 				let currentNote = grouped_events[event.occured_timestamp][noteIndex];
-				console.log("Switching to note:", currentNote);
+				currentNote.eventId = participantData.events.findIndex(e => e.occured_timestamp === currentNote.occured_timestamp && e.eventDetails === currentNote.eventDetails);
+				selectedBookmark = currentNote.eventId;	
 				button.style.background = observers[currentNote.observer];
 				tooltip.innerHTML = `Timestamp: ${currentNote.occured_timestamp}<br>Type: ${currentNote.type}<br>Details: ${currentNote.eventDetails}<br>Observer: ${currentNote.observer}`;
 			});
@@ -1865,8 +1869,9 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 		tooltip.style.zIndex = "1000";
 		tooltip.style.backgroundColor = "white";
 		tooltip.innerHTML = `Timestamp: ${event.occured_timestamp}<br>Type: ${event.type}<br>Details: ${event.eventDetails}<br>Observer: ${event.observer}`;
-
-		button.addEventListener("mouseenter", () => {
+		// console.log('events: ' + JSON.stringify(event));
+		
+			button.addEventListener("mouseenter", () => {
 			tooltip.style.visibility = "visible";
 			button.style.outline = "2px solid yellow";
 			tooltip.style.opacity = "1";
@@ -1879,6 +1884,10 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 			tooltip.style.visibility = "hidden";
 			tooltip.style.opacity = "0";
 			});
+
+			button.addEventListener("click", () => {
+				select_note(selectedBookmark);
+			})
 
 			document.body.appendChild(line);
 			document.body.appendChild(button);
@@ -1909,12 +1918,6 @@ function toggle_notes() {
         toggleButton.innerHTML = "<i class='fas fa-eye'></i>";
     }
 }
-
-// function color_wheel(a, x){
-// 	var dir = (Math.floor((x*4)/Math.PI + 0.5) + 8) % 8;
-// 	if( legval!=-1 && legval!=(10+dir)){ a=0; }
-// 	return makeColor( a, DIRECTIONS[dir]);
-// }
 
 // to match all the observers to the observer legend
 function colour_match_observer(observers) {

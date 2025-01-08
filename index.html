@@ -375,10 +375,17 @@
 						<div class="dropdown-content" id="note_sample_dropdown">
 						</div>
 					</div>
+					<div class="dropdown">
+						<button>Colour</button>
+						<div class="dropdown-content" id="observer_colour_dropdown">
+							<label><input type="checkbox" name="colour_type" value="same">Same</label>
+							<label><input type="checkbox" name="colour_type" value="different">Different</label>
+						</div>
+					</div>
 				</center>
 				<ul id='notelist' class="data_list"></ul>
 			</div>
-			<div id='cont5' class='data_content' onclick="update_filter_colors();update_group_colors(); update_lens_colors()">
+			<div id='cont5' class='data_content' onclick="update_filter_colors();update_group_colors(); update_lens_colors(); update_observer_colors()">
 				<div class="tool"><button href="help.html" target="popup" onclick="window.open('help.html#colours','name','width=600,height=400')"><i class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 				<p> Data Grouping Colours: </p>
 				<input type="color" id="basic_0" oninput="GROUPINGS[0]=this.value; update_colour_vals();" class="colorer">
@@ -478,7 +485,7 @@
 				<input type="color" id="obsv_4" oninput="OBSERVERS[4]=this.value; update_colour_vals();" class="colorer">
 				<br><br>
 			</div>		
-			<div id='cont6' class='data_content' onclick="update_filter_colors();update_group_colors(); update_lens_colors()">
+			<div id='cont6' class='data_content' onclick="update_filter_colors();update_group_colors(); update_lens_colors(); update_observer_colors()">
 				<div class="tool"><button href="help.html" target="popup" onclick="window.open('help.html#colours','name','width=600,height=400')"><i class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 				<p> Spatial Canvas: </p>
 				<div class="tool">
@@ -672,7 +679,8 @@
 	
 </div>
 </body>
-<script> on_document_load(); 
+<script> 
+on_document_load(); 
 App.main();
 </script>
 </html>

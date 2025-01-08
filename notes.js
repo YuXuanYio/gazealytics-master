@@ -1,6 +1,7 @@
 // lens list function
 notebox =
-	"<div></div>" +
+	'<div></div>' +
+	'<div class="data_dragger"></div>' +
 	'<div class="controls">' +
 	'<div class="tool inner_button">' +
 	'<button id="notes_#_l" onclick="toggle_note_lock(#)"> <i class="fas fa-lock-open"></i> </button>' +
@@ -54,9 +55,13 @@ function new_note(
 	base_notes.push(newnote);
 
 	q = notebox.replace(/#/g, v);
+	console.log('q', q);	
+	console.log('jjjjjj'+document.querySelector('.data_dragger'));
 	var node = document.createElement("li");
 	node.innerHTML = q;
 	node.id = "note_" + v;
+	console.log('node', node);	
+	document.getElementById('notelist').appendChild(node);	
 
 	let noteContentContainer = document.createElement("div");
 	noteContentContainer.className = "note_content_container";
@@ -123,6 +128,7 @@ function new_note(
 	}
 
 	make_note_dataset_selectors();
+	update_observer_colors();
 	select_note(v);
 }
 
