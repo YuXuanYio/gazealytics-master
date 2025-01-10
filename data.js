@@ -22,7 +22,7 @@ let twibox = '<div class="dragger" draggable="true" ondragend="dragEnd()" ondrag
 + '<div class="controls">'
 + '<input type="text" id="#_twi_name" style="width:110px" value="twi#">'
 + '<div id="#_col" style="display:inline;width:19px;height:19px;"></div>'
-+ '<button id="twi_#_c" checked="true" onclick="not_all_eye("showtwis")> <i class="fas fa-eye"></i> </button>'
++ '<button id="twi_#_c" checked="true"> <i class="fas fa-eye"></i> </button>'
 + '<input class="num" type="number" id="#_twigroup" style="width:50px" value = 1 step=1 min=1 max=20>'
 + '<div class="tool inner_button"><button  id="#_x" onclick="delete_twi(#);"> <i class="far fa-trash-alt"></i> </button><span class="tip">Delete the TWI</span></div>';
 
@@ -254,7 +254,7 @@ function new_file(){
 			if(base_twis.length == 0){
 				base_twis.push({name: "All", group: 1, included: true});
 				add_item_to_twilist("All", 0);
-				document.getElementById("twi_0_c").onclick = function(){ document.getElementById('sort_dropdown').value = 'No_sort'; load_controls(); matrix_changed = true;timeline_changed=true;  this.checked = !this.checked; if(this.checked){this.innerHTML='<i class="fas fa-eye"></i>';}else{this.innerHTML='<i class="fas fa-eye-slash"></i>';} };
+				document.getElementById("twi_0_c").onclick = function(){ document.getElementById('sort_dropdown').value = 'No_sort'; load_controls(); matrix_changed = true;timeline_changed=true;  this.checked = !this.checked; removeAllBookmarkButtons(); if(this.checked){this.innerHTML='<i class="fas fa-eye"></i>';}else{this.innerHTML='<i class="fas fa-eye-slash"></i>'; } };
 			}
 			
 			for(let i = 0; i < tois_to_be_added.length; i++){
@@ -293,7 +293,6 @@ function new_file(){
 			fileCounter = 0; filelist = document.getElementById('new_f').value = ""; 
 			err_msg = '';
 			cluster_warn = '';
-			addSamplesToNotesFilter();
 		}
 	}
 	reader.readAsText(filelist[fileCounter]);
@@ -650,9 +649,21 @@ function add_item_to_twilist(name, twi_id){
 	node.setAttribute('class', 'data_item');
 	document.getElementById('twilist').appendChild(node);
 	update_twi_colors();
-	
+
 	document.getElementById('twi_'+v+'_c').checked = true;
-	document.getElementById('twi_'+v+'_c').onclick = function(){ document.getElementById('sort_dropdown').value = 'No_sort'; load_controls(); matrix_changed = true;timeline_changed=true;  this.checked = !this.checked; if(this.checked){this.innerHTML='<i class="fas fa-eye"></i>';}else{this.innerHTML='<i class="fas fa-eye-slash"></i>';} }
+	document.getElementById("twi_" + v + "_c").onclick = function () {
+		document.getElementById("sort_dropdown").value = "No_sort";
+		load_controls();
+		matrix_changed = true;
+		timeline_changed = true;
+		this.checked = !this.checked;
+		if (this.checked) {
+			this.innerHTML = '<i class="fas fa-eye"></i>';
+		} else {
+			this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+		}
+		removeAllBookmarkButtons();
+	};
 	document.getElementById(v+'_twi_name').value = name;
 	document.getElementById(v+'_twigroup').value = base_twis[v].group;
 }
@@ -1534,47 +1545,47 @@ let importNotes = () => {
 
 let processNotesTSV = (notesContent) => {
     const lines = notesContent.trim().split('\n');
-    const headers = lines[0].split('\t').map(header => header.replace(/\s+/g, '').toLowerCase());
-    const rows = lines.slice(1);
+
+    const COLUMN_SESSION_START = 0;
+    const COLUMN_TIMESTAMP = 1;
+    const COLUMN_OBSERVER = 2;
+    const COLUMN_PARTICIPANT_ID = 3;
+    const COLUMN_EVENT_DETAILS = 4;
+    const COLUMN_TYPE = 5;
 
     const dataByParticipant = {};
+    const hasHeaders = /^[a-zA-Z]/.test(lines[0].split('\t')[0]);
+    const rows = hasHeaders ? lines.slice(1) : lines;
 
     rows.forEach((line) => {
         const values = line.split('\t');
-        const rowData = {};
-        
-        headers.forEach((header, index) => {
-            rowData[header] = values[index] || null;
-        });
 
-        const participantID = rowData['participantid'];
+        const participantID = values[COLUMN_PARTICIPANT_ID];
         if (!dataByParticipant[participantID]) {
             dataByParticipant[participantID] = { events: [] };
         }
 
-		if (!dataByParticipant[participantID].startTime) {
-			dataByParticipant[participantID].startTime = rowData['sessionstarttimeactual'];
-		}
+        if (!dataByParticipant[participantID].startTime) {
+            dataByParticipant[participantID].startTime = values[COLUMN_SESSION_START];
+        }
 
-		dataByParticipant[participantID].events.push({
-            eventDetails: rowData['eventdetails'],
-            type: rowData['type'],
-            location: rowData['location'],
-            timestamp: rowData['timestamp'],
-			timestamp_ms: calculateTimeDifferenceInMs(rowData['sessionstarttimeactual'], rowData['timestamp']),
-			occured_timestamp: calculateTimeDifference(rowData['sessionstarttimeactual'], rowData['timestamp']),
-            observer: rowData['observer'],
+        const eventType = values[COLUMN_TYPE].trim().toLowerCase();
+        if (!noteTypes.includes(eventType)) {
+            noteTypes.push(eventType);
+        }
+
+        dataByParticipant[participantID].events.push({
+            eventDetails: values[COLUMN_EVENT_DETAILS],
+            type: eventType,
+            timestamp: values[COLUMN_TIMESTAMP],
+            timestamp_ms: calculateTimeDifferenceInMs(values[COLUMN_SESSION_START], values[COLUMN_TIMESTAMP]),
+            occured_timestamp: calculateTimeDifference(values[COLUMN_SESSION_START], values[COLUMN_TIMESTAMP]),
+            observer: values[COLUMN_OBSERVER],
         });
     });
 
     importedNotes = dataByParticipant;
 
-	DATASETS.forEach((dataset) => {
-		const participantID = dataset.name;
-		if (importedNotes[participantID]) {
-			dataset.notes = importedNotes[participantID];
-		}
-	});
-
-	loadNotesFromTSV();
+	updateNoteTypeDropdown();
+    loadNotesFromTSV();
 }
