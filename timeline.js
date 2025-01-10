@@ -4,6 +4,7 @@ let TIMELINE_draggableRecty = 0;
 let TIMELINE_draggingY = false; // Is the object being dragged?
 let datname;
 let canvasWidth;
+let show_note_legend = false;
 
 let timelinesketch = (p) => {
 	//PFont  f; PFont  fb; // the font used for general text writing applications. defined in setup
@@ -1649,6 +1650,9 @@ let do_matrix_timeline_overlay = (p) => {
 };
 
 const observers = {};
+const grouped_events = {};
+let observerColourIndex = 0;
+const event_types = [];
 function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 	let start_time = toi_bookmark.tmin;
 	let end_time = toi_bookmark.tmax;
@@ -1659,18 +1663,20 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 
 	for (let i = 0; i < participantData.events.length; i++) {
 		let event = participantData.events[i];
+		event_types.push(event.type);
+		let ts = (canvas.width * (event.timestamp_ms - start_time)) / max_duration;
 		if (event.visibleOnTimeline === false || event.included === false) {
 			continue;
 		}
-		let ts = (canvas.width * (event.timestampMs - start_time)) / max_duration;
 		let observerName = event.observer;
-	
-		// get a colour for a observer
-		if(!observers[observerName]) {
-			const alphaValue = Math.round(Math.random()*255) + 75;
-			const angleValue = Math.random()*2*Math.PI;
-			observers[observerName] = color_wheel(alphaValue, angleValue)
-		}	
+		let selectedBookmark;
+		event.eventId = i;
+		selectedBookmark = event.eventId;
+
+		if (!observers[observerName]) {
+            observers[observerName] = OBSERVERS[observerColourIndex % OBSERVERS.length];
+            observerColourIndex++;
+        }
 		
 		// create an empty array if there is a timestanp for a note
 		if(!grouped_events[event.occured_timestamp]) {
@@ -1710,13 +1716,19 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 
 		let button = document.createElement("button");
 		button.className = `timeline-bookmark-${data.name}-toi-${toi_bookmark.twi_id}`;
-		button.style.position = "absolute";	
+		button.setAttribute("data-observer", observerName);
+		button.setAttribute("data-event-type", event.type);
+		button.setAttribute("data-event-detail-id", i);
 
+		button.style.position = "absolute";	
+		console.log('i ' + i);
+		
 		button.style.left = `${canvasRect.left + (diff * 2) + ts - 7.5}px`;
 		button.style.top = `${canvasRect.top + center_y - 7.5}px`;
 		button.style.width = "15px";
 		button.style.height = "15px";
 		button.style.background = observers[observerName];
+		
 		button.style.border = "none";
 		button.style.cursor = "pointer";
 		button.style.borderRadius = "5px";
@@ -1726,10 +1738,11 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 		if(grouped_events[event.occured_timestamp].length > 1) {
 			let toggleButton = document.createElement('button');
 			toggleButton.className = `timeline-toggle-${data.name}`;
-			toggleButton.innerHTML = '<i class="fa-solid fa-angles-right fa-2xs"></i>';
+			// toggleButton.innerHTML = '<i class="fa-solid fa-angles-right fa-2xs"></i>';
+			toggleButton.innerHTML = grouped_events[event.occured_timestamp].length;
 			toggleButton.style.position = "absolute";
 			toggleButton.style.left = `${canvasRect.left + (diff * 2) + ts - 8.5}px`;
-			toggleButton.style.top = `${canvasRect.top + center_y - 30}px`;
+			toggleButton.style.top = `${canvasRect.top + center_y - 35}px`;
 			toggleButton.style.zIndex = "3";
 			document.body.appendChild(toggleButton);
 
@@ -1738,7 +1751,8 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 				// to get the notes in the sequence on click of the toggle button
 				noteIndex = (noteIndex + 1) % grouped_events[event.occured_timestamp].length;
 				let currentNote = grouped_events[event.occured_timestamp][noteIndex];
-				console.log("Switching to note:", currentNote);
+				currentNote.eventId = participantData.events.findIndex(e => e.occured_timestamp === currentNote.occured_timestamp && e.eventDetails === currentNote.eventDetails);
+				selectedBookmark = currentNote.eventId;	
 				button.style.background = observers[currentNote.observer];
 				tooltip.innerHTML = `Timestamp: ${currentNote.occured_timestamp}<br>Type: ${currentNote.type}<br>Details: ${currentNote.eventDetails}<br>Observer: ${currentNote.observer}`;
 			});
@@ -1758,9 +1772,10 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 		tooltip.style.opacity = "0";
 		tooltip.style.zIndex = "1000";
 		tooltip.style.backgroundColor = "white";
-		tooltip.innerHTML = `Timestamp: ${event.occuredTimestamp}<br>Type: ${event.type}<br>Details: ${event.content}<br>Observer: ${event.observer}`;
-
-		button.addEventListener("mouseenter", () => {
+		tooltip.innerHTML = `Timestamp: ${event.occured_timestamp}<br>Type: ${event.type}<br>Details: ${event.eventDetails}<br>Observer: ${event.observer}`;
+		// console.log('events: ' + JSON.stringify(event));
+		
+			button.addEventListener("mouseenter", () => {
 			tooltip.style.visibility = "visible";
 			button.style.outline = "2px solid yellow";
 			tooltip.style.opacity = "1";
@@ -1773,6 +1788,13 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 			tooltip.style.visibility = "hidden";
 			tooltip.style.opacity = "0";
 			});
+
+			button.addEventListener("click", () => {
+				select_note(selectedBookmark);
+			})
+
+			document.addEventListener("DOMContentLoaded", filter_observers_by_colour());
+			console.log('observers: ' + JSON.stringify(observers));			
 
 			document.body.appendChild(line);
 			document.body.appendChild(button);
@@ -1820,12 +1842,6 @@ function toggle_notes() {
     }
 }
 
-function color_wheel(a, x){
-	var dir = (Math.floor((x*4)/Math.PI + 0.5) + 8) % 8;
-	if( legval!=-1 && legval!=(10+dir)){ a=0; }
-	return makeColor( a, DIRECTIONS[dir]);
-}
-
 // to match all the observers to the observer legend
 function colour_match_observer(observers) {
     let container = document.getElementById('legend_container');
@@ -1865,4 +1881,113 @@ function colour_match_observer(observers) {
     });
 
     container.appendChild(legendRow);
+}
+
+function filter_observers_by_colour() {
+	let sameCheckbox = document.querySelector('input[value="same"]');
+	let differentCheckbox = document.querySelector('input[value="different"]');
+	let typeCheckbox = document.querySelector('input[value="note_type_colour"]');
+
+	sameCheckbox.addEventListener('change', () => {
+		if (sameCheckbox.checked) {
+			differentCheckbox.checked = false;
+			typeCheckbox.checked = false;
+			show_note_legend = false;
+			change_all_bookmarks_to_grey();
+		}
+	})
+
+	differentCheckbox.addEventListener('change', () => {
+		if (differentCheckbox.checked) {
+			sameCheckbox.checked = false;
+			typeCheckbox.checked = false;
+			show_note_legend = false;
+			change_all_bookmarks_to_original();
+		}
+	});
+
+	typeCheckbox.addEventListener('change', () => {
+		if (typeCheckbox.checked) {
+			sameCheckbox.checked = false;
+			differentCheckbox.checked = false;
+			show_note_legend = true;
+			filter_by_note_type_observer();
+		}
+	});
+}
+
+function change_all_bookmarks_to_grey() {
+	let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
+	bookmarks.forEach(bookmark => {
+		bookmark.style.background = "#696b6a";
+		bookmark.style.border = "1px solid black";
+	});
+	add_note_type_legend();
+}
+
+function change_all_bookmarks_to_original() {
+	let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
+	bookmarks.forEach(bookmark => {
+		let currentObserver = bookmark.getAttribute("data-observer");
+		let originalColour = observers[currentObserver];
+		if (originalColour) {
+			bookmark.style.background = originalColour;
+			bookmark.style.border = originalColour;
+		}
+	});
+	add_note_type_legend();
+}
+
+let event_colour_map = {};
+function filter_by_note_type_observer() {
+	for(let i=0; i<event_types.length; i++) {
+		event_colour_map[event_types[i]] = OBSERVERS[i];	
+	}
+	
+	let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
+	bookmarks.forEach(bookmark => {
+		let observer = bookmark.getAttribute("data-event-type");
+		let typeColour = event_colour_map[observer];
+		if (typeColour) {
+			bookmark.style.background = typeColour;
+			bookmark.style.border = typeColour;
+			add_note_type_legend();
+		}
+	})
+}
+
+function add_note_type_legend() {
+	let container = document.getElementById('note_type_legend');
+	container.innerHTML = "";
+
+	if(show_note_legend === true) {
+		let legendRow = document.createElement("ul");
+		legendRow.style.display = "flex";
+		legendRow.style.flexDirection = "row";
+		legendRow.style.gap = "15px";
+	
+		Object.entries(event_colour_map).forEach(([noteType, colour]) => {
+			let observerDiv = document.createElement('div');
+			observerDiv.style.display = "flex";
+			observerDiv.style.alignItems = "center";
+			observerDiv.style.marginBottom = "5px";
+			observerDiv.style.justifyContent = "center";
+	
+			let colorIndicator = document.createElement('div');
+			colorIndicator.style.width = "15px";
+			colorIndicator.style.height = "15px";
+			colorIndicator.style.borderRadius = "5px"; 
+			colorIndicator.style.background = colour; 
+			colorIndicator.style.marginRight = "10px";
+			observerDiv.style.alignItems = "center";
+			observerDiv.style.justifyContent = "center";
+			let observerText = document.createElement('span');
+			observerText.textContent = noteType;
+	
+			observerDiv.appendChild(colorIndicator);
+			observerDiv.appendChild(observerText);
+			legendRow.appendChild(observerDiv);
+		});
+		container.appendChild(legendRow);
+	}
 }
