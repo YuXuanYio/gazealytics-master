@@ -37,7 +37,7 @@ function new_note(
 	visibleOnCanvas,
 	visibleOnTimeline
 ) {
-	v = base_notes.length;
+	let v = base_notes.length;
 	notePID = selected_data;
 	DATASETS.forEach((d, i) => {
 		if (d.name === noteBelongTo) {
@@ -95,13 +95,15 @@ function new_note(
 	textarea.className = "tool";
 	textarea.id = "note_" + v + "_content";
 	textarea.value = content;
-	textarea.onchange = function () {
+	textarea.addEventListener("input", function () {
+		console.log(base_notes);
+		console.log(v);
 		if (!base_notes[v].locked) {
 			base_notes[v].content = this.value;
 		} else {
 			this.value = base_notes[v].content;
 		}
-	};
+	});	
 
 	noteContentContainer.appendChild(textarea);
 
@@ -335,6 +337,7 @@ function delete_note(id) {
 			selected_note = -1;
 		}
 	}
+	draw_time_all(TimeLine);
 }
 
 function key_note(key) {

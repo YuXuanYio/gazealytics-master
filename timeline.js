@@ -1660,7 +1660,7 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 
 	for (let i = 0; i < participantData.events.length; i++) {
 		let event = participantData.events[i];
-		if (event.visibleOnTimeline === false) {
+		if (event.visibleOnTimeline === false || event.included === false) {
 			continue;
 		}
 		let ts = (canvas.width * (event.timestampMs - start_time)) / max_duration;
