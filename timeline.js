@@ -3,7 +3,6 @@ let TIMELINE_CANVAS;
 let TIMELINE_draggableRecty = 0;
 let TIMELINE_draggingY = false; // Is the object being dragged?
 let datname;
-let squares = [];
 let canvasWidth;
 
 let timelinesketch = (p) => {
@@ -1666,22 +1665,36 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 		let ts = (canvas.width * (event.timestampMs - start_time)) / max_duration;
 		let observerName = event.observer;
 	
+		// get a colour for a observer
 		if(!observers[observerName]) {
 			const alphaValue = Math.round(Math.random()*255) + 75;
 			const angleValue = Math.random()*2*Math.PI;
 			observers[observerName] = color_wheel(alphaValue, angleValue)
-		}		
+		}	
 		
+		// create an empty array if there is a timestanp for a note
+		if(!grouped_events[event.occured_timestamp]) {
+			grouped_events[event.occured_timestamp] = [];
+		}
+
+		// check if the array has repeated notes
+		if(!grouped_events[event.occured_timestamp].some(note => note.eventDetails === event.eventDetails)) {
+			grouped_events[event.occured_timestamp].push(event);
+		}
+		
+		// get different colours for different observers
 		if(Object.keys(observers).length !== 0) {
 			colour_match_observer(observers);
 		}
 
+		// calculation to add the bookmark button in the timeline
 		if (ts >= 0 && ts <= canvas.width) {
 		let start_y = h2top;
 		let end_y = h2top + h2;
 		let center_y = start_y + (end_y - start_y) / 2;										
 		
-		const canvasRect = TIMELINE_CANVAS.elt.getBoundingClientRect(); // canvas position	
+		// get the timeline of the canvas
+		const canvasRect = TIMELINE_CANVAS.elt.getBoundingClientRect();
 		let diff = (TIMELINE_CANVAS.width - canvas.width) / 3;
 
 		let line = document.createElement("div");
@@ -1708,6 +1721,28 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 		button.style.cursor = "pointer";
 		button.style.borderRadius = "5px";
 		button.style.zIndex = "2";
+
+		// to view multiple notes at the same timestamp
+		if(grouped_events[event.occured_timestamp].length > 1) {
+			let toggleButton = document.createElement('button');
+			toggleButton.className = `timeline-toggle-${data.name}`;
+			toggleButton.innerHTML = '<i class="fa-solid fa-angles-right fa-2xs"></i>';
+			toggleButton.style.position = "absolute";
+			toggleButton.style.left = `${canvasRect.left + (diff * 2) + ts - 8.5}px`;
+			toggleButton.style.top = `${canvasRect.top + center_y - 30}px`;
+			toggleButton.style.zIndex = "3";
+			document.body.appendChild(toggleButton);
+
+			let noteIndex = 0;
+			toggleButton.addEventListener("click", () => {
+				// to get the notes in the sequence on click of the toggle button
+				noteIndex = (noteIndex + 1) % grouped_events[event.occured_timestamp].length;
+				let currentNote = grouped_events[event.occured_timestamp][noteIndex];
+				console.log("Switching to note:", currentNote);
+				button.style.background = observers[currentNote.observer];
+				tooltip.innerHTML = `Timestamp: ${currentNote.occured_timestamp}<br>Type: ${currentNote.type}<br>Details: ${currentNote.eventDetails}<br>Observer: ${currentNote.observer}`;
+			});
+		}
 
 		let tooltip = document.createElement("tooltip");
 		tooltip.className = "tooltip";
@@ -1763,18 +1798,23 @@ function removeAllBookmarkButtons() {
 }
 
 function toggle_notes() {
+	// get all the html elements starting with the following classnames
     let toggleButton = document.getElementById("observer_notes");
     let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
 	let lines = document.querySelectorAll("[class^='timeline-line-']");
+	let multiNotesButton = document.querySelectorAll("[class^='timeline-toggle-']");
     
+	// to switch off the notes, lines and multiNotes functions in the timeline
     if (toggleButton.dataset.toggle === "on") {
         bookmarks.forEach((btn) => btn.style.display = "none");
 		lines.forEach((line) => line.style.display = "none");
+		multiNotesButton.forEach((btn) => btn.style.display = "none");
         toggleButton.dataset.toggle = "off";
         toggleButton.innerHTML = "<i class='fas fa-eye-slash'></i>";
     } else {
         bookmarks.forEach((btn) => btn.style.display = "block");
 		lines.forEach((line) => line.style.display = "block");
+		multiNotesButton.forEach((btn) => btn.style.display = "block");
         toggleButton.dataset.toggle = "on";
         toggleButton.innerHTML = "<i class='fas fa-eye'></i>";
     }
@@ -1786,6 +1826,7 @@ function color_wheel(a, x){
 	return makeColor( a, DIRECTIONS[dir]);
 }
 
+// to match all the observers to the observer legend
 function colour_match_observer(observers) {
     let container = document.getElementById('legend_container');
     container.innerHTML = "";
