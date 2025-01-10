@@ -929,6 +929,8 @@ function click_showtwis(){
 	document.getElementById('showtwis').classList.add( 'toggle-on' );
 	var hidden = document.getElementById('showtwis').innerHTML.includes("slash");
 	if( hidden ){
+		draw_time_all(TimeLine);
+		select_twi(0)
 		document.getElementById('showtwis').innerHTML = " <i class='fas fa-eye'></i>  ";
 		for(var i=0; i<base_twis.length; i++){
 			if(base_twis[i].included) {
@@ -937,6 +939,7 @@ function click_showtwis(){
 			}			
 		}
 	}else{
+		removeAllBookmarkButtons();
 		document.getElementById('showtwis').innerHTML = " <i class='fas fa-eye-slash'></i> ";
 		for(var i=0; i<base_twis.length; i++){
 			if(base_twis[i].included) {
@@ -952,8 +955,15 @@ function not_all_eye(id){
 }
 function click_notes(){
 	SHOW_NOTES = document.getElementById('notes').innerHTML.includes( "slash" );
-	if( SHOW_NOTES ){document.getElementById('notes').innerHTML = " <i class='fas fa-eye'></i> "}
-	else{document.getElementById('notes').innerHTML = " <i class='fas fa-eye-slash'></i> "}
+	if( SHOW_NOTES ) {
+		document.getElementById('notes').innerHTML = " <i class='fas fa-eye'></i> ";
+		document.getElementById('notes').classList.remove("toggle-off");
+		document.getElementById('notes').classList.add('toggle-on');
+	} else {
+		document.getElementById('notes').innerHTML = " <i class='fas fa-eye-slash'></i> ";
+		document.getElementById('notes').classList.remove("toggle-on");
+		document.getElementById('notes').classList.add('toggle-off');
+	}
 }
 function control_state(val){
 	if( CONTROL_STATE == val ){ CONTROL_STATE = ""; }
