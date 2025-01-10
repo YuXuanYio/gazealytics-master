@@ -52,7 +52,7 @@ let spatialsketch = (p) => {
 				find_note(p, X, Y);
 				if(selected_note == -1){
 					view_panel(4);
-					new_note(X+OFFSET_X, Y+OFFSET_Y, "", "", "General" , "Not Available", "Not Available", true);
+					new_note(X+OFFSET_X, Y+OFFSET_Y, "", "", "General" , "N.A.", "N.A.", "N.A.", "N.A.", true, false);
 				}				
 			}else{
 				find_lens(X, Y);

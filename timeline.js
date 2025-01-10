@@ -567,7 +567,7 @@ let timelinesketch = (p) => {
 		p.noStroke();
 		if(dat.toi_id == -1) return;
 		for(let i= toi.j_min; i< toi.j_max; i++){
-			console.log('tot i ' + i);
+			// console.log('tot i ' + i);
 			
 			if(fixs[i] != undefined) {
 				let dist = (fixs[i].x*(spatial_width/WIDTH) - SPATIAL.mouseX)**2 + (fixs[i].y*(spatial_height/HEIGHT) - SPATIAL.mouseY)**2;
@@ -981,8 +981,8 @@ let draw_time_all = (canvas) => {
 		}
 		
 		if(TIMELINE_CANVAS.num_of_rows > 0) {
-			h2 = canvas.height/TIMELINE_CANVAS.num_of_rows; 			
-
+			h2 = canvas.height/TIMELINE_CANVAS.num_of_rows;
+			
 			for(let k=0, row=0; k<VALUED.length && row<TIMELINE_CANVAS.num_of_rows; k++){
 				let data = DATASETS[VALUED[k]]; // data.name == PID
 				// console.log('dataaa: ' + JSON.stringify(data, null, 2));
@@ -1033,6 +1033,11 @@ let draw_time_all = (canvas) => {
 						if(data.fixs.length == 0){
 							continue;					
 						}
+
+						if (data.notes) {
+							addBookmarkButton(data, h2top, h2, canvas, toi);
+						}
+					
 						for(let j = toi.j_min; j < toi.j_max; j++){
 							if(data.fixs[j] != undefined && (data.fixs[j].t - toi.tmin)/toi_longest_duration < TIME_ANIMATE) {
 								
@@ -1049,110 +1054,6 @@ let draw_time_all = (canvas) => {
 								}
 							}					
 						}
-						
-						// if (mockData[data.name]) {
-						// 	add_bookmark(data, h2top, h2, canvas);
-						// }
-						
-						if (data.notes) {
-							add_bookmark_button(data, h2top, h2, canvas);
-						}
-
-						// if (mockData[data.name]) {															
-						// 	let participantData = mockData[data.name];
-						// 	let start_time = data.t[0];
-						// 	let end_time = data.t[data.t.length - 1];
-						// 	let max_duration = end_time - start_time;
-						  
-						// 	// Clear `squares` and buttons before loading new data
-						// 	squares = []; 
-						// 	document.querySelectorAll(".timeline-button").forEach((btn) => btn.remove());
-						  
-						// 	for (let i = 0; i < participantData.events.length; i++) {
-						// 	  let event = participantData.events[i];
-						// 	  let ts = (canvas.width * (event.timestamp_ms - start_time)) / max_duration;
-						  
-						// 	  if (ts >= 0 && ts <= canvas.width) {
-						// 		let start_y = h2top;
-						// 		let end_y = h2top + h2;
-						// 		let center_y = start_y + (end_y - start_y) / 2;
-						  
-						// 		// Add button instead of bookmark
-						// 		let button = document.createElement("button");
-						// 		button.className = "timeline-button";
-						// 		button.style.position = "absolute";
-						  
-						// 		// Adjust position relative to the canvas
-						// 		const canvasRect = TIMELINE_CANVAS.elt.getBoundingClientRect(); // Get canvas position
-						// 		let diff = (TIMELINE_CANVAS.width - canvas.width) / 3;
-						// 		button.style.left = `${canvasRect.left + ts - 7.5}px`; // Adjust left position
-						// 		button.style.top = `${canvasRect.top + center_y - 7.5}px`; // Adjust top position
-						  
-						// 		button.style.width = "15px";
-						// 		button.style.height = "15px";
-						// 		button.style.background = "red";
-						// 		button.style.border = "none";
-						// 		button.style.cursor = "pointer";
-						// 		button.title = event.eventDetails; // Tooltip with event details
-						  
-						// 		// Add onclick event listener
-						// 		button.addEventListener("click", () => {
-						// 		  console.log("Button clicked for event:", event.eventDetails);
-						// 		});
-						  
-						// 		// Append button to the document body
-						// 		document.body.appendChild(button);
-						  
-						// 		// Add to squares array for reference (optional)
-						// 		squares.push({
-						// 		  x: ts - 7.5, // Button's top-left X (matches button left)
-						// 		  y: center_y - 7.5, // Button's top-left Y (matches button top)
-						// 		  size: 15, // Button size
-						// 		  details: event.eventDetails // Event details
-						// 		});
-						// 	  }
-						// 	}
-						//}
-						  
-						// if(mockData[data.name]) {															
-						// 	let participantData = mockData[data.name];
-						// 	let start_time = data.t[0];
-						// 	let end_time = data.t[data.t.length - 1];
-						// 	let max_duration = end_time - start_time;
-						// 		for(let i=0; i<participantData.events.length; i++) {
-						// 			let event = participantData.events[i];									
-						// 			let ts = (canvas.width * (event.timestamp_ms - start_time)) / max_duration;											
-						// 			if (ts >= 0 && ts <= canvas.width) {
-						// 				let start_y = h2top;
-						// 				let end_y = h2top + h2;
-						// 				let center_y = start_y + (end_y - start_y) / 2;
-						// 				let squareSize = 15;
-
-						// 				canvasWidth = canvas.width;
-						// 				console.log('event: ' + i);
-						// 				console.log('x:' + ts - squareSize/2);
-						// 				console.log('y:' + center_y - squareSize/2);										
-										
-						// 				canvas.stroke(145, 15, 15); // bookmark line
-						// 				canvas.fill(255, 100, 100);
-						// 				canvas.line(ts, start_y, ts, end_y); // vertical line											
-						// 				canvas.rect(ts - squareSize / 2, center_y - squareSize / 2, squareSize, squareSize);
-						// 				canvas.textAlign(canvas.CENTER);
-						// 				canvas.fill(0, 0, 0);
-						// 				canvas.text(event.eventDetails, ts, (start_y + center_y)/2); // label at the top
-
-						// 				let exists = squares.some((sq) => sq.x === ts - squareSize / 2 && sq.y === center_y - squareSize / 2);
-						// 				if(!exists) {
-						// 					squares.push({
-						// 						x: ts - squareSize/2, // Top-left X
-						// 						y: center_y - squareSize/2, // Top-left Y
-						// 						size: squareSize, // Size of the square
-						// 						details: event.eventDetails // Event details
-						// 					});
-						// 				} 										
-						// 			}									
-						// 		}	
-						// 	}
 						
 						// colours
 						for(let j = toi.j_min; j < toi.j_max; j++){
@@ -1752,26 +1653,21 @@ const observers = {};
 const grouped_events = {};
 let observerColourIndex = 0;
 const event_types = [];
-
-function add_bookmark_button(data, h2top, h2, canvas) {
+function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
+	let start_time = toi_bookmark.tmin;
+	let end_time = toi_bookmark.tmax;
 	let participantData = data.notes;
-	let start_time = data.t[0];
-	let end_time = data.t[data.t.length - 1];
 	let max_duration = end_time - start_time;
 
-	let datasetClass = `timeline-bookmark-${data.name}`;
-	let lineClass = `timeline-line-${data.name}`;
-	let toggleButtonClass = `timeline-toggle-${data.name}`
-
-	// removes all the duplications when adding another dataset
-	document.querySelectorAll(`.${lineClass}`).forEach((line) => line.remove());
-	document.querySelectorAll(`.${datasetClass}`).forEach((btn) => btn.remove());
-	document.querySelectorAll(`.${toggleButtonClass}`).forEach((btn) => btn.remove());
+	removeBookmarkButton(data, toi_bookmark);
 
 	for (let i = 0; i < participantData.events.length; i++) {
 		let event = participantData.events[i];
 		event_types.push(event.type);
 		let ts = (canvas.width * (event.timestamp_ms - start_time)) / max_duration;
+		if (event.visibleOnTimeline === false || event.included === false) {
+			continue;
+		}
 		let observerName = event.observer;
 		let selectedBookmark;
 		event.eventId = i;
@@ -1808,7 +1704,7 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 		let diff = (TIMELINE_CANVAS.width - canvas.width) / 3;
 
 		let line = document.createElement("div");
-		line.className = `timeline-line-${data.name}`;
+		line.className = `timeline-line-${data.name}-toi-${toi_bookmark.twi_id}`;
 		line.style.position = "absolute";	
 
 		line.style.left = `${canvasRect.left + (diff * 2) + ts}px`;
@@ -1819,10 +1715,11 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 		line.style.zIndex = "1";
 
 		let button = document.createElement("button");
-		button.className = `timeline-bookmark-${data.name}`;
+		button.className = `timeline-bookmark-${data.name}-toi-${toi_bookmark.twi_id}`;
 		button.setAttribute("data-observer", observerName);
 		button.setAttribute("data-event-type", event.type);
 		button.setAttribute("data-event-detail-id", i);
+
 		button.style.position = "absolute";	
 		console.log('i ' + i);
 		
@@ -1904,6 +1801,22 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 			document.body.appendChild(tooltip);
 		}
 	}
+}
+
+function removeBookmarkButton(data, toi_bookmark) {
+	let datasetClass = `timeline-bookmark-${data.name}-toi-${toi_bookmark.twi_id}`;
+	let lineClass = `timeline-line-${data.name}-toi-${toi_bookmark.twi_id}`;
+
+	document.querySelectorAll(`.${lineClass}`).forEach((line) => line.remove());
+	document.querySelectorAll(`.${datasetClass}`).forEach((btn) => btn.remove());
+}
+
+function removeAllBookmarkButtons() {
+	DATASETS.forEach((data) => {
+		data.tois.forEach((toi) => {
+			removeBookmarkButton(data, toi);
+		});
+	});
 }
 
 function toggle_notes() {

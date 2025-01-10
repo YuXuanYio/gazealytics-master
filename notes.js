@@ -4,19 +4,24 @@ notebox =
 	'<div class="data_dragger"></div>' +
 	'<div class="controls">' +
 	'<div class="tool inner_button">' +
-	'<button id="notes_#_l" onclick="toggle_note_lock(#)"> <i class="fas fa-lock-open"></i> </button>' +
+	'<button id="notes_#_l" onclick="toggleNoteLock(#)"> <i class="fas fa-lock-open"></i> </button>' +
 	'<span class="tip">Lock the lens with current values</span></div>' +
 	'<div class="tool inner_button">' +
-	'<button id="notes_#_v" class="toggler toggle-on" onclick="toggle_note_visibility(#)"> <i class="fas fa-eye"></i> </button>' +
+	'<button id="notes_#_v" class="toggler toggle-on" onclick="toggleSpatialVisibility(#)"> <i class="fas fa-eye"></i> </button>' +
 	'<span class="tip">Toggle visibility of note on spatial canvas</span></div>' +
+	'<div class="tool inner_button">' +
+	'<button id="notes_#_t" class="toggler toggle-on" onclick="toggleTimeVisibility(#)"> <i class="fas fa-clock"></i> </button>' +
+	'<span class="tip">Toggle visibility of note on timeline canvas</span></div>' +
 	'<div class="tool inner_button"><button onclick="delete_note(#);"><i class="far fa-trash-alt"></i></button>' +
 	'<span class="tip">Delete the note</span></div><br>' +
-	'<select class="note_dataset" id="#_note_pid" onchange="change_note_pid(#, this.value)"></select>' +
+	'<select class="note_dataset" id="#_note_pid" onchange="changeNotePid(#, this.value)"></select>' +
 	"</div>";
 
 base_notes = [];
 order_notes = [];
 importedNotes = {};
+preFilteredBaseNotes = [];
+noteTypes = [];
 selected_note = -1;
 var LINE_CHAR = "\n";
 
@@ -27,8 +32,11 @@ function new_note(
 	noteBelongTo,
 	type,
 	timestamp,
+	timestampMs,
+	occuredTimestamp,
 	observer,
-	visibleOnCanvas
+	visibleOnCanvas,
+	visibleOnTimeline
 ) {
 	let v = base_notes.length;
 	notePID = selected_data;
@@ -48,9 +56,12 @@ function new_note(
 		type: type,
 		timestamp: timestamp,
 		observer: observer,
+		timestampMs: timestampMs,
+		occuredTimestamp: occuredTimestamp,
 		shownInList: true,
 		locked: false,
 		visibleOnCanvas: visibleOnCanvas,
+		visibleOnTimeline: visibleOnTimeline
 	};
 	base_notes.push(newnote);
 
@@ -75,7 +86,7 @@ function new_note(
 	let timestampLabel = document.createElement("label");
 	timestampLabel.className = "tool note_timestamp";
 	timestampLabel.id = "note_" + v + "_note_timestamp";
-	timestampLabel.textContent = `Timestamp: ${timestamp}`;
+	timestampLabel.textContent = `Timestamp: ${occuredTimestamp}`;
 
 	let observerLabel = document.createElement("label");
 	observerLabel.className = "tool note_observer";
@@ -90,13 +101,15 @@ function new_note(
 	textarea.className = "tool";
 	textarea.id = "note_" + v + "_content";
 	textarea.value = content;
-	textarea.onchange = function () {
+	textarea.addEventListener("input", function () {
+		console.log(base_notes);
+		console.log(v);
 		if (!base_notes[v].locked) {
 			base_notes[v].content = this.value;
 		} else {
 			this.value = base_notes[v].content;
 		}
-	};
+	});	
 
 	textarea.addEventListener('change', () => {
 		let bookmarkButton = document.querySelector(`button[data-event-detail-id="${v_id}"]`);
@@ -138,6 +151,21 @@ function new_note(
 		eyeButton.classList.add("toggle-off");
 	}
 
+	if (!visibleOnTimeline) {
+		let timeButton = document.getElementById(`notes_${v}_t`);
+		timeButton.innerHTML = '<i class="fas fa-ban"></i>';
+		timeButton.classList.remove("toggle-on");
+		timeButton.classList.add("toggle-off");
+	
+		timeButton.disabled = true;
+	
+		let tipSpan = timeButton.parentElement.querySelector('.tip');
+		if (tipSpan) {
+			tipSpan.textContent = "Time-based notes are disabled";
+		}
+	
+	}
+	
 	make_note_dataset_selectors();
 	update_observer_colors();
 	select_note(v);
@@ -326,6 +354,7 @@ function delete_note(id) {
 			selected_note = -1;
 		}
 	}
+	draw_time_all(TimeLine);
 }
 
 function key_note(key) {
@@ -355,28 +384,31 @@ function key_note(key) {
 
 let loadNotesFromTSV = () => {
 	DATASETS.forEach((d, i) => {
-		if (d.initialised && d.should_save && d.included) {
-			let notes = d.notes;
-			let sessionStartTimestamp = notes.startTime;
-			notes.events.forEach((n, j) => {
-				let eventTimestamp = n.timestamp;
-				let timestampDifference = calculateTimeDifference(
-					sessionStartTimestamp,
-					eventTimestamp
-				);
+		const sampleId = d.name;
+		currentSampleNote = importedNotes[sampleId];
+		d.notes = {};
+		if (d.initialised && d.should_save && d.included && currentSampleNote) {
+			d.notes.startTime = currentSampleNote.startTime;
+
+			currentSampleNote.events.forEach((n, j) => {
 				new_note(
 					200,
 					200,
 					n.eventDetails,
 					d.name,
 					n.type,
-					timestampDifference,
+					n.timestamp,
+					n.timestamp_ms,
+					n.occured_timestamp,
 					n.observer,
-					false
+					false,
+					true
 				);
 			});
 		}
 	});
+	loadNotesIntoDatasets();
+
 	draw_time_all(TimeLine);
 };
 
@@ -400,79 +432,54 @@ function addSamplesToNotesFilter() {
 }
 
 function filterNotes() {
-	let selectedTypes = Array.from(
-		document.querySelectorAll(
-			'#note_type_dropdown input[name="note_type"]:checked'
-		)
-	).map((checkbox) => checkbox.value);
-	let selectedSamples = Array.from(
-		document.querySelectorAll(
-			'#note_sample_dropdown input[name="note_sample"]:checked'
-		)
-	).map((checkbox) => checkbox.value);
+    let selectedTypes = Array.from(
+        document.querySelectorAll(
+            '#note_type_dropdown input[name="note_type"]:checked'
+        )
+    ).map((checkbox) => checkbox.value);
+    let selectedSamples = Array.from(
+        document.querySelectorAll(
+            '#note_sample_dropdown input[name="note_sample"]:checked'
+        )
+    ).map((checkbox) => checkbox.value);
 
-	base_notes.forEach((note) => {
-		const noteType = note.type.toLowerCase();
-		const noteSample = DATASETS[note.pid]?.name;
-		
-		const typeMatch = (selectedTypes.length === 0) || selectedTypes.includes(noteType);
-		const sampleMatch = (selectedSamples.length === 0) || selectedSamples.includes(noteSample);
+    if (preFilteredBaseNotes.length === 0) {
+        preFilteredBaseNotes = JSON.parse(JSON.stringify(base_notes));
+    }
 
-		note.shownInList = typeMatch && sampleMatch;
-	});
-
-	const noteList = document.getElementById("notelist").children;
-	for (let i = 0; i < noteList.length; i++) {
-		const elem = noteList[i];
-		const id = parseInt(elem.id.split("_")[1], 10);
-		const note = base_notes[id];
-		elem.style.display = note.shownInList ? "" : "none";
+    if (selectedTypes.length === 0 && selectedSamples.length === 0) {
+		base_notes = JSON.parse(JSON.stringify(preFilteredBaseNotes));
+        preFilteredBaseNotes = [];
+    }else {
+		base_notes = JSON.parse(JSON.stringify(preFilteredBaseNotes));
 	}
 
-	make_note_dataset_selectors();
+    base_notes.forEach((note) => {
+        const noteType = note.type.toLowerCase();
+        const noteSample = DATASETS[note.pid]?.name;
+
+        const typeMatch = (selectedTypes.length === 0) || selectedTypes.includes(noteType);
+        const sampleMatch = (selectedSamples.length === 0) || selectedSamples.includes(noteSample);
+
+        note.shownInList = typeMatch && sampleMatch;
+        note.visibleOnCanvas = note.shownInList && note.visibleOnCanvas;
+        note.visibleOnTimeline = note.shownInList && note.visibleOnTimeline;
+    });
+
+    const noteList = document.getElementById("notelist").children;
+    for (let i = 0; i < noteList.length; i++) {
+        const elem = noteList[i];
+        const id = parseInt(elem.id.split("_")[1], 10);
+        const note = base_notes[id];
+        elem.style.display = note.shownInList ? "" : "none";
+    }
+
+    loadNotesIntoDatasets();
+    draw_time_all(TimeLine);
+    make_note_dataset_selectors();
 }
 
-function calculateTimeDifference(dateStr1, dateStr2) {
-	const parseDate = (dateStr) => {
-		const [day, month, year, time] = dateStr.split(/[\/\s]/);
-		const [hours, minutes, seconds] = time.split(":");
-		return new Date(year, month - 1, day, hours, minutes, seconds);
-	};
-
-	const date1 = parseDate(dateStr1);
-	const date2 = parseDate(dateStr2);
-
-	const differenceInMilliseconds = Math.abs(date2 - date1);
-
-	const hours = Math.floor(differenceInMilliseconds / 3600000);
-	const minutes = Math.floor((differenceInMilliseconds % 3600000) / 60000);
-	const seconds = Math.floor((differenceInMilliseconds % 60000) / 1000);
-	const milliseconds = differenceInMilliseconds % 1000;
-
-	const formatted = [
-		String(hours).padStart(2, "0"),
-		String(minutes).padStart(2, "0"),
-		String(seconds).padStart(2, "0"),
-		String(milliseconds).padStart(3, "0"),
-	].join(":");
-
-	return formatted;
-}
-
-function calculateTimeDifferenceInMs(dateStr1, dateStr2) {
-    const parseDate = (dateStr) => {
-        const [day, month, year, time] = dateStr.split(/[\/\s]/);
-        const [hours, minutes, seconds] = time.split(":");
-        return new Date(year, month - 1, day, hours, minutes, seconds);
-    };
-
-    const date1 = parseDate(dateStr1);
-    const date2 = parseDate(dateStr2);
-
-    return Math.abs(date2 - date1);
-}
-
-function toggle_note_lock(id) {
+function toggleNoteLock(id) {
 	let note = base_notes[id];
 	note.locked = !note.locked;
 
@@ -487,27 +494,53 @@ function toggle_note_lock(id) {
 	textarea.readOnly = note.locked;
 }
 
-function toggle_note_visibility(id) {
+function toggleSpatialVisibility(id) {
 	let note = base_notes[id];
-	note.visibleOnCanvas = !note.visibleOnCanvas;
-
 	let eyeButton = document.getElementById(`notes_${id}_v`);
-	if (note.visibleOnCanvas) {
+
+	if (!note.visibleOnCanvas) {
+		note.visibleOnCanvas = true;
 		eyeButton.innerHTML = '<i class="fas fa-eye"></i>';
 		eyeButton.classList.remove("toggle-off");
 		eyeButton.classList.add("toggle-on");
 	} else {
+		note.visibleOnCanvas = false;
 		eyeButton.innerHTML = '<i class="fas fa-eye-slash"></i>';
 		eyeButton.classList.remove("toggle-on");
 		eyeButton.classList.add("toggle-off");
 	}
 
+	loadNotesIntoDatasets();
+	draw_time_all(TimeLine);
 	if (typeof draw_notes === "function" && typeof canvas !== "undefined") {
 		draw_notes(canvas);
 	}
 }
 
-function change_note_pid(id, value) {
+function toggleTimeVisibility(id) {
+	let note = base_notes[id];
+	let timeButton = document.getElementById(`notes_${id}_t`);
+
+	if (!note.visibleOnTimeline) {
+		note.visibleOnTimeline = true;
+		timeButton.innerHTML = '<i class="fas fa-clock"></i>';
+		timeButton.classList.remove("toggle-off");
+		timeButton.classList.add("toggle-on");
+	} else {
+		note.visibleOnTimeline = false;
+		timeButton.innerHTML = '<i class="fas fa-times-circle"></i>';
+		timeButton.classList.remove("toggle-on");
+		timeButton.classList.add("toggle-off");
+	}
+
+	loadNotesIntoDatasets();
+	draw_time_all(TimeLine);
+	if (typeof draw_notes === "function" && typeof canvas !== "undefined") {
+		draw_notes(canvas);
+	}
+}
+
+function changeNotePid(id, value) {
 	let note = base_notes[id];
 	if (!note.locked) {
 		note.pid = parseInt(value);
@@ -515,3 +548,31 @@ function change_note_pid(id, value) {
 		document.getElementById(`${id}_note_pid`).value = note.pid;
 	}
 }
+
+function loadNotesIntoDatasets() {
+	currentPid = -1;
+	base_notes.forEach((note) => {
+		if (note.pid !== currentPid) {
+			currentPid = note.pid;
+			DATASETS[currentPid].notes.events = [];
+		}
+		DATASETS[note.pid].notes.events.push(note);
+	});
+}
+
+const updateNoteTypeDropdown = () => {
+    const dropdown = document.getElementById("note_type_dropdown");
+    dropdown.innerHTML = "";
+
+    if (noteTypes.length === 0) {
+        dropdown.innerHTML = "<label>No types available</label>";
+    } else {
+        noteTypes.forEach(type => {
+            const capitalisedType = type.charAt(0).toUpperCase() + type.slice(1);
+            const label = document.createElement("label");
+            label.innerHTML = `<input type="checkbox" name="note_type" value="${type}"> ${capitalisedType}`;
+            dropdown.appendChild(label);
+        });
+    }
+    addSamplesToNotesFilter();
+};
