@@ -378,10 +378,12 @@
 					<div class="dropdown">
 						<button>Colour</button>
 						<div class="dropdown-content" id="observer_colour_dropdown">
-							<label><input type="checkbox" name="colour_type" value="same">Same</label>
-							<label><input type="checkbox" name="colour_type" value="different">Different</label>
+							<label><input type="checkbox" name="colour_type" value="same">Default</label>
+							<label><input type="checkbox" name="colour_type" value="different">Observer</label>
+							<label><input type="checkbox" name="colour_type" value="note_type_colour">Note Type</label>
 						</div>
 					</div>
+					<div id="note_type_legend"></div>
 				</center>
 				<ul id='notelist' class="data_list"></ul>
 			</div>
@@ -477,12 +479,16 @@
 				<input type="color" id="matrix_1" oninput="MATCOL[1]=this.value; update_colour_vals();" class="colorer">
 				<input type="color" id="matrix_2" oninput="MATCOL[2]=this.value; update_colour_vals();" class="colorer">
 				<br >
-				<p>Observer Colours</p>
+				<p>Notes</p>
 				<input type="color" id="obsv_0" oninput="OBSERVERS[0]=this.value; update_colour_vals();" class="colorer">
 				<input type="color" id="obsv_1" oninput="OBSERVERS[1]=this.value; update_colour_vals();" class="colorer">
 				<input type="color" id="obsv_2" oninput="OBSERVERS[2]=this.value; update_colour_vals();" class="colorer">
 				<input type="color" id="obsv_3" oninput="OBSERVERS[3]=this.value; update_colour_vals();" class="colorer">
 				<input type="color" id="obsv_4" oninput="OBSERVERS[4]=this.value; update_colour_vals();" class="colorer">
+				<input type="color" id="obsv_5" oninput="OBSERVERS[5]=this.value; update_colour_vals();" class="colorer">
+				<input type="color" id="obsv_6" oninput="OBSERVERS[6]=this.value; update_colour_vals();" class="colorer">
+				<input type="color" id="obsv_7" oninput="OBSERVERS[7]=this.value; update_colour_vals();" class="colorer">
+				<input type="color" id="obsv_8" oninput="OBSERVERS[8]=this.value; update_colour_vals();" class="colorer">
 				<br><br>
 			</div>		
 			<div id='cont6' class='data_content' onclick="update_filter_colors();update_group_colors(); update_lens_colors(); update_observer_colors()">

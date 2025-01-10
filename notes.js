@@ -30,7 +30,7 @@ function new_note(
 	observer,
 	visibleOnCanvas
 ) {
-	v = base_notes.length;
+	let v = base_notes.length;
 	notePID = selected_data;
 	DATASETS.forEach((d, i) => {
 		if (d.name === noteBelongTo) {
@@ -55,14 +55,15 @@ function new_note(
 	base_notes.push(newnote);
 
 	q = notebox.replace(/#/g, v);
-	console.log('q', q);	
-	console.log('jjjjjj'+document.querySelector('.data_dragger'));
+	// console.log('q', q);	
+	// console.log('jjjjjj'+document.querySelector('.data_dragger'));
 	var node = document.createElement("li");
 	node.innerHTML = q;
 	node.id = "note_" + v;
-	console.log('node', node);	
+	// console.log('node', node);	
 	document.getElementById('notelist').appendChild(node);	
-
+	let v_id = v;
+	
 	let noteContentContainer = document.createElement("div");
 	noteContentContainer.className = "note_content_container";
 
@@ -96,6 +97,16 @@ function new_note(
 			this.value = base_notes[v].content;
 		}
 	};
+
+	textarea.addEventListener('change', () => {
+		let bookmarkButton = document.querySelector(`button[data-event-detail-id="${v_id}"]`);
+		if (bookmarkButton) {
+			let tooltip = bookmarkButton.nextSibling;
+			if (tooltip && tooltip.className === "tooltip") {
+				tooltip.innerHTML = `${timestampLabel.textContent}<br> ${typeLabel.textContent}<br>Details: ${textarea.value}<br>${observerLabel.textContent}`;
+			}
+		}
+	});
 
 	noteContentContainer.appendChild(textarea);
 

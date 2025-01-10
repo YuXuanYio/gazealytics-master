@@ -4,6 +4,7 @@ let TIMELINE_draggableRecty = 0;
 let TIMELINE_draggingY = false; // Is the object being dragged?
 let datname;
 let canvasWidth;
+let show_note_legend = false;
 
 let timelinesketch = (p) => {
 	//PFont  f; PFont  fb; // the font used for general text writing applications. defined in setup
@@ -1750,6 +1751,7 @@ let do_matrix_timeline_overlay = (p) => {
 const observers = {};
 const grouped_events = {};
 let observerColourIndex = 0;
+const event_types = [];
 
 function add_bookmark_button(data, h2top, h2, canvas) {
 	let participantData = data.notes;
@@ -1768,6 +1770,7 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 
 	for (let i = 0; i < participantData.events.length; i++) {
 		let event = participantData.events[i];
+		event_types.push(event.type);
 		let ts = (canvas.width * (event.timestamp_ms - start_time)) / max_duration;
 		let observerName = event.observer;
 		let selectedBookmark;
@@ -1817,8 +1820,12 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 
 		let button = document.createElement("button");
 		button.className = `timeline-bookmark-${data.name}`;
+		button.setAttribute("data-observer", observerName);
+		button.setAttribute("data-event-type", event.type);
+		button.setAttribute("data-event-detail-id", i);
 		button.style.position = "absolute";	
-
+		console.log('i ' + i);
+		
 		button.style.left = `${canvasRect.left + (diff * 2) + ts - 7.5}px`;
 		button.style.top = `${canvasRect.top + center_y - 7.5}px`;
 		button.style.width = "15px";
@@ -1889,6 +1896,9 @@ function add_bookmark_button(data, h2top, h2, canvas) {
 				select_note(selectedBookmark);
 			})
 
+			document.addEventListener("DOMContentLoaded", filter_observers_by_colour());
+			console.log('observers: ' + JSON.stringify(observers));			
+
 			document.body.appendChild(line);
 			document.body.appendChild(button);
 			document.body.appendChild(tooltip);
@@ -1958,4 +1968,113 @@ function colour_match_observer(observers) {
     });
 
     container.appendChild(legendRow);
+}
+
+function filter_observers_by_colour() {
+	let sameCheckbox = document.querySelector('input[value="same"]');
+	let differentCheckbox = document.querySelector('input[value="different"]');
+	let typeCheckbox = document.querySelector('input[value="note_type_colour"]');
+
+	sameCheckbox.addEventListener('change', () => {
+		if (sameCheckbox.checked) {
+			differentCheckbox.checked = false;
+			typeCheckbox.checked = false;
+			show_note_legend = false;
+			change_all_bookmarks_to_grey();
+		}
+	})
+
+	differentCheckbox.addEventListener('change', () => {
+		if (differentCheckbox.checked) {
+			sameCheckbox.checked = false;
+			typeCheckbox.checked = false;
+			show_note_legend = false;
+			change_all_bookmarks_to_original();
+		}
+	});
+
+	typeCheckbox.addEventListener('change', () => {
+		if (typeCheckbox.checked) {
+			sameCheckbox.checked = false;
+			differentCheckbox.checked = false;
+			show_note_legend = true;
+			filter_by_note_type_observer();
+		}
+	});
+}
+
+function change_all_bookmarks_to_grey() {
+	let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
+	bookmarks.forEach(bookmark => {
+		bookmark.style.background = "#696b6a";
+		bookmark.style.border = "1px solid black";
+	});
+	add_note_type_legend();
+}
+
+function change_all_bookmarks_to_original() {
+	let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
+	bookmarks.forEach(bookmark => {
+		let currentObserver = bookmark.getAttribute("data-observer");
+		let originalColour = observers[currentObserver];
+		if (originalColour) {
+			bookmark.style.background = originalColour;
+			bookmark.style.border = originalColour;
+		}
+	});
+	add_note_type_legend();
+}
+
+let event_colour_map = {};
+function filter_by_note_type_observer() {
+	for(let i=0; i<event_types.length; i++) {
+		event_colour_map[event_types[i]] = OBSERVERS[i];	
+	}
+	
+	let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
+	bookmarks.forEach(bookmark => {
+		let observer = bookmark.getAttribute("data-event-type");
+		let typeColour = event_colour_map[observer];
+		if (typeColour) {
+			bookmark.style.background = typeColour;
+			bookmark.style.border = typeColour;
+			add_note_type_legend();
+		}
+	})
+}
+
+function add_note_type_legend() {
+	let container = document.getElementById('note_type_legend');
+	container.innerHTML = "";
+
+	if(show_note_legend === true) {
+		let legendRow = document.createElement("ul");
+		legendRow.style.display = "flex";
+		legendRow.style.flexDirection = "row";
+		legendRow.style.gap = "15px";
+	
+		Object.entries(event_colour_map).forEach(([noteType, colour]) => {
+			let observerDiv = document.createElement('div');
+			observerDiv.style.display = "flex";
+			observerDiv.style.alignItems = "center";
+			observerDiv.style.marginBottom = "5px";
+			observerDiv.style.justifyContent = "center";
+	
+			let colorIndicator = document.createElement('div');
+			colorIndicator.style.width = "15px";
+			colorIndicator.style.height = "15px";
+			colorIndicator.style.borderRadius = "5px"; 
+			colorIndicator.style.background = colour; 
+			colorIndicator.style.marginRight = "10px";
+			observerDiv.style.alignItems = "center";
+			observerDiv.style.justifyContent = "center";
+			let observerText = document.createElement('span');
+			observerText.textContent = noteType;
+	
+			observerDiv.appendChild(colorIndicator);
+			observerDiv.appendChild(observerText);
+			legendRow.appendChild(observerDiv);
+		});
+		container.appendChild(legendRow);
+	}
 }
