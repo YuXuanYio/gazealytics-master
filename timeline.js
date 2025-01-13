@@ -1664,7 +1664,8 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 	for (let i = 0; i < participantData.events.length; i++) {
 		let event = participantData.events[i];
 		event_types.push(event.type);
-		let ts = (canvas.width * (event.timestamp_ms - start_time)) / max_duration;
+		
+		let ts = (canvas.width * (event.timestampMs - start_time)) / max_duration;
 		if (event.visibleOnTimeline === false || event.included === false) {
 			continue;
 		}
@@ -1693,7 +1694,7 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 			colour_match_observer(observers);
 		}
 
-		// calculation to add the bookmark button in the timeline
+		// calculation to add the bookmark button in the timeline	
 		if (ts >= 0 && ts <= canvas.width) {
 		let start_y = h2top;
 		let end_y = h2top + h2;
@@ -1721,8 +1722,7 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 		button.setAttribute("data-event-detail-id", i);
 
 		button.style.position = "absolute";	
-		console.log('i ' + i);
-		
+
 		button.style.left = `${canvasRect.left + (diff * 2) + ts - 7.5}px`;
 		button.style.top = `${canvasRect.top + center_y - 7.5}px`;
 		button.style.width = "15px";
@@ -1751,10 +1751,10 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 				// to get the notes in the sequence on click of the toggle button
 				noteIndex = (noteIndex + 1) % grouped_events[event.occured_timestamp].length;
 				let currentNote = grouped_events[event.occured_timestamp][noteIndex];
-				currentNote.eventId = participantData.events.findIndex(e => e.occured_timestamp === currentNote.occured_timestamp && e.eventDetails === currentNote.eventDetails);
+				currentNote.eventId = participantData.events.findIndex(e => e.occured_timestamp === currentNote.occured_timestamp && e.content === currentNote.content);
 				selectedBookmark = currentNote.eventId;	
 				button.style.background = observers[currentNote.observer];
-				tooltip.innerHTML = `Timestamp: ${currentNote.occured_timestamp}<br>Type: ${currentNote.type}<br>Details: ${currentNote.eventDetails}<br>Observer: ${currentNote.observer}`;
+				tooltip.innerHTML = `Timestamp: ${currentNote.occured_timestamp}<br>Type: ${currentNote.type}<br>Details: ${currentNote.content}<br>Observer: ${currentNote.observer}`;
 			});
 		}
 
@@ -1772,7 +1772,7 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 		tooltip.style.opacity = "0";
 		tooltip.style.zIndex = "1000";
 		tooltip.style.backgroundColor = "white";
-		tooltip.innerHTML = `Timestamp: ${event.occured_timestamp}<br>Type: ${event.type}<br>Details: ${event.eventDetails}<br>Observer: ${event.observer}`;
+		tooltip.innerHTML = `Timestamp: ${event.occuredTimestamp}<br>Type: ${event.type}<br>Details: ${event.content}<br>Observer: ${event.observer}`;
 		// console.log('events: ' + JSON.stringify(event));
 		
 			button.addEventListener("mouseenter", () => {
