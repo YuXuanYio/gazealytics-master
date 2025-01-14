@@ -1739,7 +1739,7 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 		if(grouped_events[event.occuredTimestamp].length > 1) {
 			console.log("grouped events occured")
 			let toggleButton = document.createElement('button');
-			toggleButton.className = `timeline-toggle-${data.name}`;
+			toggleButton.className = `timeline-toggle-${data.name}-toi-${toi_bookmark.twi_id}`;
 			// toggleButton.innerHTML = '<i class="fa-solid fa-angles-right fa-2xs"></i>';
 			toggleButton.innerHTML = grouped_events[event.occuredTimestamp].length;
 			toggleButton.style.position = "absolute";
@@ -1796,7 +1796,6 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 			})
 
 			document.addEventListener("DOMContentLoaded", filter_observers_by_colour());
-			console.log('observers: ' + JSON.stringify(observers));			
 
 			document.body.appendChild(line);
 			document.body.appendChild(button);
@@ -1808,9 +1807,11 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 function removeBookmarkButton(data, toi_bookmark) {
 	let datasetClass = `timeline-bookmark-${data.name}-toi-${toi_bookmark.twi_id}`;
 	let lineClass = `timeline-line-${data.name}-toi-${toi_bookmark.twi_id}`;
+	let toggleButtonClass = `timeline-toggle-${data.name}-toi-${toi_bookmark.twi_id}`;
 
 	document.querySelectorAll(`.${lineClass}`).forEach((line) => line.remove());
 	document.querySelectorAll(`.${datasetClass}`).forEach((btn) => btn.remove());
+	document.querySelectorAll(`.${toggleButtonClass}`).forEach((btn) => btn.remove());
 }
 
 function removeAllBookmarkButtons() {
