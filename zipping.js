@@ -430,37 +430,47 @@ function load_zip(){
 						if(selected_twi != -1 && document.getElementById("twi_"+selected_twi) != undefined)
 							select_twi(selected_twi);
 						update_all();
-					}catch (error) { console.error(error); }
-				});
-			zip.file("notes.json").async("string").then(function (data) {
-					try{
-						let content = JSON.parse(data);
-						//json_lenses = JSON.stringify( { base_notes:base_notes, order_notes:order_notes, selected_note:selected_note } );
-						list = document.getElementById('notelist');
-						list.innerHTML = "";//content.datahtml;
-						base_notes = content.base_notes;
-						for(var v=0; v < base_notes.length; v++){
-							if( base_notes[v].included ){
-								q = notebox.replace(/#/g, v);
-								var node = document.createElement("li");
-								node.innerHTML = q; node.id = "note_"+v;
-								// node.setAttribute('onclick', "if(selected_note!="+v+"){select_note("+v+");}else{select_note(-1);}");
-								node.onclick = function(e){
-									var v = parseInt(this.id.split('_')[1]);
-									var e_type = e.target.id.split('_')[2];
-									// selection conditions
-									if( e_type != 'content' && e_type != 'pid'){
-										if(selected_note!=v){select_note(v);}else{select_note(-1);}
-									}else{
-										if(selected_note!=v){select_note(v);}
+						zip.file("notes.json").async("string").then(function (data) {
+							try {
+								let content = JSON.parse(data);
+								noteTypes = [];
+		
+								const list = document.getElementById("notelist");
+								list.innerHTML = "";
+						
+								base_notes = [];
+								const notes = content.base_notes || [];
+								selected_note = content.selected_note || -1;
+						
+								notes.forEach((note) => {
+									new_note(
+										note.X,
+										note.Y,
+										note.content,
+										note.pid,
+										note.type,
+										note.timestamp,
+										note.timestampMs,
+										note.occuredTimestamp,
+										note.observer,
+										note.visibleOnCanvas,
+										note.visibleOnTimeline,
+										true, // isPreloaded
+										note.locked
+									);
+									if (!noteTypes.includes(note.type)) {
+										noteTypes.push(note.type);
 									}
-								}
-								node.setAttribute('class', 'note_item');
-								document.getElementById('notelist').appendChild(node);
-								document.getElementById('note_'+v+"_content").value = base_notes[v].content;
+								});
+						
+								select_note(selected_note);
+								loadNotesIntoDatasets();
+								updateNoteTypeDropdown();
+								document.getElementById("load_notes").disabled = false;
+							} catch (error) {
+								console.error("Error parsing notes:", error);
 							}
-						}
-						select_note( content.selected_note );
+						});	
 					}catch (error) { console.error(error); }
 				});
 			zip.file("settings.json").async("string").then(function (data) {

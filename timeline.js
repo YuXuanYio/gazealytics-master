@@ -589,12 +589,12 @@ let timelinesketch = (p) => {
 						if(td > 1){
 							p.noStroke(); 
 							p.rect( 100 + ts, timeline_highlight_position, td, 10 );
-							console.log('rectangle: ' + timeline_highlight_position + ' x ' + ts);
+							// console.log('rectangle: ' + timeline_highlight_position + ' x ' + ts);
 
 						}else{
 							p.stroke(cy(80, dat.group)); 
 							p.line(100 + ts, timeline_highlight_position, 100+ts, timeline_highlight_position+10);
-							console.log('vertical stroke: ' + timeline_highlight_position + ' x ' + ts);
+							// console.log('vertical stroke: ' + timeline_highlight_position + ' x ' + ts);
 							
 						}
 					}
@@ -1652,7 +1652,6 @@ let do_matrix_timeline_overlay = (p) => {
 const observers = {};
 const grouped_events = {};
 let observerColourIndex = 0;
-const event_types = [];
 function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 	let start_time = toi_bookmark.tmin;
 	let end_time = toi_bookmark.tmax;
@@ -1663,7 +1662,6 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 
 	for (let i = 0; i < participantData.events.length; i++) {
 		let event = participantData.events[i];
-		event_types.push(event.type);
 		
 		let ts = (canvas.width * (event.timestampMs - start_time)) / max_duration;
 		if (event.visibleOnTimeline === false || event.included === false) {
@@ -1737,7 +1735,6 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 
 		// to view multiple notes at the same timestamp
 		if(grouped_events[event.occuredTimestamp].length > 1) {
-			console.log("grouped events occured")
 			let toggleButton = document.createElement('button');
 			toggleButton.className = `timeline-toggle-${data.name}-toi-${toi_bookmark.twi_id}`;
 			// toggleButton.innerHTML = '<i class="fa-solid fa-angles-right fa-2xs"></i>';
@@ -1943,8 +1940,8 @@ function change_all_bookmarks_to_original() {
 
 let event_colour_map = {};
 function filter_by_note_type_observer() {
-	for(let i=0; i<event_types.length; i++) {
-		event_colour_map[event_types[i]] = OBSERVERS[i];	
+	for(let i=0; i<noteTypes.length; i++) {
+		event_colour_map[noteTypes[i]] = OBSERVERS[i];	
 	}
 	
 	let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
