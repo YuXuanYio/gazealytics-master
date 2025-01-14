@@ -1096,26 +1096,6 @@ let draw_time_all = (canvas) => {
 	}
 };
 
-// TIMELINE_CANVAS.mousePressed(() => {
-//     for (let i = 0; i < squares.length; i++) {
-//         let square = squares[i];
-//         // check if mouse is inside the square
-//         if (
-//             mouseX >= square.x &&
-//             mouseX <= square.x + square.size &&
-//             mouseY >= square.y &&
-//             mouseY <= square.y + square.size
-//         ) {
-//             // event details
-//             console.log(`Clicked on: ${square.details}`);
-//             // show the text on the canvas
-//             canvas.fill(0);
-//             canvas.textAlign(canvas.CENTER);
-//             canvas.text(square.details, square.x + square.size / 2, square.y - 10);
-//         }
-//     }
-// });
-
 let draw_time_saccadetype = (canvas) => {
 	canvas.fill(black(100)); canvas.noStroke(); canvas.rect(0, 0, canvas.width, canvas.height); canvas.strokeWeight(1);
 	let l = undefined; if(selected_lens !=-1){ l = base_lenses[selected_lens]; }
