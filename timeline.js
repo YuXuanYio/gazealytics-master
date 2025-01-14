@@ -1678,15 +1678,15 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
             observers[observerName] = OBSERVERS[observerColourIndex % OBSERVERS.length];
             observerColourIndex++;
         }
-		
+
 		// create an empty array if there is a timestanp for a note
-		if(!grouped_events[event.occured_timestamp]) {
-			grouped_events[event.occured_timestamp] = [];
+		if(!grouped_events[event.occuredTimestamp]) {
+			grouped_events[event.occuredTimestamp] = [];
 		}
 
 		// check if the array has repeated notes
-		if(!grouped_events[event.occured_timestamp].some(note => note.eventDetails === event.eventDetails)) {
-			grouped_events[event.occured_timestamp].push(event);
+		if(!grouped_events[event.occuredTimestamp].some(note => note.content === event.content)) {
+			grouped_events[event.occuredTimestamp].push(event);
 		}
 		
 		// get different colours for different observers
@@ -1734,12 +1734,14 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 		button.style.borderRadius = "5px";
 		button.style.zIndex = "2";
 
+
 		// to view multiple notes at the same timestamp
-		if(grouped_events[event.occured_timestamp].length > 1) {
+		if(grouped_events[event.occuredTimestamp].length > 1) {
+			console.log("grouped events occured")
 			let toggleButton = document.createElement('button');
 			toggleButton.className = `timeline-toggle-${data.name}`;
 			// toggleButton.innerHTML = '<i class="fa-solid fa-angles-right fa-2xs"></i>';
-			toggleButton.innerHTML = grouped_events[event.occured_timestamp].length;
+			toggleButton.innerHTML = grouped_events[event.occuredTimestamp].length;
 			toggleButton.style.position = "absolute";
 			toggleButton.style.left = `${canvasRect.left + (diff * 2) + ts - 8.5}px`;
 			toggleButton.style.top = `${canvasRect.top + center_y - 35}px`;
@@ -1749,12 +1751,12 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 			let noteIndex = 0;
 			toggleButton.addEventListener("click", () => {
 				// to get the notes in the sequence on click of the toggle button
-				noteIndex = (noteIndex + 1) % grouped_events[event.occured_timestamp].length;
-				let currentNote = grouped_events[event.occured_timestamp][noteIndex];
-				currentNote.eventId = participantData.events.findIndex(e => e.occured_timestamp === currentNote.occured_timestamp && e.content === currentNote.content);
+				noteIndex = (noteIndex + 1) % grouped_events[event.occuredTimestamp].length;
+				let currentNote = grouped_events[event.occuredTimestamp][noteIndex];
+				currentNote.eventId = participantData.events.findIndex(e => e.occuredTimestamp === currentNote.occuredTimestamp && e.content === currentNote.content);
 				selectedBookmark = currentNote.eventId;	
 				button.style.background = observers[currentNote.observer];
-				tooltip.innerHTML = `Timestamp: ${currentNote.occured_timestamp}<br>Type: ${currentNote.type}<br>Details: ${currentNote.content}<br>Observer: ${currentNote.observer}`;
+				tooltip.innerHTML = `Timestamp: ${currentNote.occuredTimestamp}<br>Type: ${currentNote.type}<br>Details: ${currentNote.content}<br>Observer: ${currentNote.observer}`;
 			});
 		}
 
