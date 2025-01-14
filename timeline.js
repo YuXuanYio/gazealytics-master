@@ -1874,6 +1874,7 @@ function colour_match_observer(observers) {
     container.appendChild(legendRow);
 }
 
+// function to filter bookmark colours
 function filter_observers_by_colour() {
 	let sameCheckbox = document.querySelector('input[value="same"]');
 	let differentCheckbox = document.querySelector('input[value="different"]');
@@ -1907,6 +1908,7 @@ function filter_observers_by_colour() {
 	});
 }
 
+// function to change the bookmarks to default grey
 function change_all_bookmarks_to_grey() {
 	let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
 	bookmarks.forEach(bookmark => {
@@ -1916,6 +1918,7 @@ function change_all_bookmarks_to_grey() {
 	add_note_type_legend();
 }
 
+// function to change the bookmark colours to filter by observer 
 function change_all_bookmarks_to_original() {
 	let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
 	bookmarks.forEach(bookmark => {
@@ -1930,6 +1933,8 @@ function change_all_bookmarks_to_original() {
 }
 
 let event_colour_map = {};
+
+// function to change the bookmark colours to filter by note type
 function filter_by_note_type_observer() {
 	for(let i=0; i<event_types.length; i++) {
 		event_colour_map[event_types[i]] = OBSERVERS[i];	
@@ -1947,6 +1952,7 @@ function filter_by_note_type_observer() {
 	})
 }
 
+// function to add a legend to when colour is filtered by note type
 function add_note_type_legend() {
 	let container = document.getElementById('note_type_legend');
 	container.innerHTML = "";
