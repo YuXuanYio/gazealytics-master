@@ -1734,7 +1734,6 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 		button.style.borderRadius = "5px";
 		button.style.zIndex = "2";
 
-
 		// to view multiple notes at the same timestamp
 		if(grouped_events[event.occuredTimestamp].length > 1) {
 			console.log("grouped events occured")
@@ -1775,23 +1774,32 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 		tooltip.style.zIndex = "1000";
 		tooltip.style.backgroundColor = "white";
 		tooltip.innerHTML = `Timestamp: ${event.occuredTimestamp}<br>Type: ${event.type}<br>Details: ${event.content}<br>Observer: ${event.observer}`;
-		// console.log('events: ' + JSON.stringify(event));
 		
 			button.addEventListener("mouseenter", () => {
-			tooltip.style.visibility = "visible";
-			button.style.outline = "2px solid yellow";
-			tooltip.style.opacity = "1";
-			tooltip.style.left = `${parseFloat(button.style.left) + 20}px`;
-			tooltip.style.top = `${parseFloat(button.style.top) - 10}px`;
+				tooltip.style.visibility = "visible";
+				tooltip.style.opacity = "1";
+				tooltip.style.left = `${parseFloat(button.style.left) + 20}px`;
+				tooltip.style.top = `${parseFloat(button.style.top) - 10}px`;
+				if(!button.classList.contains('selected_bookmark')) {
+					button.style.outline = "2px solid yellow";
+				}
 			});
 	
 			button.addEventListener("mouseleave", () => {
-			button.style.outline = "none";
-			tooltip.style.visibility = "hidden";
-			tooltip.style.opacity = "0";
+				tooltip.style.visibility = "hidden";
+				tooltip.style.opacity = "0";
+				if(!button.classList.contains('selected_bookmark')) {
+					button.style.outline = "none";
+				}
 			});
 
 			button.addEventListener("click", () => {
+				document.querySelectorAll("[class^='timeline-bookmark-']").forEach(bookmarkButton => {
+					bookmarkButton.classList.remove('selected_bookmark');
+					bookmarkButton.style.outline = "none";
+				});
+				button.classList.add("selected_bookmark");
+				button.style.outline = "2px dashed green"
 				select_note(selectedBookmark);
 			})
 
