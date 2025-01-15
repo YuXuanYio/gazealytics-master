@@ -112,6 +112,9 @@ button {
 	font-family: Arial, sans-serif;
 	font-size: 14px;
 }
+.selected_bookmark{
+	outline: 2px dashed green;
+}
 .tabbut2{
 	padding: 4px;
 	margin: 4px;

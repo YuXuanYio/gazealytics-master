@@ -1096,26 +1096,6 @@ let draw_time_all = (canvas) => {
 	}
 };
 
-// TIMELINE_CANVAS.mousePressed(() => {
-//     for (let i = 0; i < squares.length; i++) {
-//         let square = squares[i];
-//         // check if mouse is inside the square
-//         if (
-//             mouseX >= square.x &&
-//             mouseX <= square.x + square.size &&
-//             mouseY >= square.y &&
-//             mouseY <= square.y + square.size
-//         ) {
-//             // event details
-//             console.log(`Clicked on: ${square.details}`);
-//             // show the text on the canvas
-//             canvas.fill(0);
-//             canvas.textAlign(canvas.CENTER);
-//             canvas.text(square.details, square.x + square.size / 2, square.y - 10);
-//         }
-//     }
-// });
-
 let draw_time_saccadetype = (canvas) => {
 	canvas.fill(black(100)); canvas.noStroke(); canvas.rect(0, 0, canvas.width, canvas.height); canvas.strokeWeight(1);
 	let l = undefined; if(selected_lens !=-1){ l = base_lenses[selected_lens]; }
@@ -1732,7 +1712,6 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 		button.style.borderRadius = "5px";
 		button.style.zIndex = "2";
 
-
 		// to view multiple notes at the same timestamp
 		if(grouped_events[event.occuredTimestamp].length > 1) {
 			let toggleButton = document.createElement('button');
@@ -1772,23 +1751,32 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 		tooltip.style.zIndex = "1000";
 		tooltip.style.backgroundColor = "white";
 		tooltip.innerHTML = `Timestamp: ${event.occuredTimestamp}<br>Type: ${event.type}<br>Details: ${event.content}<br>Observer: ${event.observer}`;
-		// console.log('events: ' + JSON.stringify(event));
 		
 			button.addEventListener("mouseenter", () => {
-			tooltip.style.visibility = "visible";
-			button.style.outline = "2px solid yellow";
-			tooltip.style.opacity = "1";
-			tooltip.style.left = `${parseFloat(button.style.left) + 20}px`;
-			tooltip.style.top = `${parseFloat(button.style.top) - 10}px`;
+				tooltip.style.visibility = "visible";
+				tooltip.style.opacity = "1";
+				tooltip.style.left = `${parseFloat(button.style.left) + 20}px`;
+				tooltip.style.top = `${parseFloat(button.style.top) - 10}px`;
+				if(!button.classList.contains('selected_bookmark')) {
+					button.style.outline = "2px solid yellow";
+				}
 			});
 	
 			button.addEventListener("mouseleave", () => {
-			button.style.outline = "none";
-			tooltip.style.visibility = "hidden";
-			tooltip.style.opacity = "0";
+				tooltip.style.visibility = "hidden";
+				tooltip.style.opacity = "0";
+				if(!button.classList.contains('selected_bookmark')) {
+					button.style.outline = "none";
+				}
 			});
 
 			button.addEventListener("click", () => {
+				document.querySelectorAll("[class^='timeline-bookmark-']").forEach(bookmarkButton => {
+					bookmarkButton.classList.remove('selected_bookmark');
+					bookmarkButton.style.outline = "none";
+				});
+				button.classList.add("selected_bookmark");
+				button.style.outline = "2px dashed green"
 				select_note(selectedBookmark);
 			})
 
@@ -1883,6 +1871,7 @@ function colour_match_observer(observers) {
     container.appendChild(legendRow);
 }
 
+// function to filter bookmark colours
 function filter_observers_by_colour() {
 	let sameCheckbox = document.querySelector('input[value="same"]');
 	let differentCheckbox = document.querySelector('input[value="different"]');
@@ -1916,6 +1905,7 @@ function filter_observers_by_colour() {
 	});
 }
 
+// function to change the bookmarks to default grey
 function change_all_bookmarks_to_grey() {
 	let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
 	bookmarks.forEach(bookmark => {
@@ -1925,6 +1915,7 @@ function change_all_bookmarks_to_grey() {
 	add_note_type_legend();
 }
 
+// function to change the bookmark colours to filter by observer 
 function change_all_bookmarks_to_original() {
 	let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
 	bookmarks.forEach(bookmark => {
@@ -1939,6 +1930,8 @@ function change_all_bookmarks_to_original() {
 }
 
 let event_colour_map = {};
+
+// function to change the bookmark colours to filter by note type
 function filter_by_note_type_observer() {
 	for(let i=0; i<noteTypes.length; i++) {
 		event_colour_map[noteTypes[i]] = OBSERVERS[i];	
@@ -1956,6 +1949,7 @@ function filter_by_note_type_observer() {
 	})
 }
 
+// function to add a legend to when colour is filtered by note type
 function add_note_type_legend() {
 	let container = document.getElementById('note_type_legend');
 	container.innerHTML = "";
