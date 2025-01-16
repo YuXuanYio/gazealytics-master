@@ -1,7 +1,7 @@
 // lens list function
 notebox =
-	'<div></div>' +
-	'<div class="data_dragger"></div>' +
+	'<div class="data_dragger" draggable="false" id="#_note_drag"></div>' +
+	'<div class="rowsplit">' +
 	'<div class="controls">' +
 	'<div class="tool inner_button">' +
 	'<button id="notes_#_l" onclick="toggleNoteLock(#)"> <i class="fas fa-lock-open"></i> </button>' +
@@ -17,12 +17,12 @@ notebox =
 	'<select class="note_dataset" id="#_note_pid" onchange="changeNotePid(#, this.value)"></select>' +
 	"</div>";
 
-base_notes = [];
-order_notes = [];
-importedNotes = {};
-preFilteredBaseNotes = [];
-noteTypes = [];
-selected_note = -1;
+var base_notes = [];
+var order_notes = [];
+var importedNotes = {};
+var preFilteredBaseNotes = [];
+var noteTypes = [];
+var selected_note = -1;
 var LINE_CHAR = "\n";
 
 function new_note(
@@ -35,22 +35,31 @@ function new_note(
 	timestampMs,
 	occuredTimestamp,
 	observer,
-	visibleOnCanvas,
-	visibleOnTimeline
+	visibleOnCanvas = true,
+	visibleOnTimeline = true,
+	isPreloaded = false,
+	isLocked = false
 ) {
 	let v = base_notes.length;
-	notePID = selected_data;
-	DATASETS.forEach((d, i) => {
-		if (d.name === noteBelongTo) {
-			notePID = i;
-		}
-	});
-	newnote = {
+
+	// If preloading, assign PID from preloaded data
+	let notePID = selected_data;
+	if (isPreloaded) {
+		notePID = noteBelongTo;
+	} else {
+		DATASETS.forEach((d, i) => {
+			if (d.name === noteBelongTo) {
+				notePID = i;
+			}
+		});
+	}
+
+	let newnote = {
 		pid: notePID,
 		X: X,
 		Y: Y,
 		content: content,
-		selected: true,
+		selected: false,
 		max_width: 0,
 		included: true,
 		type: type,
@@ -59,22 +68,18 @@ function new_note(
 		timestampMs: timestampMs,
 		occuredTimestamp: occuredTimestamp,
 		shownInList: true,
-		locked: false,
+		locked: isLocked,
 		visibleOnCanvas: visibleOnCanvas,
-		visibleOnTimeline: visibleOnTimeline
+		visibleOnTimeline: visibleOnTimeline,
 	};
+
 	base_notes.push(newnote);
 
-	q = notebox.replace(/#/g, v);
-	// console.log('q', q);	
-	// console.log('jjjjjj'+document.querySelector('.data_dragger'));
-	var node = document.createElement("li");
+	let q = notebox.replace(/#/g, v);
+	let node = document.createElement("li");
 	node.innerHTML = q;
 	node.id = "note_" + v;
-	// console.log('node', node);	
-	document.getElementById('notelist').appendChild(node);	
-	let v_id = v;
-	
+
 	let noteContentContainer = document.createElement("div");
 	noteContentContainer.className = "note_content_container";
 
@@ -93,83 +98,86 @@ function new_note(
 	observerLabel.id = "note_" + v + "_note_observer";
 	observerLabel.textContent = `Observer: ${observer}`;
 
-	noteContentContainer.appendChild(typeLabel);
-	noteContentContainer.appendChild(timestampLabel);
-	noteContentContainer.appendChild(observerLabel);
+	noteContentContainer.append(typeLabel, timestampLabel, observerLabel);
 
 	let textarea = document.createElement("textarea");
 	textarea.className = "tool";
 	textarea.id = "note_" + v + "_content";
 	textarea.value = content;
+
 	textarea.addEventListener("input", function () {
-		console.log(base_notes);
-		console.log(v);
 		if (!base_notes[v].locked) {
 			base_notes[v].content = this.value;
 		} else {
 			this.value = base_notes[v].content;
 		}
-	});	
-
-	textarea.addEventListener('change', () => {
-		let bookmarkButton = document.querySelector(`button[data-event-detail-id="${v_id}"]`);
-		if (bookmarkButton) {
-			let tooltip = bookmarkButton.nextSibling;
-			if (tooltip && tooltip.className === "tooltip") {
-				tooltip.innerHTML = `${timestampLabel.textContent}<br> ${typeLabel.textContent}<br>Details: ${textarea.value}<br>${observerLabel.textContent}`;
-			}
-		}
 	});
 
 	noteContentContainer.appendChild(textarea);
-
 	node.appendChild(noteContentContainer);
 
+	// Click event for selection
 	node.onclick = function (e) {
 		var v = parseInt(this.id.split("_")[1]);
 		var e_type = e.target.id.split("_")[2];
-		// Selection conditions
-		if (e_type != "content" && e_type != "pid") {
-			if (selected_note != v) {
+		if (e_type !== "content" && e_type !== "pid") {
+			if (selected_note !== v) {
 				select_note(v);
 			} else {
 				select_note(-1);
 			}
 		} else {
-			if (selected_note != v) {
+			if (selected_note !== v) {
 				select_note(v);
 			}
 		}
 	};
+
 	node.setAttribute("class", "note_item");
 	document.getElementById("notelist").appendChild(node);
 
 	if (!visibleOnCanvas) {
 		let eyeButton = document.getElementById(`notes_${v}_v`);
-		eyeButton.innerHTML = '<i class="fas fa-eye-slash"></i>';
-		eyeButton.classList.remove("toggle-on");
-		eyeButton.classList.add("toggle-off");
+		if (eyeButton) {
+			eyeButton.innerHTML = '<i class="fas fa-eye-slash"></i>';
+			eyeButton.classList.remove("toggle-on");
+			eyeButton.classList.add("toggle-off");
+		}
 	}
 
-	if (!visibleOnTimeline) {
-		let timeButton = document.getElementById(`notes_${v}_t`);
-		timeButton.innerHTML = '<i class="fas fa-ban"></i>';
-		timeButton.classList.remove("toggle-on");
-		timeButton.classList.add("toggle-off");
-	
-		timeButton.disabled = true;
-	
-		let tipSpan = timeButton.parentElement.querySelector('.tip');
-		if (tipSpan) {
-			tipSpan.textContent = "Time-based notes are disabled";
+	let timeButton = document.getElementById(`notes_${v}_t`);
+	if (!visibleOnTimeline && !isPreloaded) {
+		if (timeButton) {
+			timeButton.innerHTML = '<i class="fas fa-ban"></i>';
+			timeButton.classList.remove("toggle-on");
+			timeButton.classList.add("toggle-off");
+			timeButton.disabled = true;
+
+			let tipSpan = timeButton.parentElement.querySelector(".tip");
+			if (tipSpan) {
+				tipSpan.textContent = "Time-based notes are disabled";
+			}
 		}
-	
+	} else if (!visibleOnTimeline) {
+		if (timeButton) {
+			timeButton.innerHTML = '<i class="fas fa-times-circle"></i>';
+			timeButton.classList.remove("toggle-on");
+			timeButton.classList.add("toggle-off");
+		}
 	}
-	
+
 	make_note_dataset_selectors();
 	update_observer_colors();
-	select_note(v);
+
+	if (!isPreloaded) {
+		select_note(v);
+	}
+
+	if (isLocked) {
+		lockNote(v);
+	}
 }
+
 
 function make_note_dataset_selectors() {
 	selectors = document.getElementsByClassName("note_dataset");
@@ -492,6 +500,16 @@ function toggleNoteLock(id) {
 
 	let textarea = document.getElementById(`note_${id}_content`);
 	textarea.readOnly = note.locked;
+}
+
+function lockNote(id) {
+	let note = base_notes[id];
+	if (note.locked) {
+		let lockButton = document.getElementById(`notes_${id}_l`);
+		lockButton.innerHTML = '<i class="fas fa-lock"></i>';
+		let textarea = document.getElementById(`note_${id}_content`);
+		textarea.readOnly = note.locked;
+	}
 }
 
 function toggleSpatialVisibility(id) {
