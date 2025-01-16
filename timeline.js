@@ -1917,6 +1917,7 @@ function change_all_bookmarks_to_grey() {
 		bookmark.style.border = "1px solid black";
 	});
 	add_note_type_legend();
+	updateDefaultNoteColors();
 }
 
 // function to change the bookmark colours to filter by observer 
@@ -1931,6 +1932,7 @@ function change_all_bookmarks_to_original() {
 		}
 	});
 	add_note_type_legend();
+	update_observer_colors();
 }
 
 let event_colour_map = {};
@@ -1951,6 +1953,7 @@ function filter_by_note_type_observer() {
 			add_note_type_legend();
 		}
 	})
+	updateTypeColors();
 }
 
 // function to add a legend to when colour is filtered by note type

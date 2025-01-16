@@ -128,7 +128,57 @@ function update_observer_colors() {
         }
     }
 }
+function updateTypeColors() {
+	for (var i = 0; i < document.getElementById("notelist").children.length; i++) {
+		let child = document.getElementById("notelist").children[i];
+		let childId = child.id;
 
+		if (childId && childId.startsWith("note_")) {
+			let val = parseInt(childId.split("_")[1]);
+			let textContent = document.getElementById("note_" + val + "_note_type").textContent;
+			let typeName = textContent.split('Type:')[1].trim();
+
+			if (!event_colour_map[typeName]) {
+				console.error(`Color not found for type '${typeName}'.`);
+				continue;
+			}
+
+			let dragger = child.querySelector(".data_dragger");
+
+			if (dragger) {
+				dragger.style.height = "78px";
+				dragger.style.backgroundColor = event_colour_map[typeName];
+				dragger.style.border = `8px solid ${event_colour_map[typeName]}`;
+				dragger.style.display = "block";
+			} else {
+				console.warn(`data_dragger not found for note_${val}`);
+			}
+		} else {
+			console.warn("Invalid or missing ID for child:", child);
+		}
+	}
+}
+function updateDefaultNoteColors() {
+	for (var i = 0; i < document.getElementById("notelist").children.length; i++) {
+		let child = document.getElementById("notelist").children[i];
+		let childId = child.id;
+
+		if (childId && childId.startsWith("note_")) {
+			let dragger = child.querySelector(".data_dragger");
+
+			if (dragger) {
+				dragger.style.height = "78px";
+				dragger.style.backgroundColor = "#696b6a";
+				dragger.style.border = "8px solid #696b6a";
+				dragger.style.display = "block";
+			} else {
+				console.warn(`data_dragger not found for note_${val}`);
+			}
+		} else {
+			console.warn("Invalid or missing ID for child:", child);
+		}
+	}
+}
 function update_lens_colors(){
 	for(var i=0;i<document.getElementById('lenslist').children.length;i++){
 		val = parseInt(document.getElementById('lenslist').children[i].id.split('_')[1]);		
