@@ -1659,7 +1659,6 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 	let max_duration = end_time - start_time;
 
 	removeBookmarkButton(data, toi_bookmark);
-
 	for (let i = 0; i < participantData.events.length; i++) {
 		let event = participantData.events[i];
 		
@@ -1799,6 +1798,7 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 			document.body.appendChild(tooltip);
 		}
 	}
+	update_observer_colors();
 }
 
 function removeBookmarkButton(data, toi_bookmark) {
@@ -1832,13 +1832,17 @@ function toggle_notes() {
 		lines.forEach((line) => line.style.display = "none");
 		multiNotesButton.forEach((btn) => btn.style.display = "none");
         toggleButton.dataset.toggle = "off";
-        toggleButton.innerHTML = "<i class='fas fa-eye-slash'></i>";
+        toggleButton.innerHTML = "<i class='fas fa-times-circle'></i>";
+		toggleButton.classList.remove("toggle-on");
+		toggleButton.classList.add("toggle-off");
     } else {
         bookmarks.forEach((btn) => btn.style.display = "block");
 		lines.forEach((line) => line.style.display = "block");
 		multiNotesButton.forEach((btn) => btn.style.display = "block");
         toggleButton.dataset.toggle = "on";
-        toggleButton.innerHTML = "<i class='fas fa-eye'></i>";
+        toggleButton.innerHTML = "<i class='fas fa-clock'></i>";
+		toggleButton.classList.remove("toggle-off");
+		toggleButton.classList.add("toggle-on");
     }
 }
 
