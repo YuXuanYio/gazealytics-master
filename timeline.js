@@ -4,7 +4,7 @@ let TIMELINE_draggableRecty = 0;
 let TIMELINE_draggingY = false; // Is the object being dragged?
 let datname;
 let canvasWidth;
-let show_note_legend = false;
+let show_note_legend = false; let show_note_observer_legend = false; 
 
 let timelinesketch = (p) => {
 	//PFont  f; PFont  fb; // the font used for general text writing applications. defined in setup
@@ -1784,6 +1784,9 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 			document.body.appendChild(line);
 			document.body.appendChild(button);
 			document.body.appendChild(tooltip);
+
+			show_note_observer_legend = true;
+			add_note_legend();
 		}
 	}
 	update_observer_colors();
@@ -1886,6 +1889,7 @@ function filter_observers_by_colour() {
 			differentCheckbox.checked = false;
 			typeCheckbox.checked = false;
 			show_note_legend = false;
+			show_note_observer_legend = false;
 			change_all_bookmarks_to_grey();
 		}
 	})
@@ -1895,6 +1899,7 @@ function filter_observers_by_colour() {
 			sameCheckbox.checked = false;
 			typeCheckbox.checked = false;
 			show_note_legend = false;
+			show_note_observer_legend = true;
 			change_all_bookmarks_to_original();
 		}
 	});
@@ -1904,6 +1909,7 @@ function filter_observers_by_colour() {
 			sameCheckbox.checked = false;
 			differentCheckbox.checked = false;
 			show_note_legend = true;
+			show_note_observer_legend = false;
 			filter_by_note_type_observer();
 		}
 	});
@@ -1916,7 +1922,7 @@ function change_all_bookmarks_to_grey() {
 		bookmark.style.background = "#696b6a";
 		bookmark.style.border = "1px solid black";
 	});
-	add_note_type_legend();
+	add_note_legend();
 	updateDefaultNoteColors();
 }
 
@@ -1931,7 +1937,7 @@ function change_all_bookmarks_to_original() {
 			bookmark.style.border = originalColour;
 		}
 	});
-	add_note_type_legend();
+	add_note_legend();
 	update_observer_colors();
 }
 
@@ -1950,15 +1956,15 @@ function filter_by_note_type_observer() {
 		if (typeColour) {
 			bookmark.style.background = typeColour;
 			bookmark.style.border = typeColour;
-			add_note_type_legend();
+			add_note_legend();
 		}
 	})
 	updateTypeColors();
 }
 
 // function to add a legend to when colour is filtered by note type
-function add_note_type_legend() {
-	let container = document.getElementById('note_type_legend');
+function add_note_legend() {
+	let container = document.getElementById('note_legend');
 	container.innerHTML = "";
 
 	if(show_note_legend === true) {
@@ -1984,6 +1990,38 @@ function add_note_type_legend() {
 			observerDiv.style.justifyContent = "center";
 			let observerText = document.createElement('span');
 			observerText.textContent = noteType;
+	
+			observerDiv.appendChild(colorIndicator);
+			observerDiv.appendChild(observerText);
+			legendRow.appendChild(observerDiv);
+		});
+		container.appendChild(legendRow);
+	} else if (show_note_observer_legend === true) {
+		console.log("show_note_observer_legend");
+		let legendRow = document.createElement("ul");
+		legendRow.style.display = "flex";
+		legendRow.style.flexDirection = "row";
+		legendRow.style.gap = "15px";
+	
+		Object.entries(observers).forEach(([observer, colour]) => {
+			console.log("observer", observer);
+			console.log("colour", colour);
+			let observerDiv = document.createElement('div');
+			observerDiv.style.display = "flex";
+			observerDiv.style.alignItems = "center";
+			observerDiv.style.marginBottom = "5px";
+			observerDiv.style.justifyContent = "center";
+	
+			let colorIndicator = document.createElement('div');
+			colorIndicator.style.width = "15px";
+			colorIndicator.style.height = "15px";
+			colorIndicator.style.borderRadius = "5px"; 
+			colorIndicator.style.background = colour; 
+			colorIndicator.style.marginRight = "10px";
+			observerDiv.style.alignItems = "center";
+			observerDiv.style.justifyContent = "center";
+			let observerText = document.createElement('span');
+			observerText.textContent = observer;
 	
 			observerDiv.appendChild(colorIndicator);
 			observerDiv.appendChild(observerText);
