@@ -1588,6 +1588,7 @@ let do_matrix_timeline_overlay = (p) => {
 	}
 };
 
+let bookmarks = [];
 const observers = {};
 let observerColourIndex = 0;
 function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
@@ -1596,7 +1597,7 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
     let participantData = data.notes;
     let max_duration = end_time - start_time;
     let tolerancePercentage = max_duration * 0.05;
-    
+	
     removeBookmarkButton(data, toi_bookmark);
 
     const grouped_events = {};
@@ -1691,8 +1692,9 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
                 button.style.borderRadius = "5px";
                 button.style.zIndex = "2";    
                 
+				let toggleButton;
 				if(events.length > 1) {
-					let toggleButton = document.createElement('button');
+					toggleButton = document.createElement('button');
 					toggleButton.className = `timeline-toggle-${data.name}-toi-${toi_bookmark.twi_id}`;
 					toggleButton.innerHTML = events.length;
 					toggleButton.style.position = "absolute";
@@ -1757,13 +1759,38 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
                 });
 
                 document.addEventListener("DOMContentLoaded", filter_observers_by_colour());
-
+				bookmarks.push({
+					timestamp: event.timestampMs,
+					max_duration,
+					button,
+					line,
+					toggleButton
+				});
+				
                 document.body.appendChild(line);
                 document.body.appendChild(button);
                 document.body.appendChild(tooltip);
             });
         }
     });
+}
+
+function updateBookmarkButton(time_animate) {
+
+	bookmarks.forEach(bookmark => {
+		const { timestamp, max_duration, button, line, toggleButton } = bookmark; 
+		let scaledTime = timestamp / max_duration;		
+		
+		if(button && line) {
+			if(scaledTime >= time_animate) {
+				button.style.visibility = "hidden";
+				line.style.visibility = "hidden";
+				if(toggleButton) {
+					toggleButton.style.visibility = "hidden";
+				}
+			}
+		}
+	})
 }
 
 function removeBookmarkButton(data, toi_bookmark) {

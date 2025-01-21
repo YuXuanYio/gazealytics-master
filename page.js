@@ -417,30 +417,44 @@ function load_controls(){
 		FORE_SIZE = parseFloat(document.getElementById("fore_size_sl").noUiSlider.get());
 		foreground_changed = true; 
 	}
-	if( !TIMELINE_SLIDER_DISABLED && TIME_ANIMATE != parseFloat(document.getElementById("time_animate_sl").noUiSlider.get())){
-		TIME_ANIMATE = parseFloat(document.getElementById("time_animate_sl").noUiSlider.get());
+	// if( !TIMELINE_SLIDER_DISABLED && TIME_ANIMATE != parseFloat(document.getElementById("time_animate_sl").noUiSlider.get())){
+	// 	TIME_ANIMATE = parseFloat(document.getElementById("time_animate_sl").noUiSlider.get());
+	// 	requestAnimationFrame(() => {
+	// 		updateBookmarkButton(TIME_ANIMATE);
+	// 	});
 
-		//update video with the time
-		if(VIDEO_LINKING && selected_data != -1 && DATASETS[selected_data] != null && DATASETS[selected_data] != undefined && 
-			currentVideoObj != null && currentVideoObj != undefined) {
-				
-			//get time from dataset
-			let data = DATASETS[selected_data]; toi = data.tois[ data.toi_id ];
-			let longest_duration = data.tmax - data.tmin;
-			let ts = 0;
+	const slider = document.getElementById("time_animate_sl").noUiSlider;
+	slider.on('update', (values, handle) => {
+    const time_animate = parseFloat(values[handle]);
+    if (!TIMELINE_SLIDER_DISABLED && TIME_ANIMATE !== time_animate) {
+        TIME_ANIMATE = time_animate;
+        requestAnimationFrame(() => {
+            updateBookmarkButton(TIME_ANIMATE);
+        });
 
-			if(lenses.length == 0){
-				for(let j = toi.j_min; j < toi.j_max && (data.fixs[j].t - data.tmin)/longest_duration < TIME_ANIMATE; j++){
-					if(data.fixs[j].t - data.tmin < 0)
-						ts = 0;
-					else
-						ts = (TimeLine.width*(data.fixs[j].t - data.tmin))/longest_duration;					
+	//update video with the time
+	if(VIDEO_LINKING && selected_data != -1 && DATASETS[selected_data] != null && DATASETS[selected_data] != undefined && 
+		currentVideoObj != null && currentVideoObj != undefined) {
+
+		//get time from dataset
+		let data = DATASETS[selected_data]; toi = data.tois[ data.toi_id ];
+		let longest_duration = data.tmax - data.tmin;
+		let ts = 0;
+
+		if(lenses.length == 0){
+			for(let j = toi.j_min; j < toi.j_max && (data.fixs[j].t - data.tmin)/longest_duration < TIME_ANIMATE; j++){
+				if(data.fixs[j].t - data.tmin < 0){
+					ts = 0;
+				}
+				else {
+					ts = (TimeLine.width*(data.fixs[j].t - data.tmin))/longest_duration;
 				}
 			}
-			//set video time
-			VIDEOS[selected_data].videoobj.time((ts*VIDEOS[selected_data].videoobj.duration())/TimeLine.width);
 		}
-		background_changed = true; timeline_changed = true;
+		//set video time
+		VIDEOS[selected_data].videoobj.time((ts*VIDEOS[selected_data].videoobj.duration())/TimeLine.width);
+	}
+	background_changed = true; timeline_changed = true;
 	}else if( TIME_PLAY && TIME_ANIMATE < 1.0 ){
 		if(VIDEO_LINKING && selected_data != -1 && VIDEOS[selected_data] != null && VIDEOS[selected_data] != undefined && 
 			currentVideoObj != null && currentVideoObj != undefined) {
@@ -454,6 +468,7 @@ function load_controls(){
 		}
 		background_changed = true; timeline_changed = true;
 	}
+});
 	if( SACC_BRIGHT != parseFloat(document.getElementById("sacc_bright_sl").noUiSlider.get())){
 		SACC_BRIGHT = parseFloat(document.getElementById("sacc_bright_sl").noUiSlider.get());
 		midground_changed = SHOW_SACCADE;
@@ -863,10 +878,12 @@ function click_time_play(){
 	if (TIME_PLAY) {
 		TIMELINE_SLIDER_DISABLED = true;
 		document.getElementById("time_animate_sl").setAttribute('disabled', true);
+		console.log('test 4');		
 	}		
 	else {
 		TIMELINE_SLIDER_DISABLED = false;
 		document.getElementById("time_animate_sl").removeAttribute('disabled');
+		console.log('test 5');		
 	}
 		
 		
@@ -882,6 +899,7 @@ function click_time_play(){
 		VIDEOS[selected_data].videoobj.pause();
 		let timelinetime = TT(Math.floor(VIDEOS[selected_data].videoobj.time()*1000));
 		document.getElementById("time_animate_sl").noUiSlider.set( parseFloat(timelinetime/TimeLine.width).toFixed(2) );
+		console.log('test 6');		
 	}
 }
 function click_size(){
