@@ -69,31 +69,11 @@ let timelinesketch = (p) => {
 				}
 				if(min_id != data.toi_id){ press_toi = min_id; }
 				else{ press_toi = -1; }				
-			}
-
-			for (let i = 0; i <squares.length; i++) {
-				let square = squares[i];
-				// console.log('square: ' + squares);	
-				// console.log('one square: ' + JSON.stringify(square));
-							
-				console.log('p.mouseX:'+p.mouseX);
-				console.log('p.mouseY:'+p.mouseY);
-				console.log('square.x: ' + square.x);
-				console.log('square.y: ' + square.y);				
-				if(p.mouseX >= square.x && p.mouseX <= square.x + square.size && p.mouseY >= square.y && p.mouseY <= square.y + square.size) {
-					console.log('mouse pressed on square');					
-				}
-			}		
+			}	
 		});
 
 		TIMELINE_CANVAS.mouseOver(() => {
-			p.mouseIsOver_timeline = true;
-			// Check here
-			console.log('mouseOver timeline');
-			console.log('canvas width: ' + canvasWidth);
-			console.log('TIMELINE canvas width: ' + TIMELINE_CANVAS.width);
-			console.log('timeline: ' + TimeLine.width);
-			
+			p.mouseIsOver_timeline = true;			
 		});
 
 		TIMELINE_CANVAS.mouseOut(() => { p.mouseIsOver_timeline = false; });
@@ -180,12 +160,10 @@ let timelinesketch = (p) => {
 		let longdur = 0;
 		for(let v=0; v<VALUED.length; v++){
 			let dat = DATASETS[VALUED[v]];
-			// console.log('dataset: ' + JSON.stringify(dat, null, 2));
 
 			longdur = Math.max(longdur, dat.tmax - dat.tmin);
 		}
 		longest_duration = longdur;
-		// console.log('longest_duration: ' + JSON.stringify(longest_duration));
 		
 		TIMELINE.longest_duration = longest_duration; //assigning the value to global variable of longest_duration so that it can be accessed from all files
 		
@@ -200,25 +178,15 @@ let timelinesketch = (p) => {
 				TimeLine.colorMode(p.HSB, 100);
 				TimeLine.background(black(100));
 				if(TIME_DATA=='lens'){
-					draw_time_lens(TimeLine);
-					console.log('lens');
-					
+					draw_time_lens(TimeLine);					
 				}else if(TIME_DATA=='data'){
 					draw_time_data(TimeLine);
-					console.log('data');
-
 				}else if(TIME_DATA=='all'|| TIME_DATA=='group'){
 					draw_time_all(TimeLine);
-					console.log('time_data');
-					
 				}else if(TIME_DATA=='saccades'){
 					draw_time_saccades(TimeLine);
-					console.log('saccades');
-
 				}else if(TIME_DATA=='saccadetype'){
-					draw_time_saccadetype(TimeLine);
-					console.log('time_saccadetype');
-					
+					draw_time_saccadetype(TimeLine);					
 				}	
 			}
 			p.image(TimeLine, 200, 0);
@@ -554,7 +522,6 @@ let timelinesketch = (p) => {
 			}
 			if(SPATIAL.mouseIsOver_spatial) { 
 				p.do_spatial_overlay(); 
-				// console.log('spatial_overlay');
 			 }
 		}catch (error) { console.error(error); timeline_changed = true; }
 	};
@@ -566,9 +533,7 @@ let timelinesketch = (p) => {
 		p.fill(cy(80, dat.group)); 
 		p.noStroke();
 		if(dat.toi_id == -1) return;
-		for(let i= toi.j_min; i< toi.j_max; i++){
-			// console.log('tot i ' + i);
-			
+		for(let i= toi.j_min; i< toi.j_max; i++){			
 			if(fixs[i] != undefined) {
 				let dist = (fixs[i].x*(spatial_width/WIDTH) - SPATIAL.mouseX)**2 + (fixs[i].y*(spatial_height/HEIGHT) - SPATIAL.mouseY)**2;
 				let size = Math.exp(FIX_SIZE) * Math.sqrt(fixs[i].dt);
@@ -589,13 +554,9 @@ let timelinesketch = (p) => {
 						if(td > 1){
 							p.noStroke(); 
 							p.rect( 100 + ts, timeline_highlight_position, td, 10 );
-							// console.log('rectangle: ' + timeline_highlight_position + ' x ' + ts);
-
 						}else{
 							p.stroke(cy(80, dat.group)); 
-							p.line(100 + ts, timeline_highlight_position, 100+ts, timeline_highlight_position+10);
-							// console.log('vertical stroke: ' + timeline_highlight_position + ' x ' + ts);
-							
+							p.line(100 + ts, timeline_highlight_position, 100+ts, timeline_highlight_position+10);							
 						}
 					}
 				}
@@ -985,8 +946,6 @@ let draw_time_all = (canvas) => {
 			
 			for(let k=0, row=0; k<VALUED.length && row<TIMELINE_CANVAS.num_of_rows; k++){
 				let data = DATASETS[VALUED[k]]; // data.name == PID
-				// console.log('dataaa: ' + JSON.stringify(data, null, 2));
-				// console.log('PID: ' + data.name);
 				
 				if(data == undefined || !data.included)
 					continue;
@@ -1630,163 +1589,181 @@ let do_matrix_timeline_overlay = (p) => {
 };
 
 const observers = {};
-const grouped_events = {};
 let observerColourIndex = 0;
 function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
-	let start_time = toi_bookmark.tmin;
-	let end_time = toi_bookmark.tmax;
-	let participantData = data.notes;
-	let max_duration = end_time - start_time;
+    let start_time = toi_bookmark.tmin;
+    let end_time = toi_bookmark.tmax;
+    let participantData = data.notes;
+    let max_duration = end_time - start_time;
+    let tolerancePercentage = max_duration * 0.05;
+    
+    removeBookmarkButton(data, toi_bookmark);
 
-	removeBookmarkButton(data, toi_bookmark);
+    const grouped_events = {};
+    const grouped_within_tolerance = {};
 
-	for (let i = 0; i < participantData.events.length; i++) {
-		let event = participantData.events[i];
-		
-		let ts = (canvas.width * (event.timestampMs - start_time)) / max_duration;
-		if (event.visibleOnTimeline === false || event.included === false) {
-			continue;
-		}
-		let observerName = event.observer;
-		let selectedBookmark;
-		event.eventId = i;
-		selectedBookmark = event.eventId;
+    for (let i = 0; i < participantData.events.length; i++) {
+        let event = participantData.events[i];
+        let ts = (canvas.width * (event.timestampMs - start_time)) / max_duration;
+        if (event.visibleOnTimeline === false || event.included === false) {
+            continue;
+        }
+        let observerName = event.observer;
+        let selectedBookmark;
+        event.eventId = i;
+        selectedBookmark = event.eventId;
 
-		if (!observers[observerName]) {
+        if (!observers[observerName]) {
             observers[observerName] = OBSERVERS[observerColourIndex % OBSERVERS.length];
             observerColourIndex++;
         }
 
-		// create an empty array if there is a timestanp for a note
-		if(!grouped_events[event.occuredTimestamp]) {
-			grouped_events[event.occuredTimestamp] = [];
-		}
+        if(!grouped_events[event.timestampMs]) {
+            grouped_events[event.timestampMs] = [];
+        }
 
-		// check if the array has repeated notes
-		if(!grouped_events[event.occuredTimestamp].some(note => note.content === event.content)) {
-			grouped_events[event.occuredTimestamp].push(event);
-		}
+        grouped_events[event.timestampMs].push(event);    
+    }
+
+    let sorted_timestamps = Object.keys(grouped_events).map(Number).sort((a, b) => a - b);
+
+    let currentGroup = [];
+    let currentStartTimestamp = sorted_timestamps[0];
+
+    currentGroup.push(...grouped_events[currentStartTimestamp]);
+
+    for (let i = 1; i < sorted_timestamps.length; i++) {
+        let currentTimestamp = sorted_timestamps[i];
+        let previousTimestamp = sorted_timestamps[i - 1];
+
+        if((currentTimestamp - previousTimestamp) <= tolerancePercentage) {
+            currentGroup.push(...grouped_events[currentTimestamp]);
+        } else {
+            grouped_within_tolerance[currentStartTimestamp] = currentGroup;
+            currentStartTimestamp = currentTimestamp;
+            currentGroup = [...grouped_events[currentTimestamp]];
+        }
+    }
+    grouped_within_tolerance[currentStartTimestamp] = currentGroup;
+
+    if(Object.keys(observers).length !== 0) {
+        colour_match_observer(observers);
+    }
+
+    Object.entries(grouped_within_tolerance).forEach(([timestampMs, events]) => {
+        let ts = (canvas.width * (timestampMs - start_time)) / max_duration;
+
+        if (ts >= 0 && ts <= canvas.width) {
+            let start_y = h2top;
+            let end_y = h2top + h2;
+            let center_y = start_y + (end_y - start_y) / 2;    
+
+            events.forEach((event, i) => {
+                let button = document.createElement("button");
+                let line = document.createElement("div");
+                let canvasRect = TIMELINE_CANVAS.elt.getBoundingClientRect();
+                let diff = (TIMELINE_CANVAS.width - canvas.width) / 3;
+
+                line.className = `timeline-line-${data.name}-toi-${toi_bookmark.twi_id}`;
+                line.style.position = "absolute";    
+
+                line.style.left = `${canvasRect.left + (diff * 2) + ts}px`;
+                line.style.top = `${canvasRect.top + start_y}px`;
+                line.style.width = "1px";
+                line.style.height = `${end_y - start_y}px`;
+                line.style.backgroundColor = "black";
+                line.style.zIndex = "1";
+
+                button.className = `timeline-bookmark-${data.name}-toi-${toi_bookmark.twi_id}`;
+                button.setAttribute("data-observer", event.observer);
+                button.setAttribute("data-event-type", event.type);
+                button.setAttribute("data-event-detail-id", event.eventId);
+
+                button.style.position = "absolute";    
+                button.style.left = `${canvasRect.left + (diff * 2) + ts - 7.5}px`;
+                button.style.top = `${canvasRect.top + center_y - 7.5}px`;
+                button.style.width = "15px";
+                button.style.height = "15px";
+                button.style.background = observers[event.observer];
+                
+                button.style.border = "none";
+                button.style.cursor = "pointer";
+                button.style.borderRadius = "5px";
+                button.style.zIndex = "2";    
+                
+				if(events.length > 1) {
+					let toggleButton = document.createElement('button');
+					toggleButton.className = `timeline-toggle-${data.name}-toi-${toi_bookmark.twi_id}`;
+					toggleButton.innerHTML = events.length;
+					toggleButton.style.position = "absolute";
+					toggleButton.style.left = `${canvasRect.left + (diff * 2) + ts - 8.5}px`;
+					toggleButton.style.top = `${canvasRect.top + center_y - 35}px`;
+					toggleButton.style.zIndex = "3";
+					document.body.appendChild(toggleButton);
 		
-		// get different colours for different observers
-		if(Object.keys(observers).length !== 0) {
-			colour_match_observer(observers);
-		}
-
-		// calculation to add the bookmark button in the timeline	
-		if (ts >= 0 && ts <= canvas.width) {
-		let start_y = h2top;
-		let end_y = h2top + h2;
-		let center_y = start_y + (end_y - start_y) / 2;										
-		
-		// get the timeline of the canvas
-		const canvasRect = TIMELINE_CANVAS.elt.getBoundingClientRect();
-		let diff = (TIMELINE_CANVAS.width - canvas.width) / 3;
-
-		let line = document.createElement("div");
-		line.className = `timeline-line-${data.name}-toi-${toi_bookmark.twi_id}`;
-		line.style.position = "absolute";	
-
-		line.style.left = `${canvasRect.left + (diff * 2) + ts}px`;
-		line.style.top = `${canvasRect.top + start_y}px`;
-		line.style.width = "1px";
-		line.style.height = `${end_y - start_y}px`;
-		line.style.backgroundColor = "black";
-		line.style.zIndex = "1";
-
-		let button = document.createElement("button");
-		button.className = `timeline-bookmark-${data.name}-toi-${toi_bookmark.twi_id}`;
-		button.setAttribute("data-observer", observerName);
-		button.setAttribute("data-event-type", event.type);
-		button.setAttribute("data-event-detail-id", i);
-
-		button.style.position = "absolute";	
-
-		button.style.left = `${canvasRect.left + (diff * 2) + ts - 7.5}px`;
-		button.style.top = `${canvasRect.top + center_y - 7.5}px`;
-		button.style.width = "15px";
-		button.style.height = "15px";
-		button.style.background = observers[observerName];
-		
-		button.style.border = "none";
-		button.style.cursor = "pointer";
-		button.style.borderRadius = "5px";
-		button.style.zIndex = "2";
-
-		// to view multiple notes at the same timestamp
-		if(grouped_events[event.occuredTimestamp].length > 1) {
-			let toggleButton = document.createElement('button');
-			toggleButton.className = `timeline-toggle-${data.name}-toi-${toi_bookmark.twi_id}`;
-			// toggleButton.innerHTML = '<i class="fa-solid fa-angles-right fa-2xs"></i>';
-			toggleButton.innerHTML = grouped_events[event.occuredTimestamp].length;
-			toggleButton.style.position = "absolute";
-			toggleButton.style.left = `${canvasRect.left + (diff * 2) + ts - 8.5}px`;
-			toggleButton.style.top = `${canvasRect.top + center_y - 35}px`;
-			toggleButton.style.zIndex = "3";
-			document.body.appendChild(toggleButton);
-
-			let noteIndex = 0;
-			toggleButton.addEventListener("click", () => {
-				// to get the notes in the sequence on click of the toggle button
-				noteIndex = (noteIndex + 1) % grouped_events[event.occuredTimestamp].length;
-				let currentNote = grouped_events[event.occuredTimestamp][noteIndex];
-				currentNote.eventId = participantData.events.findIndex(e => e.occuredTimestamp === currentNote.occuredTimestamp && e.content === currentNote.content);
-				selectedBookmark = currentNote.eventId;	
-				button.style.background = observers[currentNote.observer];
-				tooltip.innerHTML = `Timestamp: ${currentNote.occuredTimestamp}<br>Type: ${currentNote.type}<br>Details: ${currentNote.content}<br>Observer: ${currentNote.observer}`;
-			});
-		}
-
-		let tooltip = document.createElement("tooltip");
-		tooltip.className = "tooltip";
-		tooltip.style.position = "absolute";
-		tooltip.style.padding = "10px 10px";
-		tooltip.style.color = "black";
-		tooltip.style.borderRadius = "5px";
-		tooltip.style.fontSize = "14px";
-		tooltip.style.fontWeight = "bold";
-		tooltip.style.fontFamily = "Calibri";
-		tooltip.style.visibility = "hidden";
-		tooltip.style.transition = "opacity 0.3s";
-		tooltip.style.opacity = "0";
-		tooltip.style.zIndex = "1000";
-		tooltip.style.backgroundColor = "white";
-		tooltip.innerHTML = `Timestamp: ${event.occuredTimestamp}<br>Type: ${event.type}<br>Details: ${event.content}<br>Observer: ${event.observer}`;
-		
-			button.addEventListener("mouseenter", () => {
-				tooltip.style.visibility = "visible";
-				tooltip.style.opacity = "1";
-				tooltip.style.left = `${parseFloat(button.style.left) + 20}px`;
-				tooltip.style.top = `${parseFloat(button.style.top) - 10}px`;
-				if(!button.classList.contains('selected_bookmark')) {
-					button.style.outline = "2px solid yellow";
+					let noteIndex = 0;
+					toggleButton.addEventListener("click", () => {
+						noteIndex = (noteIndex + 1) % events.length;
+						let currentNote = events[noteIndex];
+						currentNote.eventId = participantData.events.findIndex(e => e.occuredTimestamp === currentNote.occuredTimestamp && e.content === currentNote.content);
+						selectedBookmark = currentNote.eventId;    
+						button.style.background = observers[currentNote.observer];
+						tooltip.innerHTML = `Timestamp: ${currentNote.occuredTimestamp}<br>Type: ${currentNote.type}<br>Details: ${currentNote.content}<br>Observer: ${currentNote.observer}`;
+					});
 				}
-			});
-	
-			button.addEventListener("mouseleave", () => {
-				tooltip.style.visibility = "hidden";
-				tooltip.style.opacity = "0";
-				if(!button.classList.contains('selected_bookmark')) {
-					button.style.outline = "none";
-				}
-			});
+                
+                let tooltip = document.createElement("tooltip");
+                tooltip.className = "tooltip";
+                tooltip.style.position = "absolute";
+                tooltip.style.padding = "10px 10px";
+                tooltip.style.color = "black";
+                tooltip.style.borderRadius = "5px";
+                tooltip.style.fontSize = "14px";
+                tooltip.style.fontWeight = "bold";
+                tooltip.style.fontFamily = "Calibri";
+                tooltip.style.visibility = "hidden";
+                tooltip.style.transition = "opacity 0.3s";
+                tooltip.style.opacity = "0";
+                tooltip.style.zIndex = "1000";
+                tooltip.style.backgroundColor = "white";
+                tooltip.innerHTML = `Timestamp: ${event.occuredTimestamp}<br>Type: ${event.type}<br>Details: ${event.content}<br>Observer: ${event.observer}`;
+                
+                button.addEventListener("mouseenter", () => {
+                    tooltip.style.visibility = "visible";
+                    tooltip.style.opacity = "1";
+                    tooltip.style.left = `${parseFloat(button.style.left) + 20}px`;
+                    tooltip.style.top = `${parseFloat(button.style.top) - 10}px`;
+                    if(!button.classList.contains('selected_bookmark')) {
+                        button.style.outline = "2px solid yellow";
+                    }
+                });
+    
+                button.addEventListener("mouseleave", () => {
+                    tooltip.style.visibility = "hidden";
+                    tooltip.style.opacity = "0";
+                    if(!button.classList.contains('selected_bookmark')) {
+                        button.style.outline = "none";
+                    }
+                });
 
-			button.addEventListener("click", () => {
-				document.querySelectorAll("[class^='timeline-bookmark-']").forEach(bookmarkButton => {
-					bookmarkButton.classList.remove('selected_bookmark');
-					bookmarkButton.style.outline = "none";
-				});
-				button.classList.add("selected_bookmark");
-				button.style.outline = "2px dashed green"
-				select_note(selectedBookmark);
-			})
+                button.addEventListener("click", () => {
+                    document.querySelectorAll("[class^='timeline-bookmark-']").forEach(bookmarkButton => {
+                        bookmarkButton.classList.remove('selected_bookmark');
+                        bookmarkButton.style.outline = "none";
+                    });
+                    button.classList.add("selected_bookmark");
+                    button.style.outline = "2px dashed green"
+                    select_note(selectedBookmark);
+                });
 
-			document.addEventListener("DOMContentLoaded", filter_observers_by_colour());
+                document.addEventListener("DOMContentLoaded", filter_observers_by_colour());
 
-			document.body.appendChild(line);
-			document.body.appendChild(button);
-			document.body.appendChild(tooltip);
-		}
-	}
+                document.body.appendChild(line);
+                document.body.appendChild(button);
+                document.body.appendChild(tooltip);
+            });
+        }
+    });
 }
 
 function removeBookmarkButton(data, toi_bookmark) {
