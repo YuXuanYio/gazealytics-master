@@ -1685,7 +1685,45 @@ function export_spatial_canvas(){
 
 	if(EXPORT_METRIC_CANVAS)
 		MATRIX.save(matrixCanvas1, "metrics.jpg");
+	exportCombinedCanvas();
 }
+
+function exportCombinedCanvas() {
+	console.log(typeof html2canvas);
+
+    const parentElement = document.getElementById("pj2");
+
+	console.log(parentElement);
+    if (!parentElement) {
+        console.error("Element not found: #defaultCanvas1");
+        return;
+    }
+
+	const rect = parentElement.getBoundingClientRect();
+	console.log("Element dimensions:", rect);
+	if (rect.width === 0 || rect.height === 0) {
+		console.error("Element is not visible or has zero dimensions.");
+		return;
+	}
+
+
+	html2canvas(parentElement.childNodes[0].children, { logging: true })
+    .then((canvas) => {
+        console.log("@@@@@@@@@@@@@@@@@@@@@@@");
+        const link = document.createElement("a");
+        link.download = "timeline_with_bookmarks.jpg";
+        link.href = canvas.toDataURL("image/jpeg");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    })
+    .catch((error) => {
+        console.error("Error during html2canvas execution:", error);
+    });
+
+}
+
+
 
 function export_metrics(){
 	var sacc_string = 'data:text/tsv;charset=utf-8,'+ saccades_values_string();
