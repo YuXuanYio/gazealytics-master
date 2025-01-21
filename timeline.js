@@ -1667,9 +1667,9 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 		}
 		
 		// get different colours for different observers
-		if(Object.keys(observers).length !== 0) {
-			colour_match_observer(observers);
-		}
+		// if(Object.keys(observers).length !== 0) {
+		// 	colour_match_observer(observers);
+		// }
 
 		// calculation to add the bookmark button in the timeline	
 		if (ts >= 0 && ts <= canvas.width) {
