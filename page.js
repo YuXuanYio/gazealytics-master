@@ -878,12 +878,10 @@ function click_time_play(){
 	if (TIME_PLAY) {
 		TIMELINE_SLIDER_DISABLED = true;
 		document.getElementById("time_animate_sl").setAttribute('disabled', true);
-		console.log('test 4');		
 	}		
 	else {
 		TIMELINE_SLIDER_DISABLED = false;
 		document.getElementById("time_animate_sl").removeAttribute('disabled');
-		console.log('test 5');		
 	}
 		
 		
@@ -899,7 +897,6 @@ function click_time_play(){
 		VIDEOS[selected_data].videoobj.pause();
 		let timelinetime = TT(Math.floor(VIDEOS[selected_data].videoobj.time()*1000));
 		document.getElementById("time_animate_sl").noUiSlider.set( parseFloat(timelinetime/TimeLine.width).toFixed(2) );
-		console.log('test 6');		
 	}
 }
 function click_size(){

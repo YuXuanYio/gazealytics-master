@@ -1761,6 +1761,7 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
                 document.addEventListener("DOMContentLoaded", filter_observers_by_colour());
 				bookmarks.push({
 					timestamp: event.timestampMs,
+					start_time,
 					max_duration,
 					button,
 					line,
@@ -1776,10 +1777,9 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 }
 
 function updateBookmarkButton(time_animate) {
-
 	bookmarks.forEach(bookmark => {
-		const { timestamp, max_duration, button, line, toggleButton } = bookmark; 
-		let scaledTime = timestamp / max_duration;		
+		const { timestamp, start_time, max_duration, button, line, toggleButton } = bookmark; 
+		let scaledTime = (timestamp - start_time) / max_duration;		
 		
 		if(button && line) {
 			if(scaledTime >= time_animate) {
