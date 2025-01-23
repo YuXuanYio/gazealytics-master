@@ -1,7 +1,7 @@
 // lens list function
 notebox =
-	'<div></div>' +
-	'<div class="data_dragger"></div>' +
+	'<div class="data_dragger" draggable="false" id="#_note_drag"></div>' +
+	'<div class="rowsplit">' +
 	'<div class="controls">' +
 	'<div class="tool inner_button">' +
 	'<button id="notes_#_l" onclick="toggleNoteLock(#)"> <i class="fas fa-lock-open"></i> </button>' +
