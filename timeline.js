@@ -1647,9 +1647,9 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
     }
     grouped_within_tolerance[currentStartTimestamp] = currentGroup;
 
-    if(Object.keys(observers).length !== 0) {
-        colour_match_observer(observers);
-    }
+    // if(Object.keys(observers).length !== 0) {
+    //     colour_match_observer(observers);
+    // }
 
     Object.entries(grouped_within_tolerance).forEach(([timestampMs, events]) => {
         let ts = (canvas.width * (timestampMs - start_time)) / max_duration;
@@ -1674,6 +1674,15 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
                 line.style.height = `${end_y - start_y}px`;
                 line.style.backgroundColor = "black";
                 line.style.zIndex = "1";
+
+				let start_x = ts;
+				setTimeout(() => {
+					canvas.line(start_x, start_y, start_x, end_y);
+					canvas.line("red");
+					canvas.strokeWeight(1);
+					canvas.style("z-index", 100);
+					console.log('stroke');					
+				})
 
                 button.className = `timeline-bookmark-${data.name}-toi-${toi_bookmark.twi_id}`;
                 button.setAttribute("data-observer", event.observer);

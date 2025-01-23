@@ -108,10 +108,10 @@ function update_observer_colors() {
             let textContent = document.getElementById("note_" + val + "_note_observer").textContent;
             let observerName = textContent.split('Observer:')[1].trim();
 
-            if (!observers[observerName]) {
-                console.error(`Color not found for observer '${observerName}'.`);
-                continue;
-            }
+            // if (!observers[observerName]) {
+            //     console.error(`Color not found for observer '${observerName}'.`);
+            //     continue;
+            // }
 
             let dragger = child.querySelector(".data_dragger");
 

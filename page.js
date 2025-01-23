@@ -1700,7 +1700,7 @@ function export_spatial_canvas(){
 
 	if(EXPORT_METRIC_CANVAS)
 		MATRIX.save(matrixCanvas1, "metrics.jpg");
-	exportCombinedCanvas();
+	// exportCombinedCanvas();
 }
 
 function exportCombinedCanvas() {
