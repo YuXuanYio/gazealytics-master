@@ -1678,10 +1678,8 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 				let start_x = ts;
 				setTimeout(() => {
 					canvas.line(start_x, start_y, start_x, end_y);
-					canvas.line("red");
+					canvas.stroke("black");
 					canvas.strokeWeight(1);
-					canvas.style("z-index", 100);
-					console.log('stroke');					
 				})
 
                 button.className = `timeline-bookmark-${data.name}-toi-${toi_bookmark.twi_id}`;
