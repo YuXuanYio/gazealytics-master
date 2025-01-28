@@ -329,7 +329,7 @@ function load_zip(){
 						list.innerHTML = "";
 						for(var v=0; v < base_twis.length; v++){
 							if( base_twis[v].included ){
-								q = twibox.replace(/#/g, v);
+								q = newTwiBox.replace(/#/g, v);
 								var node = document.createElement("li");
 								node.innerHTML = q; node.id = "twi_"+v;
 								// node.setAttribute('onclick', "if(selected_lens!="+v+"){select_lens("+v+");}else{select_lens(-1);}console.log('target', e.target);");

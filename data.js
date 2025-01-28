@@ -1,5 +1,27 @@
 
 // dataset list functions
+let newTwiBox = '<div class="data_dragger" draggable="true" ondragend="dragEnd()" ondragover="dragOver_page(event)" ondragstart="dragStart(event)" id="#_twi_dragger"></div>'
++ '<div class="rowsplit">'
++ '<div class="controls">'
++ '<input type="text" id="#_twi_name" style="width:110px" value="twi#">'
++ '<div id="#_col" style="display:inline;width:19px;height:19px;"></div>'
++ '<button id="twi_#_c" checked="true"> <i class="fas fa-eye"></i> </button>'
++ '<input class="num" type="number" id="#_twigroup" style="width:50px" value = 1 step=1 min=1 max=20>'
++ '<div class="tool inner_button"><button  id="#_x" onclick="delete_item(#);"> <i class="far fa-trash-alt"></i> </button><span class="tip">Delete the TWI</span></div>'
++ '<div class="time_controls" ><ol id="#_toi" class="toi_list">'
++ '<li onclick="set_toi(#, 0)" id="#_twi_0" class="toi_selected"><center>All</center></li>'
++ '<li id="#_addtoi"><div class="tool inner_button"><button onclick="new_toi(#,0,1)"><center><i class="fas fa-plus"></i></center></button><span class="tip">Select existing AOIs</span></div></li>'
++ '<li id="#_loadtois"><div class="tool inner_button"><input id="#_toi_f" type="file" name="name" style="display: none;" onchange="load_toi_list(#)"/> <button onclick="click_load_toi_list(#)"><center><i class="fas fa-file-upload"></i></center></button><span class="tip">Upload new AOI file</span></div></li>'
++ '<div id="#_nametoi_box" style="display:none;"><input type="text" id="#_nametoi" style="width:80px" disabled=true/> </div></div></div>'
+
+let twibox = '<div class="dragger" draggable="true" ondragend="dragEnd()" ondragover="dragOver_page(event)" ondragstart="dragStart(event)" id="#_twi_dragger"></div>'
++ '<div class="controls">'
++ '<input type="text" id="#_twi_name" style="width:110px" value="twi#">'
++ '<div id="#_col" style="display:inline;width:19px;height:19px;"></div>'
++ '<button id="twi_#_c" checked="true"> <i class="fas fa-eye"></i> </button>'
++ '<input class="num" type="number" id="#_twigroup" style="width:50px" value = 1 step=1 min=1 max=20>'
++ '<div class="tool inner_button"><button  id="#_x" onclick="delete_twi(#);"> <i class="far fa-trash-alt"></i> </button><span class="tip">Delete the TWI</span></div>';
+
 let databox = '<div class="data_dragger" draggable="true" ondragend="dragEnd()" ondragover="dragOver_page(event)" ondragstart="dragStart(event)" id="#_drag"></div>'
 + '<div class="rowsplit">'
 + '<div class="controls">'
@@ -17,15 +39,6 @@ let databox = '<div class="data_dragger" draggable="true" ondragend="dragEnd()" 
 + '<li id="#_deltoi"><div class="tool inner_button"><button onclick="delete_selected_toi(#)"><center> <i class="far fa-trash-alt"></i>  </center></button><span class="tip">Delete the selected TOI</span></div></li></ol>'
 + '<div id="#_nametoi_box" style="display:none;"><input type="text" id="#_nametoi" style="width:80px" disabled=true/> </div></div></div>'
 + '<div class="timebox" id="tb"> <input type="text" id="#_left" value=12:34 onchange="update_timeslider(#)"> <div id="#_sl" class="timeslider"></div> <input type="text" id="#_right" value=12:34:03 onchange="update_timeslider(#)"></div></div></div> ';
-
-let twibox = '<div class="dragger" draggable="true" ondragend="dragEnd()" ondragover="dragOver_page(event)" ondragstart="dragStart(event)" id="#_twi_dragger"></div>'
-+ '<div class="controls">'
-+ '<input type="text" id="#_twi_name" style="width:110px" value="twi#">'
-+ '<div id="#_col" style="display:inline;width:19px;height:19px;"></div>'
-+ '<button id="twi_#_c" checked="true"> <i class="fas fa-eye"></i> </button>'
-+ '<input class="num" type="number" id="#_twigroup" style="width:50px" value = 1 step=1 min=1 max=20>'
-+ '<div class="tool inner_button"><button  id="#_x" onclick="delete_twi(#);"> <i class="far fa-trash-alt"></i> </button><span class="tip">Delete the TWI</span></div>';
-
 
 var fileCounter = 0; var filelist; var groupCounter = 0; var relative_w = 0; var relative_h = 0;
 var err_row = []; var err_msg = ''; var err_count = 0; var cluster_warn = ''; 
@@ -641,7 +654,7 @@ function delete_toi(data_id, twi_id){
 function add_item_to_twilist(name, twi_id){
 	//add to DOM twi list	
 	v = twi_id;
-	q = twibox.replace(/#/g, v);
+	q = newTwiBox.replace(/#/g, v);
 	node = document.createElement("li");
 	node.innerHTML = q; node.id = "twi_"+v;
 	//node.setAttribute('onclick', "if(selected_lens!="+v+"){select_lens("+v+");}else{select_lens(-1);}");
