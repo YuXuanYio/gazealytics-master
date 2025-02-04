@@ -419,13 +419,26 @@ function load_controls(){
 	}
 	if( !TIMELINE_SLIDER_DISABLED && TIME_ANIMATE != parseFloat(document.getElementById("time_animate_sl").noUiSlider.get())){
 		TIME_ANIMATE = parseFloat(document.getElementById("time_animate_sl").noUiSlider.get());
+		let data = DATASETS[selected_data]; 
+		if (VIDEOS[selected_data].coords) {
+			let data_approx_duration = data.t_end - data.t_start
+			let video_coords_index = Math.floor((data_approx_duration * TIME_ANIMATE) / VIDEOS[selected_data].coords.length);
+			currVidLens.move(VIDEOS[selected_data].coords[video_coords_index].x1, VIDEOS[selected_data].coords[video_coords_index].y1, VIDEOS[selected_data].coords[video_coords_index].x2, VIDEOS[selected_data].coords[video_coords_index].y2);
+		}
 
 		//update video with the time
 		if(VIDEO_LINKING && selected_data != -1 && DATASETS[selected_data] != null && DATASETS[selected_data] != undefined && 
 			currentVideoObj != null && currentVideoObj != undefined) {
 				
 			//get time from dataset
-			let data = DATASETS[selected_data]; toi = data.tois[ data.toi_id ];
+			let data = DATASETS[selected_data]; 
+			let toi = null
+			if (data.tois_id == -1) {
+				toi = data.tois[ data.toi_id ];
+			} else {
+				toi = data.tois[0];
+			}
+
 			let longest_duration = data.tmax - data.tmin;
 			let ts = 0;
 
@@ -447,10 +460,22 @@ function load_controls(){
 			
 			TIME_ANIMATE = Math.min( 1.0, TIME_ANIMATE + 0.01/100 );
 			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );
+			let data = DATASETS[selected_data]; 
+			if (VIDEOS[selected_data].coords) {
+				let data_approx_duration = data.t_end - data.t_start
+				let video_coords_index = Math.floor((data_approx_duration * TIME_ANIMATE) / VIDEOS[selected_data].coords.length);
+				currVidLens.move(VIDEOS[selected_data].coords[video_coords_index].x1, VIDEOS[selected_data].coords[video_coords_index].y1, VIDEOS[selected_data].coords[video_coords_index].x2, VIDEOS[selected_data].coords[video_coords_index].y2);
+			}
 		}
 		else {
 			TIME_ANIMATE = Math.min( 1.0, TIME_ANIMATE + 0.01 );
-			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );		
+			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );	
+			let data = DATASETS[selected_data]; 
+			if (VIDEOS[selected_data].coords) {
+				let data_approx_duration = data.t_end - data.t_start
+				let video_coords_index = Math.floor((data_approx_duration * TIME_ANIMATE) / VIDEOS[selected_data].coords.length);
+				currVidLens.move(VIDEOS[selected_data].coords[video_coords_index].x1, VIDEOS[selected_data].coords[video_coords_index].y1, VIDEOS[selected_data].coords[video_coords_index].x2, VIDEOS[selected_data].coords[video_coords_index].y2);
+			}	
 		}
 		background_changed = true; timeline_changed = true;
 	}

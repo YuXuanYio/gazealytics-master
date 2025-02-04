@@ -2,6 +2,7 @@ let backimage, cropimage;
 let Minimap;
 let SpatialBackground, SpatialMidground, SpatialForeground;
 let SpatialCanvas;
+let currVidLens = null;
 
 let spatialsketch = (p) => {
 	let f = {
@@ -344,6 +345,23 @@ let spatialsketch = (p) => {
 					spatial_width, spatial_height);
 			}
 		}
+		if (VIDEOS[selected_data].coords) {
+			if (currVidLens == null) {
+				currVidLens = new VidRectLens(VIDEOS[selected_data].coords[0].x1,VIDEOS[selected_data].coords[0].y1);
+				currVidLens.add(VIDEOS[selected_data].coords[0].x2, VIDEOS[selected_data].coords[0].y2);
+				currVidLens.draw(p,false,false, spatial_width, spatial_height);
+			} else {
+				currVidLens.draw(p,false,false, spatial_width, spatial_height);
+			}
+			if (toggleVideoLensButton == null && currVidLens != null) {
+				toggleVideoLensButton = p.createButton('Toggle Video Lens');
+				toggleVideoLensButton.mousePressed(() => {
+					currVidLens.toggleVisibility();
+				});
+				toggleVideoLensButton.parent("selectfileinput");
+			}
+		}
+
 	};
 	
 	p.keyPressed = () => {
