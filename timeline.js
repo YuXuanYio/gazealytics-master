@@ -1591,12 +1591,22 @@ let do_matrix_timeline_overlay = (p) => {
 let bookmarks = [];
 const observers = {};
 let observerColourIndex = 0;
+let DATA_G;
+let H2TOP_G;
+let H2_G;
+let CANVAS_G;
+let TOI_BOOKMARK_G;
 function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
     let start_time = toi_bookmark.tmin;
     let end_time = toi_bookmark.tmax;
     let participantData = data.notes;
     let max_duration = end_time - start_time;
     let tolerancePercentage = max_duration * 0.05;
+	DATA_G = data;
+	H2TOP_G = h2top;
+	H2_G = h2;
+	CANVAS_G = canvas;
+	TOI_BOOKMARK_G = toi_bookmark;
 	
     removeBookmarkButton(data, toi_bookmark);
 
@@ -2005,15 +2015,12 @@ function add_note_legend() {
 		});
 		container.appendChild(legendRow);
 	} else if (show_note_observer_legend === true) {
-		console.log("show_note_observer_legend");
 		let legendRow = document.createElement("ul");
 		legendRow.style.display = "flex";
 		legendRow.style.flexDirection = "row";
 		legendRow.style.gap = "15px";
 	
 		Object.entries(observers).forEach(([observer, colour]) => {
-			console.log("observer", observer);
-			console.log("colour", colour);
 			let observerDiv = document.createElement('div');
 			observerDiv.style.display = "flex";
 			observerDiv.style.alignItems = "center";

@@ -225,7 +225,6 @@ function new_file(){
 
 		if( newdata.initialised ){ // new load is valid, accept it
 			var id = DATASETS.length; DATASETS.push(newdata); VIDEOS.push({}); cid = DATASETS.length;
-			console.log(DATASETS);
 			q = databox.replace(/#/g, id);
 			var node = document.createElement("li");
 			node.innerHTML = q; node.id = id;

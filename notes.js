@@ -88,22 +88,99 @@ function new_note(
 	typeLabel.id = "note_" + v + "_note_type";
 	typeLabel.textContent = `Type: ${type}`;
 
-	let timestampLabel = document.createElement("label");
-	timestampLabel.className = "tool note_timestamp";
-	timestampLabel.id = "note_" + v + "_note_timestamp";
-	timestampLabel.textContent = `Timestamp: ${occuredTimestamp}`;
-
-	let observerLabel = document.createElement("label");
-	observerLabel.className = "tool note_observer";
-	observerLabel.id = "note_" + v + "_note_observer";
-	observerLabel.textContent = `Observer: ${observer}`;
-
-	noteContentContainer.append(typeLabel, timestampLabel, observerLabel);
-
 	let textarea = document.createElement("textarea");
 	textarea.className = "tool";
 	textarea.id = "note_" + v + "_content";
 	textarea.value = content;
+
+	let observerLabel;
+	let observerContent = null;
+	let observerTextArea = null;
+	if(observer === "N.A.") {
+		observerContent = document.createElement("div");
+		observerContent.className = "tool";
+		observerContent.style.display = "flex";
+
+		observerLabel = document.createElement("label");
+		observerLabel.id = "note_" + v + "_note_observer";
+		observerLabel.className = "tool";
+		observerLabel.textContent = "Observer: "
+
+		observerTextArea = document.createElement("input");
+		observerTextArea.id = "note_" + v + "_note_observer";		
+		observerTextArea.className = "tool";
+		observerTextArea.style.marginLeft = "2px";
+		observerTextArea.style.width = "100px";
+		observerTextArea.type = "text";
+		observerTextArea.placeholder = "Name"
+		observerTextArea.value = "";
+
+		observerContent.appendChild(observerLabel);
+		observerContent.appendChild(observerTextArea);
+	} else {
+		observerLabel = document.createElement("label");
+		observerLabel.className = "tool note_observer";
+		observerLabel.id = "note_" + v + "_note_observer";
+		observerLabel.textContent = `Observer: ${observer}`;
+	}
+
+	let timestampLabel;
+	let timestampContent = null;
+	let timestampTextArea = null;
+	if(occuredTimestamp === "N.A.") {
+		timestampContent = document.createElement("div");
+		timestampContent.className = "tool";
+		timestampContent.style.display = "flex";
+
+		timestampLabel = document.createElement("label");
+		timestampLabel.textContent = "Timestamp: ";
+
+		timestampTextArea = document.createElement("input");
+		timestampTextArea.id = "timestampTextArea_" + v + "_content";
+		timestampTextArea.className = "tool";
+		timestampTextArea.style.marginLeft = "2px";
+		timestampTextArea.style.width = "90px"; 
+		timestampTextArea.placeholder = "hh:mm:ss:ms";
+		timestampTextArea.type = "text";
+		timestampTextArea.value = "";
+
+		timestampContent.appendChild(timestampLabel);
+		timestampContent.appendChild(timestampTextArea);
+	} else {
+		timestampLabel = document.createElement("label");
+		timestampLabel.className = "tool note_timestamp";
+		timestampLabel.id = "note_" + v + "_note_timestamp";
+		timestampLabel.textContent = `Timestamp: ${occuredTimestamp}`;
+	}
+
+	noteContentContainer.append(typeLabel);
+
+	if(observerContent) {
+		noteContentContainer.append(observerContent);
+	} else {
+		noteContentContainer.append(observerLabel);
+	}
+
+	if(timestampContent) {
+		noteContentContainer.appendChild(timestampContent);			
+	} else {
+		noteContentContainer.append(timestampLabel);
+	}
+
+	if(observerTextArea) {
+		observerTextArea.addEventListener("input", function() {
+			newnote.observer = observerTextArea.value;
+		});
+	}
+
+	if(timestampTextArea) {
+		timestampTextArea.addEventListener("input", function() {
+			newnote.occuredTimestamp = timestampTextArea.value;
+			newnote.timestampMs = convertToMilliseconds(timestampTextArea.value);
+			newnote.visibleOnTimeline = true;	
+		});
+		DATA_G.notes.events.push(newnote);
+	}
 
 	textarea.addEventListener("input", function () {
 		if (!base_notes[v].locked) {
@@ -114,7 +191,15 @@ function new_note(
 	});
 
 	noteContentContainer.appendChild(textarea);
-	node.appendChild(noteContentContainer);
+	if(timestampTextArea && observerTextArea) {
+		let saveButton = document.createElement("button");
+		saveButton.textContent = "Save";
+		noteContentContainer.appendChild(saveButton);
+		saveButton.addEventListener("click", function() {
+			addBookmarkButton(DATA_G, H2TOP_G, H2_G, CANVAS_G, TOI_BOOKMARK_G);	
+		});
+	}
+ 	node.appendChild(noteContentContainer);
 
 	// Click event for selection
 	node.onclick = function (e) {
@@ -167,7 +252,7 @@ function new_note(
 	}
 
 	make_note_dataset_selectors();
-	update_observer_colors();
+	setTimeout(update_observer_colors(), 0);
 
 	if (!isPreloaded) {
 		select_note(v);
