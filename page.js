@@ -421,8 +421,7 @@ function load_controls(){
 		TIME_ANIMATE = parseFloat(document.getElementById("time_animate_sl").noUiSlider.get());
 		let data = DATASETS[selected_data]; 
 		if (VIDEOS[selected_data].coords) {
-			let data_approx_duration = data.t_end - data.t_start
-			let video_coords_index = Math.floor((data_approx_duration * TIME_ANIMATE) / VIDEOS[selected_data].coords.length);
+			let video_coords_index = Math.floor(TIME_ANIMATE * (VIDEOS[selected_data].coords.length - 1));
 			currVidLens.move(VIDEOS[selected_data].coords[video_coords_index].x1, VIDEOS[selected_data].coords[video_coords_index].y1, VIDEOS[selected_data].coords[video_coords_index].x2, VIDEOS[selected_data].coords[video_coords_index].y2);
 		}
 
@@ -462,8 +461,7 @@ function load_controls(){
 			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );
 			let data = DATASETS[selected_data]; 
 			if (VIDEOS[selected_data].coords) {
-				let data_approx_duration = data.t_end - data.t_start
-				let video_coords_index = Math.floor((data_approx_duration * TIME_ANIMATE) / VIDEOS[selected_data].coords.length);
+				let video_coords_index = Math.floor(TIME_ANIMATE * (VIDEOS[selected_data].coords.length - 1));
 				currVidLens.move(VIDEOS[selected_data].coords[video_coords_index].x1, VIDEOS[selected_data].coords[video_coords_index].y1, VIDEOS[selected_data].coords[video_coords_index].x2, VIDEOS[selected_data].coords[video_coords_index].y2);
 			}
 		}
@@ -472,8 +470,7 @@ function load_controls(){
 			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );	
 			let data = DATASETS[selected_data]; 
 			if (VIDEOS[selected_data].coords) {
-				let data_approx_duration = data.t_end - data.t_start
-				let video_coords_index = Math.floor((data_approx_duration * TIME_ANIMATE) / VIDEOS[selected_data].coords.length);
+				let video_coords_index = Math.floor(TIME_ANIMATE * (VIDEOS[selected_data].coords.length - 1));
 				currVidLens.move(VIDEOS[selected_data].coords[video_coords_index].x1, VIDEOS[selected_data].coords[video_coords_index].y1, VIDEOS[selected_data].coords[video_coords_index].x2, VIDEOS[selected_data].coords[video_coords_index].y2);
 			}	
 		}
