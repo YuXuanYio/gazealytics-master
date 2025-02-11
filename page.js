@@ -459,7 +459,6 @@ function load_controls(){
 			
 			TIME_ANIMATE = Math.min( 1.0, TIME_ANIMATE + 0.01/100 );
 			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );
-			let data = DATASETS[selected_data]; 
 			if (VIDEOS[selected_data].coords) {
 				let video_coords_index = Math.floor(TIME_ANIMATE * (VIDEOS[selected_data].coords.length - 1));
 				currVidLens.move(VIDEOS[selected_data].coords[video_coords_index].x1, VIDEOS[selected_data].coords[video_coords_index].y1, VIDEOS[selected_data].coords[video_coords_index].x2, VIDEOS[selected_data].coords[video_coords_index].y2);
@@ -468,7 +467,6 @@ function load_controls(){
 		else {
 			TIME_ANIMATE = Math.min( 1.0, TIME_ANIMATE + 0.01 );
 			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );	
-			let data = DATASETS[selected_data]; 
 			if (VIDEOS[selected_data].coords) {
 				let video_coords_index = Math.floor(TIME_ANIMATE * (VIDEOS[selected_data].coords.length - 1));
 				currVidLens.move(VIDEOS[selected_data].coords[video_coords_index].x1, VIDEOS[selected_data].coords[video_coords_index].y1, VIDEOS[selected_data].coords[video_coords_index].x2, VIDEOS[selected_data].coords[video_coords_index].y2);
