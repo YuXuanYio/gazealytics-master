@@ -42,7 +42,8 @@ let button;
 let videoinput;
 let toi_start_timestamp_button = null;
 let toi_end_timestamp_button = null;
-let useFrameButton = null;
+let videoCoordsButton = null;
+let toggleVideoLensButton = null;
 let setvideotime;
 let videomoderadio;
 let videoloaded = false;
@@ -1092,48 +1093,92 @@ let matrixsketch = (p) => {
 	};
 
 	// MARK: - extractCurrentFrame
-	p.extractCurrentFrame = () => {
-		console.log("extractCurrentFrame started."); 
+	// p.extractCurrentFrame = () => {
+	// 	console.log("extractCurrentFrame started."); 
 	
-		if (selected_data === -1 || !VIDEOS[selected_data] || !VIDEOS[selected_data].videoobj) {
-			console.error("womp womp");
+	// 	if (selected_data === -1 || !VIDEOS[selected_data] || !VIDEOS[selected_data].videoobj) {
+	// 		console.error("womp womp");
+	// 		return;
+	// 	}
+	
+	// 	const videoElement = VIDEOS[selected_data].videoobj.elt || VIDEOS[selected_data].videoobj;
+	
+	// 	if (!(videoElement instanceof HTMLVideoElement)) {
+	// 		console.error("video error");
+	// 		return;
+	// 	}
+	
+	// 	// Get the current playback time
+	// 	const currentTime = videoElement.currentTime || VIDEOS[selected_data].videoobj.time();
+	// 	console.log("current playback time:", currentTime);
+	
+	// 	const videoWidth = videoElement.videoWidth;
+	// 	const videoHeight = videoElement.videoHeight;
+	
+	// 	if (!videoWidth || !videoHeight) {
+	// 		console.error("womp womp womp");
+	// 		return;
+	// 	}
+	
+	// 	// temp canvas to draw the video frame and extract the image data
+	// 	const frameCanvas = document.createElement('canvas');
+	// 	frameCanvas.width = videoWidth;
+	// 	frameCanvas.height = videoHeight;
+	// 	const frameContext = frameCanvas.getContext('2d');
+	
+	// 	frameContext.drawImage(videoElement, 0, 0, videoWidth, videoHeight);
+	
+	// 	const frameDataUrl = frameCanvas.toDataURL();
+	
+	// 	image_url = frameDataUrl;
+	// 	image_changed = true;
+	// 	loaded = false;
+	// };
+
+	p.load_video_coords = (file) => {
+		if (!file) {
+			console.error("No file provided for loading video coordinates.");
 			return;
 		}
 	
-		const videoElement = VIDEOS[selected_data].videoobj.elt || VIDEOS[selected_data].videoobj;
+		const reader = new FileReader();
 	
-		if (!(videoElement instanceof HTMLVideoElement)) {
-			console.error("video error");
-			return;
-		}
+		reader.onload = (event) => {
+			try {
+				const fileContent = event.target.result;
+				const lines = fileContent.split("\n");
+				let coords = [];
 	
-		// Get the current playback time
-		const currentTime = videoElement.currentTime || VIDEOS[selected_data].videoobj.time();
-		console.log("current playback time:", currentTime);
+				lines.forEach((line, index) => {
+					if (index === 0) return;
+					const [timestamp, x1, y1, x2, y2] = line.split("\t");
+					if (timestamp && x1 && y1 && x2 && y2) {
+						coords.push({
+							timestamp: parseInt(timestamp.trim(), 10),
+							x1: parseFloat(x1.trim()),
+							y1: parseFloat(y1.trim()),
+							x2: parseFloat(x2.trim()),
+							y2: parseFloat(y2.trim()),
+						});
+					}
+				});
 	
-		const videoWidth = videoElement.videoWidth;
-		const videoHeight = videoElement.videoHeight;
+				VIDEOS[selected_data].coords = coords;
+				console.log("Video coordinates loaded successfully:", coords);
+				console.log(VIDEOS[selected_data].coords[0])
+				console.log(VIDEOS[selected_data].coords[0].x1)
+				midground_changed = true;
+			} catch (error) {
+				console.error("Error processing video coordinates:", error);
+			}
+		};
 	
-		if (!videoWidth || !videoHeight) {
-			console.error("womp womp womp");
-			return;
-		}
+		reader.onerror = (error) => {
+			console.error("Error reading the file:", error);
+		};
 	
-		// temp canvas to draw the video frame and extract the image data
-		const frameCanvas = document.createElement('canvas');
-		frameCanvas.width = videoWidth;
-		frameCanvas.height = videoHeight;
-		const frameContext = frameCanvas.getContext('2d');
-	
-		frameContext.drawImage(videoElement, 0, 0, videoWidth, videoHeight);
-	
-		const frameDataUrl = frameCanvas.toDataURL();
-	
-		image_url = frameDataUrl;
-		image_changed = true;
-		loaded = false;
+		reader.readAsText(file);
 	};
-	
 	
 
 	// MARK: - load_video
@@ -1169,11 +1214,25 @@ let matrixsketch = (p) => {
 			toi_end_timestamp_button.mousePressed(p.set_twi_end_time);
 			toi_end_timestamp_button.parent("selectfileinput");
 		}
-		if (useFrameButton == null) {
-			useFrameButton = p.createButton('Use Frame As BG');
-			useFrameButton.mousePressed(p.extractCurrentFrame);
-			useFrameButton.parent("selectfileinput");
+		if (videoCoordsButton == null) {
+			videoCoordsButton = p.createButton('Load Video Coords');
+			videoCoordsButton.mousePressed(() => {
+				const fileInput = document.createElement('input');
+				fileInput.type = 'file';
+				fileInput.accept = '.tsv';
+		
+				fileInput.click();
+		
+				fileInput.onchange = (event) => {
+					const file = event.target.files[0];
+					if (file) {
+						p.load_video_coords(file);
+					}
+				};
+			});
+			videoCoordsButton.parent("selectfileinput");
 		}
+		
 	};
 };
 

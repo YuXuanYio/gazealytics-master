@@ -417,37 +417,37 @@ function load_controls(){
 		FORE_SIZE = parseFloat(document.getElementById("fore_size_sl").noUiSlider.get());
 		foreground_changed = true; 
 	}
-	// if( !TIMELINE_SLIDER_DISABLED && TIME_ANIMATE != parseFloat(document.getElementById("time_animate_sl").noUiSlider.get())){
-	// 	TIME_ANIMATE = parseFloat(document.getElementById("time_animate_sl").noUiSlider.get());
-	// 	requestAnimationFrame(() => {
-	// 		updateBookmarkButton(TIME_ANIMATE);
-	// 	});
+  
+	if( !TIMELINE_SLIDER_DISABLED && TIME_ANIMATE != parseFloat(document.getElementById("time_animate_sl").noUiSlider.get())){
+		TIME_ANIMATE = parseFloat(document.getElementById("time_animate_sl").noUiSlider.get());
+		let data = DATASETS[selected_data]; 
+		if (VIDEOS[selected_data].coords) {
+			let video_coords_index = Math.floor(TIME_ANIMATE * (VIDEOS[selected_data].coords.length - 1));
+			currVidLens.move(VIDEOS[selected_data].coords[video_coords_index].x1, VIDEOS[selected_data].coords[video_coords_index].y1, VIDEOS[selected_data].coords[video_coords_index].x2, VIDEOS[selected_data].coords[video_coords_index].y2);
+		}
 
-	const slider = document.getElementById("time_animate_sl").noUiSlider;
-	slider.on('update', (values, handle) => {
-    const time_animate = parseFloat(values[handle]);
-    if (!TIMELINE_SLIDER_DISABLED && TIME_ANIMATE !== time_animate) {
-        TIME_ANIMATE = time_animate;
-        requestAnimationFrame(() => {
-            updateBookmarkButton(TIME_ANIMATE);
-        });
+		//update video with the time
+		if(VIDEO_LINKING && selected_data != -1 && DATASETS[selected_data] != null && DATASETS[selected_data] != undefined && 
+			currentVideoObj != null && currentVideoObj != undefined) {
+				
+			//get time from dataset
+			let data = DATASETS[selected_data]; 
+			let toi = null
+			if (data.tois_id == -1) {
+				toi = data.tois[ data.toi_id ];
+			} else {
+				toi = data.tois[0];
+			}
 
-	//update video with the time
-	if(VIDEO_LINKING && selected_data != -1 && DATASETS[selected_data] != null && DATASETS[selected_data] != undefined && 
-		currentVideoObj != null && currentVideoObj != undefined) {
+			let longest_duration = data.tmax - data.tmin;
+			let ts = 0;
 
-		//get time from dataset
-		let data = DATASETS[selected_data]; toi = data.tois[ data.toi_id ];
-		let longest_duration = data.tmax - data.tmin;
-		let ts = 0;
-
-		if(lenses.length == 0){
-			for(let j = toi.j_min; j < toi.j_max && (data.fixs[j].t - data.tmin)/longest_duration < TIME_ANIMATE; j++){
-				if(data.fixs[j].t - data.tmin < 0){
-					ts = 0;
-				}
-				else {
-					ts = (TimeLine.width*(data.fixs[j].t - data.tmin))/longest_duration;
+			if(lenses.length == 0){
+				for(let j = toi.j_min; j < toi.j_max && (data.fixs[j].t - data.tmin)/longest_duration < TIME_ANIMATE; j++){
+					if(data.fixs[j].t - data.tmin < 0)
+						ts = 0;
+					else
+						ts = (TimeLine.width*(data.fixs[j].t - data.tmin))/longest_duration;					
 				}
 			}
 		}
@@ -461,10 +461,18 @@ function load_controls(){
 			
 			TIME_ANIMATE = Math.min( 1.0, TIME_ANIMATE + 0.01/100 );
 			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );
+			if (VIDEOS[selected_data].coords) {
+				let video_coords_index = Math.floor(TIME_ANIMATE * (VIDEOS[selected_data].coords.length - 1));
+				currVidLens.move(VIDEOS[selected_data].coords[video_coords_index].x1, VIDEOS[selected_data].coords[video_coords_index].y1, VIDEOS[selected_data].coords[video_coords_index].x2, VIDEOS[selected_data].coords[video_coords_index].y2);
+			}
 		}
 		else {
 			TIME_ANIMATE = Math.min( 1.0, TIME_ANIMATE + 0.01 );
-			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );		
+			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );	
+			if (VIDEOS[selected_data].coords) {
+				let video_coords_index = Math.floor(TIME_ANIMATE * (VIDEOS[selected_data].coords.length - 1));
+				currVidLens.move(VIDEOS[selected_data].coords[video_coords_index].x1, VIDEOS[selected_data].coords[video_coords_index].y1, VIDEOS[selected_data].coords[video_coords_index].x2, VIDEOS[selected_data].coords[video_coords_index].y2);
+			}	
 		}
 		background_changed = true; timeline_changed = true;
 	}
