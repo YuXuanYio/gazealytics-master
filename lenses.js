@@ -554,3 +554,98 @@ function calculatePolygonArea(X, Y, numPoints)
 	area = Math.abs(area/2);
 	return area;
 }
+
+
+class VidRectLens {
+    constructor(x1, y1) {
+        this.type = 'vidrect';
+        this.x1 = x1; 
+        this.y1 = y1; 
+        this.x2 = x1; 
+        this.y2 = y1; 
+        this.locked = true; 
+        this.area = 0; 
+        this.color = [255, 255, 255, 128];
+		this.visible = true;
+    }
+
+    computeArea() {
+        const width = Math.abs(this.x2 - this.x1);
+        const height = Math.abs(this.y2 - this.y1);
+        return width * height;
+    }
+
+    updateArea() {
+        this.area = this.computeArea();
+    }
+
+    add(xn, yn) {
+        this.x2 = xn;
+        this.y2 = yn;
+        this.updateArea();
+    }
+
+    inside(xn, yn) {
+        return xn >= this.x1 && xn <= this.x2 && yn >= this.y1 && yn <= this.y2;
+    }
+
+    move(x1, y1, x2, y2) {
+        this.x1 = x1;
+        this.y1 = y1;
+        this.x2 = x2;
+        this.y2 = y2;
+    }
+
+	toggleVisibility() {
+        this.visible = !this.visible;
+    }
+
+    draw(proc, building, selected, spatial_width, spatial_height) {
+		if (!this.visible) return;
+		const ratioX = spatial_width / WIDTH;
+		const ratioY = spatial_height / HEIGHT;
+	
+		const drawX1 = (this.x1 - OFFSET_X) * ratioX;
+		const drawY1 = (this.y1 - OFFSET_Y) * ratioY;
+		const drawX2 = (this.x2 - OFFSET_X) * ratioX;
+		const drawY2 = (this.y2 - OFFSET_Y) * ratioY;
+	
+		const drawWidth = drawX2 - drawX1;
+		const drawHeight = drawY2 - drawY1;
+	
+		proc.fill(...this.color); 
+		proc.stroke(0); 
+		proc.strokeWeight(1);
+	
+		proc.rect(drawX1, drawY1, drawWidth, drawHeight);
+	
+		if (building) {
+			proc.fill(255, 0, 0, 128);
+			proc.ellipse(drawX1, drawY1, 20, 20); 
+		}
+	
+		if (selected && this.x2 * this.y2 !== 0 && !this.locked) {
+			proc.strokeWeight(2);
+			proc.stroke(0, 255, 0); 
+			proc.noFill();
+			proc.rect(drawX1, drawY1, drawWidth, drawHeight);
+	
+			proc.line(drawX1 + Math.min(15, drawWidth / 2), drawY1, 
+					  drawX1 + Math.min(15, drawWidth / 2), drawY2);
+			proc.line(drawX2 - Math.min(15, drawWidth / 2), drawY1, 
+					  drawX2 - Math.min(15, drawWidth / 2), drawY2);
+			proc.line(drawX1, drawY1 + Math.min(15, drawHeight / 2), 
+					  drawX2, drawY1 + Math.min(15, drawHeight / 2));
+			proc.line(drawX1, drawY2 - Math.min(15, drawHeight / 2), 
+					  drawX2, drawY2 - Math.min(15, drawHeight / 2));
+		}
+	
+		proc.fill(0);
+		proc.strokeWeight(0);
+
+		if (this.area === undefined) {
+			this.area = (this.x2 - this.x1) * (this.y2 - this.y1);
+		}
+	}
+	
+}
