@@ -24,7 +24,8 @@ var preFilteredBaseNotes = [];
 var noteTypes = [];
 var selected_note = -1;
 var LINE_CHAR = "\n";
-
+const NOTE_TYPES = ["general", "technical", "alarms", "others"];
+let isObserver = false;
 function new_note(
 	X,
 	Y,
@@ -83,27 +84,160 @@ function new_note(
 	let noteContentContainer = document.createElement("div");
 	noteContentContainer.className = "note_content_container";
 
-	let typeLabel = document.createElement("label");
-	typeLabel.className = "tool note_type";
-	typeLabel.id = "note_" + v + "_note_type";
-	typeLabel.textContent = `Type: ${type}`;
-
-	let timestampLabel = document.createElement("label");
-	timestampLabel.className = "tool note_timestamp";
-	timestampLabel.id = "note_" + v + "_note_timestamp";
-	timestampLabel.textContent = `Timestamp: ${occuredTimestamp}`;
-
-	let observerLabel = document.createElement("label");
-	observerLabel.className = "tool note_observer";
-	observerLabel.id = "note_" + v + "_note_observer";
-	observerLabel.textContent = `Observer: ${observer}`;
-
-	noteContentContainer.append(typeLabel, timestampLabel, observerLabel);
-
 	let textarea = document.createElement("textarea");
 	textarea.className = "tool";
 	textarea.id = "note_" + v + "_content";
 	textarea.value = content;
+
+	let typeLabel;
+	let typeContent = null;
+	let typeDropdown = null;
+	if(type === "N/A") {
+		typeContent = document.createElement("div");
+		typeContent.className = "tool";
+
+		typeLabel = document.createElement("label");
+		typeLabel.className = "tool";
+		typeLabel.id = "note_" + v + "_note_type";
+		typeLabel.textContent = "Note Type: "
+
+		typeDropdown = document.createElement("select");
+		typeDropdown.className = "tool";
+		typeDropdown.id = "note_" + v + "_note_type"; 
+		typeDropdown.textContent = "Select Type";
+		typeDropdown.value = "";
+		typeDropdown.style.marginLeft = "2px";
+
+		const placeholderOption = document.createElement("option");
+		placeholderOption.value = "";
+		placeholderOption.textContent = "Select Type";
+		placeholderOption.selected = true;
+		placeholderOption.disabled = true;
+		typeDropdown.appendChild(placeholderOption);
+
+		NOTE_TYPES.forEach((option) => {
+			let optionElement = document.createElement("option");
+			optionElement.value = option;
+			optionElement.textContent = option;
+			typeDropdown.appendChild(optionElement);
+		})
+
+		typeContent.appendChild(typeLabel);
+		typeContent.appendChild(typeDropdown);
+	} else {
+		typeLabel = document.createElement("label");
+		typeLabel.className = "tool note_type";
+		typeLabel.id = "note_" + v + "_note_type";
+		typeLabel.textContent = `Note Type: ${type}`;
+	}
+
+	let observerLabel;
+	let observerContent = null;
+	let observerTextArea = null;
+	if(observer === "N/A") {
+		observerContent = document.createElement("div");
+		observerContent.className = "tool";
+		observerContent.style.display = "flex";
+
+		observerLabel = document.createElement("label");
+		observerLabel.id = "note_" + v + "_note_observer";
+		observerLabel.className = "tool";
+		observerLabel.textContent = "Note Taker: "
+
+		observerTextArea = document.createElement("input");
+		observerTextArea.id = "note_" + v + "manual_note_observer";		
+		observerTextArea.className = "tool";
+		observerTextArea.style.marginLeft = "2px";
+		observerTextArea.style.width = "90px";
+		observerTextArea.type = "text";
+		observerTextArea.placeholder = "Name"
+		observerTextArea.value = "";
+
+		observerContent.appendChild(observerLabel);
+		observerContent.appendChild(observerTextArea);
+	} else {
+		observerLabel = document.createElement("label");
+		observerLabel.className = "tool note_observer";
+		observerLabel.id = "note_" + v + "_note_observer";
+		observerLabel.textContent = `Note Taker: ${observer}`;
+	}
+
+	let timestampLabel;
+	let timestampContent = null;
+	let timestampTextArea = null;
+	if(occuredTimestamp === "N/A") {
+		timestampContent = document.createElement("div");
+		timestampContent.className = "tool";
+		timestampContent.style.display = "flex";
+
+		timestampLabel = document.createElement("label");
+		timestampLabel.textContent = "Timestamp: ";
+
+		timestampTextArea = document.createElement("input");
+		timestampTextArea.id = "timestampTextArea_" + v + "_content";
+		timestampTextArea.className = "tool";
+		timestampTextArea.style.marginLeft = "2px";
+		timestampTextArea.style.width = "90px"; 
+		timestampTextArea.placeholder = "hh:mm:ss:ms";
+		timestampTextArea.type = "text";
+		timestampTextArea.value = "";
+
+		timestampContent.appendChild(timestampLabel);
+		timestampContent.appendChild(timestampTextArea);
+	} else {
+		timestampLabel = document.createElement("label");
+		timestampLabel.className = "tool note_timestamp";
+		timestampLabel.id = "note_" + v + "_note_timestamp";
+		timestampLabel.textContent = `Timestamp: ${occuredTimestamp}`;
+	}
+
+	if(typeContent) {
+		noteContentContainer.appendChild(typeContent);
+	} else {
+		noteContentContainer.appendChild(typeLabel);
+	}
+
+	if(observerContent) {
+		noteContentContainer.append(observerContent);
+	} else {
+		noteContentContainer.append(observerLabel);
+	}
+
+	if(timestampContent) {
+		noteContentContainer.appendChild(timestampContent);			
+	} else {
+		noteContentContainer.append(timestampLabel);
+	}
+
+	if(typeContent) {
+		typeDropdown.addEventListener("change", function() {
+			newnote.type = typeDropdown.value;
+		});
+	}
+
+	if(observerTextArea) {
+		observerTextArea.addEventListener("input", function() {
+			newnote.observer = observerTextArea.value;
+		});
+	}
+
+	let formattedInput;
+	if(timestampTextArea) {
+		timestampTextArea.addEventListener("input", function() {
+			let inputVal = timestampTextArea.value;
+			let parts = inputVal.split(":").map(Number);
+
+			while(parts.length < 4) {
+				parts.push(0);
+			}
+
+			formattedInput = parts.slice(0, 4).map((num) => String(num).padStart(2, "0")).join(":");
+			newnote.occuredTimestamp = formattedInput;
+			newnote.timestampMs = convertToMilliseconds(formattedInput);
+			newnote.visibleOnTimeline = true;	
+		});
+		DATA_G.notes.events.push(newnote);
+	}
 
 	textarea.addEventListener("input", function () {
 		if (!base_notes[v].locked) {
@@ -114,7 +248,17 @@ function new_note(
 	});
 
 	noteContentContainer.appendChild(textarea);
-	node.appendChild(noteContentContainer);
+	if(timestampTextArea && observerTextArea) {
+		let saveButton = document.createElement("button");
+		saveButton.textContent = "Save";
+		noteContentContainer.appendChild(saveButton);
+		saveButton.addEventListener("click", function() {
+			update_observer_colors();
+			timestampTextArea.value = formattedInput;
+			addBookmarkButton(DATA_G, H2TOP_G, H2_G, CANVAS_G, TOI_BOOKMARK_G);
+		});
+	}
+ 	node.appendChild(noteContentContainer);
 
 	// Click event for selection
 	node.onclick = function (e) {
@@ -167,7 +311,7 @@ function new_note(
 	}
 
 	make_note_dataset_selectors();
-	update_observer_colors();
+	setTimeout(update_observer_colors(), 0);
 
 	if (!isPreloaded) {
 		select_note(v);
@@ -393,7 +537,8 @@ function key_note(key) {
 let loadNotesFromTSV = () => {
 	DATASETS.forEach((d, i) => {
 		const sampleId = d.name;
-		currentSampleNote = importedNotes[sampleId];
+		currentSampleNote = importedNotes[sampleId];		
+		
 		d.notes = {};
 		if (d.initialised && d.should_save && d.included && currentSampleNote) {
 			d.notes.startTime = currentSampleNote.startTime;
@@ -416,8 +561,8 @@ let loadNotesFromTSV = () => {
 		}
 	});
 	loadNotesIntoDatasets();
-
 	draw_time_all(TimeLine);
+	update_observer_colors();
 };
 
 function addSamplesToNotesFilter() {

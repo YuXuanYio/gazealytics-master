@@ -5,6 +5,7 @@
   width: inherit;
   font-family: Arial, sans-serif;
   font-size: 14px;
+  margin-bottom: 2px;
 }
 .tool2 {
   position: relative;
@@ -109,6 +110,22 @@ button {
 	display: none;
 	height: 78%;
 	overflow-y: hidden;
+	font-family: Arial, sans-serif;
+	font-size: 14px;
+}
+.timestamp-container{
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	margin-top: 5px;
+}
+.timestamp-container input{
+	flex-grow: 1;
+	padding: 2px 5px;
+	position: relative;
+	display: inline-block;
+	width: max-content;
+	margin-bottom: 5px;
 	font-family: Arial, sans-serif;
 	font-size: 14px;
 }

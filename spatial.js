@@ -53,7 +53,7 @@ let spatialsketch = (p) => {
 				find_note(p, X, Y);
 				if(selected_note == -1){
 					view_panel(4);
-					new_note(X+OFFSET_X, Y+OFFSET_Y, "", "", "General" , "N.A.", "N.A.", "N.A.", "N.A.", true, false);
+					new_note(X+OFFSET_X, Y+OFFSET_Y, "", "", "N/A" , "N/A", "N/A", "N/A", "N/A", true, true);
 				}				
 			}else{
 				find_lens(X, Y);
@@ -794,7 +794,6 @@ let draw_saccade_by_twi = (canvas, sacs, data, group, toi, longest_duration, new
 					}						
 					else if(seq%5 == 0 || seq+1 == toi.j_max)
 						canvas.text( num_format(seq, 2), data.fixs[j].x * pos_ratio + ground_x-7, data.fixs[j].y * pos_ratio + ground_y+7);
-					console.log("text size: "+textsize+", data.fixs_size: "+FIX_SIZE);
 					canvas.textSize(f.fontSize);
 					canvas.strokeWeight(1);				
 				}				

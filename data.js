@@ -225,7 +225,6 @@ function new_file(){
 
 		if( newdata.initialised ){ // new load is valid, accept it
 			var id = DATASETS.length; DATASETS.push(newdata); VIDEOS.push({}); cid = DATASETS.length;
-			
 			q = databox.replace(/#/g, id);
 			var node = document.createElement("li");
 			node.innerHTML = q; node.id = id;
@@ -1546,12 +1545,14 @@ let importNotes = () => {
 let processNotesTSV = (notesContent) => {
     const lines = notesContent.trim().split('\n');
 
-    const COLUMN_SESSION_START = 0;
-    const COLUMN_TIMESTAMP = 1;
-    const COLUMN_OBSERVER = 2;
-    const COLUMN_PARTICIPANT_ID = 3;
-    const COLUMN_EVENT_DETAILS = 4;
-    const COLUMN_TYPE = 5;
+    const COLUMN_SESSION_START_DATE = 0;
+    const COLUMN_SESSION_START_TIME = 1;
+    const COLUMN_OCCURED_DATE = 6;
+    const COLUMN_OCCURED_TIMES = 7;
+    const COLUMN_OBSERVER = 4;
+    const COLUMN_PARTICIPANT_ID = 11;
+    const COLUMN_EVENT_DETAILS = 9;
+    const COLUMN_TYPE = 10;
 
     const dataByParticipant = {};
     const hasHeaders = /^[a-zA-Z]/.test(lines[0].split('\t')[0]);
@@ -1565,8 +1566,11 @@ let processNotesTSV = (notesContent) => {
             dataByParticipant[participantID] = { events: [] };
         }
 
+        const OCCURED_TIMESTAMP = values[COLUMN_OCCURED_DATE] + ' ' + values[COLUMN_OCCURED_TIMES];
+        const SESSION_START_DATE_TIME = values[COLUMN_SESSION_START_DATE] + ' ' + values[COLUMN_SESSION_START_TIME];
+
         if (!dataByParticipant[participantID].startTime) {
-            dataByParticipant[participantID].startTime = values[COLUMN_SESSION_START];
+            dataByParticipant[participantID].startTime = SESSION_START_DATE_TIME;
         }
 
         const eventType = values[COLUMN_TYPE].trim().toLowerCase();
@@ -1577,15 +1581,15 @@ let processNotesTSV = (notesContent) => {
         dataByParticipant[participantID].events.push({
             eventDetails: values[COLUMN_EVENT_DETAILS],
             type: eventType,
-            timestamp: values[COLUMN_TIMESTAMP],
-            timestamp_ms: calculateTimeDifferenceInMs(values[COLUMN_SESSION_START], values[COLUMN_TIMESTAMP]),
-            occured_timestamp: calculateTimeDifference(values[COLUMN_SESSION_START], values[COLUMN_TIMESTAMP]),
+            timestamp: OCCURED_TIMESTAMP,
+            timestamp_ms: calculateTimeDifferenceInMs(SESSION_START_DATE_TIME, OCCURED_TIMESTAMP),
+            occured_timestamp: calculateTimeDifference(SESSION_START_DATE_TIME, OCCURED_TIMESTAMP),
             observer: values[COLUMN_OBSERVER],
         });
     });
 
     importedNotes = dataByParticipant;
 
-	updateNoteTypeDropdown();
+    updateNoteTypeDropdown();
     loadNotesFromTSV();
 }

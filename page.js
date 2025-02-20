@@ -417,6 +417,7 @@ function load_controls(){
 		FORE_SIZE = parseFloat(document.getElementById("fore_size_sl").noUiSlider.get());
 		foreground_changed = true; 
 	}
+  
 	if( !TIMELINE_SLIDER_DISABLED && TIME_ANIMATE != parseFloat(document.getElementById("time_animate_sl").noUiSlider.get())){
 		TIME_ANIMATE = parseFloat(document.getElementById("time_animate_sl").noUiSlider.get());
 		let data = DATASETS[selected_data]; 
@@ -449,10 +450,11 @@ function load_controls(){
 						ts = (TimeLine.width*(data.fixs[j].t - data.tmin))/longest_duration;					
 				}
 			}
-			//set video time
-			VIDEOS[selected_data].videoobj.time((ts*VIDEOS[selected_data].videoobj.duration())/TimeLine.width);
 		}
-		background_changed = true; timeline_changed = true;
+		//set video time
+		VIDEOS[selected_data].videoobj.time((ts*VIDEOS[selected_data].videoobj.duration())/TimeLine.width);
+	}
+	background_changed = true; timeline_changed = true;
 	}else if( TIME_PLAY && TIME_ANIMATE < 1.0 ){
 		if(VIDEO_LINKING && selected_data != -1 && VIDEOS[selected_data] != null && VIDEOS[selected_data] != undefined && 
 			currentVideoObj != null && currentVideoObj != undefined) {
@@ -474,6 +476,7 @@ function load_controls(){
 		}
 		background_changed = true; timeline_changed = true;
 	}
+});
 	if( SACC_BRIGHT != parseFloat(document.getElementById("sacc_bright_sl").noUiSlider.get())){
 		SACC_BRIGHT = parseFloat(document.getElementById("sacc_bright_sl").noUiSlider.get());
 		midground_changed = SHOW_SACCADE;
@@ -1705,7 +1708,45 @@ function export_spatial_canvas(){
 
 	if(EXPORT_METRIC_CANVAS)
 		MATRIX.save(matrixCanvas1, "metrics.jpg");
+	// exportCombinedCanvas();
 }
+
+function exportCombinedCanvas() {
+	console.log(typeof html2canvas);
+
+    const parentElement = document.getElementById("pj2");
+
+	console.log(parentElement);
+    if (!parentElement) {
+        console.error("Element not found: #defaultCanvas1");
+        return;
+    }
+
+	const rect = parentElement.getBoundingClientRect();
+	console.log("Element dimensions:", rect);
+	if (rect.width === 0 || rect.height === 0) {
+		console.error("Element is not visible or has zero dimensions.");
+		return;
+	}
+
+
+	html2canvas(parentElement.childNodes[0].children, { logging: true })
+    .then((canvas) => {
+        console.log("@@@@@@@@@@@@@@@@@@@@@@@");
+        const link = document.createElement("a");
+        link.download = "timeline_with_bookmarks.jpg";
+        link.href = canvas.toDataURL("image/jpeg");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    })
+    .catch((error) => {
+        console.error("Error during html2canvas execution:", error);
+    });
+
+}
+
+
 
 function export_metrics(){
 	var sacc_string = 'data:text/tsv;charset=utf-8,'+ saccades_values_string();

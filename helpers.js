@@ -37,3 +37,13 @@ function calculateTimeDifferenceInMs(dateStr1, dateStr2) {
 
     return Math.abs(date2 - date1);
 }
+
+function convertToMilliseconds(timestamp) {
+	let parts = timestamp.split(":").map(Number);
+	while (parts.length < 4) {
+		parts.push(0);
+	}
+
+    let [hours, minutes, seconds, milliseconds] = parts;
+    return (hours * 3600000) + (minutes * 60000) + (seconds * 1000) + milliseconds;
+}
