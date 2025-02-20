@@ -450,9 +450,9 @@ function load_controls(){
 						ts = (TimeLine.width*(data.fixs[j].t - data.tmin))/longest_duration;					
 				}
 			}
+					//set video time
+			VIDEOS[selected_data].videoobj.time((ts*VIDEOS[selected_data].videoobj.duration())/TimeLine.width);
 		}
-		//set video time
-		VIDEOS[selected_data].videoobj.time((ts*VIDEOS[selected_data].videoobj.duration())/TimeLine.width);
 		background_changed = true; timeline_changed = true;
 	} else if( TIME_PLAY && TIME_ANIMATE < 1.0 ) {
 		if(VIDEO_LINKING && selected_data != -1 && VIDEOS[selected_data] != null && VIDEOS[selected_data] != undefined && 
