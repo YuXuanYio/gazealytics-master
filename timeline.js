@@ -1609,13 +1609,11 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 	TOI_BOOKMARK_G = toi_bookmark;
 	
     removeBookmarkButton(data, toi_bookmark);
-
     const grouped_events = {};
     const grouped_within_tolerance = {};
 
     for (let i = 0; i < participantData.events.length; i++) {
         let event = participantData.events[i];
-        let ts = (canvas.width * (event.timestampMs - start_time)) / max_duration;
         if (event.visibleOnTimeline === false || event.included === false) {
             continue;
         }

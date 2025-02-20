@@ -255,7 +255,6 @@ function new_note(
 		saveButton.addEventListener("click", function() {
 			update_observer_colors();
 			timestampTextArea.value = formattedInput;
-			console.log('form:' + formattedInput);			
 			addBookmarkButton(DATA_G, H2TOP_G, H2_G, CANVAS_G, TOI_BOOKMARK_G);
 		});
 	}
@@ -538,7 +537,8 @@ function key_note(key) {
 let loadNotesFromTSV = () => {
 	DATASETS.forEach((d, i) => {
 		const sampleId = d.name;
-		currentSampleNote = importedNotes[sampleId];
+		currentSampleNote = importedNotes[sampleId];		
+		
 		d.notes = {};
 		if (d.initialised && d.should_save && d.included && currentSampleNote) {
 			d.notes.startTime = currentSampleNote.startTime;

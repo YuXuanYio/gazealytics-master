@@ -114,11 +114,6 @@ function update_observer_colors() {
 			if(manualObserverElement && manualObserverElement != "") {
 				observers[manualObserverElement.value] = OBSERVERS[observerColourIndex];
 			}
-			
-            // if (!observers[observerName]) {
-            //     console.error(`Color not found for observer '${observerName}'.`);
-            //     continue;
-            // }
 
             let dragger = child.querySelector(".data_dragger");
 
@@ -128,15 +123,11 @@ function update_observer_colors() {
 					dragger.style.backgroundColor = observers[observerName];
 					dragger.style.border = `8.5px solid ${observers[observerName]}`;
 					dragger.style.display = "block";
-					console.log('obserrName');
 				} else if (manualObserverElement) {
 					dragger.style.height = "78px";
 					dragger.style.backgroundColor = observers[manualObserverElement.value];
 					dragger.style.border = `8.5px solid ${observers[manualObserverElement.value]}`;
-					dragger.style.display = "block";
-					console.log('hello');
-					console.log('obss: ' + JSON.stringify(observers));
-					
+					dragger.style.display = "block";					
 				}
             } else {
                 console.warn(`data_dragger not found for note_${val}`);
@@ -153,13 +144,8 @@ function updateTypeColors() {
 
 		if (childId && childId.startsWith("note_")) {
 			let val = parseInt(childId.split("_")[1]);
-			let textContent = document.getElementById("note_" + val + "_note_type").textContent;
-
-			console.log('textContent: '+ textContent);
-			
+			let textContent = document.getElementById("note_" + val + "_note_type").textContent;			
 			let typeName = textContent.split('Note Type:')[1].trim();
-
-			console.log('types: ' + JSON.stringify(event_colour_map));
 			
 			if (!event_colour_map[typeName]) {
 				console.error(`Color not found for type '${typeName}'.`);
