@@ -453,9 +453,8 @@ function load_controls(){
 		}
 		//set video time
 		VIDEOS[selected_data].videoobj.time((ts*VIDEOS[selected_data].videoobj.duration())/TimeLine.width);
-	}
-	background_changed = true; timeline_changed = true;
-	}else if( TIME_PLAY && TIME_ANIMATE < 1.0 ){
+		background_changed = true; timeline_changed = true;
+	} else if( TIME_PLAY && TIME_ANIMATE < 1.0 ) {
 		if(VIDEO_LINKING && selected_data != -1 && VIDEOS[selected_data] != null && VIDEOS[selected_data] != undefined && 
 			currentVideoObj != null && currentVideoObj != undefined) {
 			
@@ -476,7 +475,6 @@ function load_controls(){
 		}
 		background_changed = true; timeline_changed = true;
 	}
-});
 	if( SACC_BRIGHT != parseFloat(document.getElementById("sacc_bright_sl").noUiSlider.get())){
 		SACC_BRIGHT = parseFloat(document.getElementById("sacc_bright_sl").noUiSlider.get());
 		midground_changed = SHOW_SACCADE;
