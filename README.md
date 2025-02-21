@@ -43,7 +43,7 @@ Cai, M., Zheng, B., & Demmans Epp, C. (2022, July). Towards Supporting Adaptive 
 
 ## Tutorial
 
-### Getting started with Gazealytics
+### Getting Started With Gazealytics
 There are some videos for getting started with Gazealytics (whose previous release was named as webVETA).
 
   * The [features video](https://www.youtube.com/watch?v=TihdrjG0B8g&feature=youtu.be) of Gazealytics
