@@ -621,7 +621,8 @@
 					</div>
 					<div class="tool"><button  onclick="export_matrix()"> <i class="far fa-save"></i> </button><span class="tip">Save the metric values</span></div>
 					<div class="tool"><button  onclick="export_spatial_canvas()"> <i class="far fa-save"></i> </button><span class="tip">Export the current canvas</span></div>
-					
+					<div class="tool"><button href="help.html" target="popup" onclick="window.open('help.html#export','name','width=600,height=400')"><i class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
+
 					<div id="grid_num" class="matsel tool">
 						<input type="number" class="num2" id='GRID_N' style='width:40px'value=6 step=1 min=2 max=50 onchange="GRID_N=Math.min(50, Math.max(1, this.value));matrix_changed=true;">
 						<span class="tip">Controls the number of grid cells (N by N) used in grid-based relative density metrics</span>
