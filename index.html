@@ -47,7 +47,6 @@
 		<div class="tool" style='display: inline'><button href="help.html" target="popup" onclick="window.open('help.html#overview','name','width=600,height=400')"><i class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 		<button type="button" class="tabbut2" id="tab2" onclick='collapse(2)'> Saccades </button>
 		<button type="button" class="tabbut2" id="tab3" onclick='collapse(3)'> Timeline </button>
-		<button type="button" class="tabbut2" id="tab4" onclick='collapse(4)'> Video Controls </button>
 		<hr >
 		<!-- MARK: Overview
 		-->
@@ -265,29 +264,8 @@
 				<button type="button" id="time_play" class="toggler" onclick="click_time_play();">Play</button>
 				<span class="tip">Allows for filtering and animating spatial and timeline canvases over time. Does not effect metrics or other viz features</span>
 			</div>
-			<!-- TODO: Potentially move this into Video Controls below -->
 			<div class="tool2" id="video_controls" style="display: inline">
 				<button type="button" id="control_video" class="toggler" onclick="toggle_videocursors()">Linking Video</button><span class="tip">Toggles video linking visualization</span>
-			</div>
-		</div>
-		<!-- MARK: Video Controls
-		-->
-		<div class="collapsing" id='part4'>
-			<div class="tool">
-			Video Controls:
-			</div>	
-			<div class="tool" style="display:inline"><button href="help.html" target="popup" onclick="window.open('help.html#video_controls','name','width=600,height=400')"><i class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
-			<br><br>
-			<div class="tool" id="dataset_selection" style="display:none">Data Selected:
-				<select id="datasets_selection"></select>
-			</div>
-			<br>
-			<div class="tool" id="videotwi_selection" style="display:none">TWI Selected:
-				<select id="videotwis_selection"></select>
-			</div>
-			<br>
-			<div class="tool2" id="extract_video_button" style="display:none">
-				<button type="button" id="extract_video" class="toggler" onclick="download_video()">Extract Video</button><span class="tip">Export/Download video associated with selected dataset and TWI selected</span>
 			</div>
 		</div>
 		<br >
