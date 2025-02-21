@@ -42,12 +42,22 @@ Cai, M., Zheng, B., & Demmans Epp, C. (2022, July). Towards Supporting Adaptive 
   * Python 3.5 or above (web server scripting)
 
 ## Tutorial
+
+### Getting started with Gazealytics
 There are some videos for getting started with Gazealytics (whose previous release was named as webVETA).
 
   * The [features video](https://www.youtube.com/watch?v=TihdrjG0B8g&feature=youtu.be) of Gazealytics
   * The [setup video](https://www.youtube.com/watch?v=-vfOij3I3tc) which describes how to set up AOIs, TWIs, workspace etc
   * Example use case: [Group-level analysis using AOIs, fixations and Matrix tools](https://www.youtube.com/watch?v=00l1PMzEEx8)
   * Example use case: [Group-level analysis using scan paths](https://www.youtube.com/watch?v=LcieFoK3kh8)
+
+### Time-Based Notes
+If you're working with **time-based notes**, follow these steps to ensure they are correctly uploaded in Gazealytics:  
+
+1️⃣ Go to the **Samples** tab and upload [Participant Data - P2.tsv](https://drive.google.com/drive/u/0/folders/1y0CVFFjW5MneZeart9FZ22gTXqVKLvsk)  
+2️⃣ Next, navigate to the **Notes** tab and upload [Notes.tsv](https://drive.google.com/drive/u/0/folders/1y0CVFFjW5MneZeart9FZ22gTXqVKLvsk)  
+
+Once uploaded, Gazealytics will integrate the notes with gaze data in the notes as well as the timeline, making it easier to analyze participant behavior over time.
 
 More details can be found in Gazealytics paper: https://arxiv.org/pdf/2303.17202.pdf
 
@@ -60,6 +70,7 @@ the [Needleman-Wunsch algorithm](https://www.sciencedirect.com/science/article/p
   * Interactively achieving more suitable AOI definitions by improving AOI uncertainty metric, e.g., [hit-any-AOI-rate](https://dl.acm.org/doi/pdf/10.1145/3517031.3531166); 
   * [Saccade bundling](https://ieeexplore.ieee.org/abstract/document/6065028); usage: reduce visual clutter and better reveal scan path patterns  
   * [Matrix reordering](https://inria.hal.science/hal-01326759/document); usage: reveal visual patterns of fixations, saccades, scanpath based on similarity of individual or their group-level metrics. 
+  * Time-based Notes; usage: annotations linked to specific points in time are added as notes and bookmarks in the timeline.
 
 ## Visual analysis examples
 The examples below are meant to showcase Gazealytics's capabilities as a unified and flexible visual eye tracking analytics toolkit. It is ready to be integrated into users' existing data analysis workflow.
@@ -157,6 +168,7 @@ time window of interest (TWI)-AOIs
  * Load previously saved Gazealytics project files by clicking on "Load Project" - [Torus-wrapping graphs](https://arxiv.org/abs/2303.17066): [saved zip file-1](https://osf.io/kwve2), [saved zip file-2](https://osf.io/sc6by) 
  * Start from importing raw gaze sequence by clicking on "Load .tsv" and "Load background": [.tsv files and reference images](https://osf.io/au3bj/files/osfstorage)
  * Other saved project files and raw data: [Torus-wrapping graphs](https://osf.io/au3bj/)
+ * Time-based notes sample dataset: [.tsv files for notes](https://drive.google.com/drive/u/0/folders/1y0CVFFjW5MneZeart9FZ22gTXqVKLvsk)
 
 ## Development
 To run Gazealytics from its source code simply run the following:
