@@ -165,7 +165,7 @@ function new_note(
 	let timestampLabel;
 	let timestampContent = null;
 	let timestampTextArea = null;
-	if(occuredTimestamp === "N/A") {
+	if(occuredTimestamp === "00:00:00:00") {
 		timestampContent = document.createElement("div");
 		timestampContent.className = "tool";
 		timestampContent.style.display = "flex";
@@ -180,7 +180,15 @@ function new_note(
 		timestampTextArea.style.width = "90px"; 
 		timestampTextArea.placeholder = "hh:mm:ss:ms";
 		timestampTextArea.type = "text";
-		timestampTextArea.value = "";
+		timestampTextArea.value = "00:00:00:00";
+
+		let parts = timestampTextArea.value.split(":").map(Number);
+		while(parts.length < 4) {
+			parts.push(0);
+		}
+		let formattedInput = parts.slice(0, 4).map((num) => String(num).padStart(2, "0")).join(":");
+		newnote.occuredTimestamp = formattedInput;
+		newnote.timestampMs = convertToMilliseconds(formattedInput);
 
 		timestampContent.appendChild(timestampLabel);
 		timestampContent.appendChild(timestampTextArea);
