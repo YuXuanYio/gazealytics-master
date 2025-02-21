@@ -475,6 +475,7 @@ function load_controls(){
 		}
 		background_changed = true; timeline_changed = true;
 	}
+	updateBookmarkButton(TIME_ANIMATE);
 	if( SACC_BRIGHT != parseFloat(document.getElementById("sacc_bright_sl").noUiSlider.get())){
 		SACC_BRIGHT = parseFloat(document.getElementById("sacc_bright_sl").noUiSlider.get());
 		midground_changed = SHOW_SACCADE;
