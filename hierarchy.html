@@ -44,14 +44,43 @@
             }
             .toggle-icon.expanded::before { content: '↳'; } 
             .toggle-icon.collapsed::before { content: '→'; } 
+
+            .filter-group {
+                display: flex;
+                align-items: center;
+                gap: 3px;
+                margin-right: 5px; 
+            }
+            .filter-group select {
+                padding: 5px 8px;
+                border-radius: 4px;
+                border: 1px solid #ccc;
+                background-color: white;
+                font-size: 14px;
+                cursor: pointer;
+            }
         </style>
     </head>
     <body>
         <div style="text-align: center;"><h3>AOI Hierarchy</h3></div>
-        <div style="display: flex; gap: 5px; margin-bottom: 15px;" id="filterButtons">Filter By:
-            <button type="button" id="filter_screen_id">Screen</button>
-            <button type="button" id="filter_app_id">Application</button>
-            <button type="button" id="filter_interface_id">Interface</button>
+        <div style="display: flex; gap: 3px; margin-bottom: 15px;" id="filterButtons">Filter By:
+            <div class="filter-group">
+                <select id="screenFilter">
+                    <option value="all">All Screens</option>
+                    </select>
+            </div>
+
+            <div class="filter-group">
+                <select id="appFilter">
+                    <option value="all">All Applications</option>
+                    </select>
+            </div>
+
+            <div class="filter-group">
+                <select id="interfaceFilter">
+                    <option value="all">All Interfaces</option>
+                    </select>
+            </div>
         </div>
 
         <div id="hierarchyDisplay">
@@ -59,19 +88,15 @@
         </div>
 
         <script>
-            window.onload = function() {
-                const mainWindow = window.opener;
-                const lenses = mainWindow.lenses || []; 
+            let allLensesData = []; 
+
+            function renderHierarchy(lensesToRender) {
                 const hierarchyDisplay = document.getElementById('hierarchyDisplay');
                 hierarchyDisplay.innerHTML = ''; 
 
-                if (lenses.length === 0) {
-                    hierarchyDisplay.innerHTML = "<p>No AOIs have been created yet or saved with full hierarchy details.</p>";
-                    return;
-                }
-
                 const hierarchy = {}; // screenId -> appId -> interfaceId -> [lens_objects]
-                lenses.forEach(lens => {
+
+                lensesToRender.forEach(lens => {
                     const screenId = lens.screen_id;
                     const appId = lens.app_id;
                     const interfaceId = lens.interface_id;
@@ -95,18 +120,17 @@
 
                 // if no lenses meet the hierarchy criteria after filtering
                 if (Object.keys(hierarchy).length === 0) {
-                    hierarchyDisplay.innerHTML = "<p>No AOIs found with complete Screen, Application, and Interface IDs.</p>";
+                    hierarchyDisplay.innerHTML = "<p>No AOIs found with complete Screen, Application, and Interface IDs matching filters.</p>";
                     return;
                 }
-
 
                 // HTML tree structure
                 let treeHtml = '<ul class="tree-list">';
 
                 for (const screenId in hierarchy) {
                     const screenNodeId = `screen-${screenId}`;
-                    treeHtml += `<li id="${screenNodeId}" class="level-screen expanded">`; 
-                    treeHtml += `<span class="fas fa-caret-down"></span>Screen ID: ${screenId}`;
+                    treeHtml += `<li id="${screenNodeId}" class="level-screen expanded">`;
+                    treeHtml += `<span class="toggle-icon expanded"></span>Screen ID: ${screenId}`;
                     treeHtml += '<ul>'; // application level
                     for (const appId in hierarchy[screenId]) {
                         const appNodeId = `app-${screenId}-${appId}`;
@@ -140,22 +164,112 @@
                     node.addEventListener('click', function(event) {
                         // toggle if the click is directly on the list item itself (not children)
                         if (event.target === this || event.target.classList.contains('toggle-icon')) {
-                            this.classList.toggle('collapsed');
-                            this.classList.toggle('expanded');
+                            const isCurrentlyExpanded = this.classList.contains('expanded');
+
+                            this.classList.toggle('collapsed', isCurrentlyExpanded);
+                            this.classList.toggle('expanded', !isCurrentlyExpanded);
+
                             const icon = this.querySelector('.toggle-icon');
                             if (icon) {
-                                icon.classList.toggle('collapsed');
-                                icon.classList.toggle('expanded');
+                                icon.classList.toggle('expanded', !isCurrentlyExpanded);
+                                icon.classList.toggle('collapsed', isCurrentlyExpanded);
                             }
-                            event.stopPropagation(); 
+                            event.stopPropagation();
                         }
                     });
                 });
+            }
 
-                // filtering logic for the buttons
-                document.getElementById('filter_screen_id').onclick = () => {};
-                document.getElementById('filter_app_id').onclick = () => {};
-                document.getElementById('filter_interface_id').onclick = () => {};
+            // populate filter dropdowns with unique values
+            function populateFilterDropdowns(lensesData) {
+                const screenFilter = document.getElementById('screenFilter');
+                const appFilter = document.getElementById('appFilter');
+                const interfaceFilter = document.getElementById('interfaceFilter');
+
+                // clear previous options
+                screenFilter.innerHTML = '<option value="all">All Screens</option>';
+                appFilter.innerHTML = '<option value="all">All Applications</option>';
+                interfaceFilter.innerHTML = '<option value="all">All Interfaces</option>';
+
+                // unique IDs
+                const uniqueScreenIds = new Set();
+                const uniqueAppIds = new Set();
+                const uniqueInterfaceIds = new Set();
+
+                lensesData.forEach(lens => {
+                    if (lens.screen_id) uniqueScreenIds.add(lens.screen_id);
+                    if (lens.app_id) uniqueAppIds.add(lens.app_id);
+                    if (lens.interface_id) uniqueInterfaceIds.add(lens.interface_id);
+                });
+
+                Array.from(uniqueScreenIds).sort((a, b) => { return String(a).localeCompare(String(b), undefined, {numeric: true}); }).forEach(id => {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = id;
+                    screenFilter.appendChild(option);
+                });
+
+                Array.from(uniqueAppIds).sort((a, b) => { return String(a).localeCompare(String(b), undefined, {numeric: true}); }).forEach(id => {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = id;
+                    appFilter.appendChild(option);
+                });
+
+                Array.from(uniqueInterfaceIds).sort((a, b) => { return String(a).localeCompare(String(b), undefined, {numeric: true}); }).forEach(id => {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = id;
+                    interfaceFilter.appendChild(option);
+                });
+            }
+
+            // apply filters and re-render the hierarchy
+            function applyFilters() {
+                const selectedScreen = document.getElementById('screenFilter').value;
+                const selectedApp = document.getElementById('appFilter').value;
+                const selectedInterface = document.getElementById('interfaceFilter').value;
+
+                let filteredLenses = allLensesData.filter(lens => {
+                    // three hierarchy levels must be defined for a lens to be considered for filtering and display
+                    const hasAllHierarchyData = lens.screen_id !== undefined && lens.screen_id !== null &&
+                                                lens.app_id !== undefined && lens.app_id !== null &&
+                                                lens.interface_id !== undefined && lens.interface_id !== null;
+
+                    // lens is excluded from filtering if missing
+                    if (!hasAllHierarchyData) {
+                        return false;
+                    }
+
+                    // convert lens IDs to string for comparison
+                    const matchesScreen = (selectedScreen === 'all' || String(lens.screen_id) === selectedScreen);
+                    const matchesApp = (selectedApp === 'all' || String(lens.app_id) === selectedApp);
+                    const matchesInterface = (selectedInterface === 'all' || String(lens.interface_id) === selectedInterface);
+                    
+                    return matchesScreen && matchesApp && matchesInterface;
+                });
+
+                renderHierarchy(filteredLenses);
+            }
+
+            window.onload = function() {
+                const mainWindow = window.opener;
+                allLensesData = mainWindow.lenses || [];
+                const hierarchyDisplay = document.getElementById('hierarchyDisplay');
+                hierarchyDisplay.innerHTML = '';
+
+                if (allLensesData.length === 0) {
+                    hierarchyDisplay.innerHTML = "<p>No AOIs have been created yet or saved with full hierarchy details.</p>";
+                    return;
+                }
+
+                populateFilterDropdowns(allLensesData);
+                renderHierarchy(allLensesData);
+
+                // event listeners for filter changes
+                document.getElementById('screenFilter').addEventListener('change', applyFilters);
+                document.getElementById('appFilter').addEventListener('change', applyFilters);
+                document.getElementById('interfaceFilter').addEventListener('change', applyFilters);
             };
         </script>
     </body>
