@@ -310,6 +310,13 @@
 					<div class="tool"><button href="help.html" target="popup" onclick="window.open('help.html#aois','name','width=600,height=400')"><i class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 					<br>
 					<div class="tool"><button type="button" class="toggler toggle-on" id="show_lenslabel" onclick="click_showlabel();">Labels</button><span class="tip">Toggles visibility of labels within the AOIs on spatial canvas</span></div>
+					<br>
+					<div class="tool">
+						<label for="timeInput">Time (H:MM:SS.ms):</label>
+						<input type="text" id="timeInput" placeholder="0:00:00.00" onchange="handleAOITimeChange(this.value, isString=true)" value="0:00:00.00" style="width:100px;">
+						<span class="tip">Enter time in H:MM:SS.ms format</span>
+					</div>
+					<br>
 				</center>
 				
 				<ul id='lenslist' class="data_list"></ul>

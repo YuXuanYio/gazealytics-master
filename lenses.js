@@ -117,13 +117,52 @@ class PolyLens{
 				g += '<tr><th><input class="num" type="number" onchange="base_lenses['+this.id+'].x['+i+']=parseFloat(this.value);lenses_update()" style="width:80px" value='+this.x[i]+'></th>';
 				g += '<th><input class="num" type="number" onchange="base_lenses['+this.id+'].y['+i+']=parseFloat(this.value);lenses_update()" style="width:80px" value='+this.y[i]+'></th></tr>';
 			}
+			g += '<tr><th> Start Time: </th><th> End Time: </th></tr>';
+			g += `<tbody id="time_row_${this.id}">`;
+
+			this.timeRanges.forEach((range, i) => {
+				g += `<tr>
+					<th>
+						<input class="num" type="text"
+							onchange="base_lenses[${this.id}].edit_start_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+							style="width:80px"
+							value="${formatMilliseconds(range.start)}">
+					</th>
+					<th>
+						<input class="num" type="text"
+							onchange="base_lenses[${this.id}].edit_end_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+							style="width:80px"
+							value="${formatMilliseconds(range.end)}">`;
+
+				if (i === this.timeRanges.length - 1) {
+					g += `<button type="button" onclick="event.stopPropagation(); addExtraTimeRow(${this.id})" style="margin-left:5px;">+</button>`;
+				}
+
+				g += `</th></tr>`;
+			});
+
+			g += `</tbody>`;
+
 			g = "<table>"+g+"</table>";
 			return g;
 		}
-		constructor(lid, x1, y1, groupid){
+
+		edit_start_time(start, index = 0) {
+			this.timeRanges[index].start = start;
+			handleAOITimeChange(start, isString=false);
+		}
+
+		edit_end_time(end, index = 0) {
+			this.timeRanges[index].end = end;
+			handleAOITimeChange(end, isString=false);
+		}
+	
+		constructor(lid, x1, y1, groupid, sampleId, startTime, endTime){
 			this.type = 'poly'; this.id = lid; this.name = lid+''; this.locked = false;
 			this.x = [x1]; this.y = [y1]; this.centx = x1; this.centy = y1; this.group = groupid;
 			this.area = 0;
+			this.timeRanges = [{ start: startTime, end: endTime }];
+			this.sampleId = sampleId;
 		}
 }
 class EllipseLens{
@@ -261,15 +300,52 @@ class EllipseLens{
 			else if(this.area == undefined)
 				this.area = this.getArea();
 		}
-		make_controls(){
-			var g = '<tr><th><input class="num" type="number" onchange="base_lenses['+this.id+'].x1=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.x1+'></th>';
+		make_controls() {
+			let g = '<tr><th><input class="num" type="number" onchange="base_lenses['+this.id+'].x1=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.x1+'></th>';
 			g += '<th><input class="num" type="number" onchange="base_lenses['+this.id+'].y1=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.y1+'></th></tr>';
 			g += '<tr><th><input class="num" type="number" onchange="base_lenses['+this.id+'].x2=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.x2+'></th>';
 			g += '<th><input class="num" type="number" onchange="base_lenses['+this.id+'].y2=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.y2+'></th></tr>';
-			g = "<table>"+g+"</table>";
-			return g;
+			
+			g += '<tr><th> Start Time: </th><th> End Time: </th></tr>';
+			g += `<tbody id="time_row_${this.id}">`;
+
+			this.timeRanges.forEach((range, i) => {
+				g += `<tr>
+					<th>
+						<input class="num" type="text"
+							onchange="base_lenses[${this.id}].edit_start_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+							style="width:80px"
+							value="${formatMilliseconds(range.start)}">
+					</th>
+					<th>
+						<input class="num" type="text"
+							onchange="base_lenses[${this.id}].edit_end_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+							style="width:80px"
+							value="${formatMilliseconds(range.end)}">`;
+
+				if (i === this.timeRanges.length - 1) {
+					g += `<button type="button" onclick="event.stopPropagation(); addExtraTimeRow(${this.id})" style="margin-left:5px;">+</button>`;
+				}
+
+				g += `</th></tr>`;
+			});
+
+			g += `</tbody>`;
+
+			return "<table>" + g + "</table>";
 		}
-		constructor(lid, x1, y1, groupid){
+
+		edit_start_time(start, index = 0) {
+			this.timeRanges[index].start = start;
+			handleAOITimeChange(start, isString=false);
+		}
+
+		edit_end_time(end, index = 0) {
+			this.timeRanges[index].end = end;
+			handleAOITimeChange(end, isString=false);
+		}
+
+		constructor(lid, x1, y1, groupid, sampleId, startTime, endTime){
 			this.type = 'ellipse'; this.id = lid; this.name = lid+''; this.locked = false;
 			this.x1 = x1; this.y1 = y1;
 			this.x2 = 0; this.y2 = 0;
@@ -277,6 +353,8 @@ class EllipseLens{
 			this.centx = x1; this.centy = y1;
 			this.group = groupid;
 			this.area = 0;
+			this.timeRanges = [{ start: startTime, end: endTime }];
+			this.sampleId = sampleId;
 		}
 }
 class RectLens extends EllipseLens{
@@ -390,8 +468,8 @@ class RectLens extends EllipseLens{
 				this.area = this.getArea();
 
 		}
-		constructor(lid, x1, y1, groupid){
-			super(lid, x1, y1, groupid); this.type = 'rect';
+		constructor(lid, x1, y1, groupid, sampleId, startTime, endTime){
+			super(lid, x1, y1, groupid, sampleId, startTime, endTime); this.type = 'rect';
 		}
 }
 
@@ -409,12 +487,14 @@ lens_type_list = ['poly', 'ellipse', 'rect']; LENS_CREATION_MODE = lens_type_lis
 function create_lens(mx, my){
 	v = lid;
 	let groupid = LENSEGROUPS.length + 1;
+	sampleId = selected_data; startTime = DATASETS[selected_data].t_start; endTime = DATASETS[selected_data].t_end; // time in ms
+	console.log("Creating lens with id", v, "at", mx, my, "group", groupid, "sampleId", sampleId, "startTime", startTime, "endTime", endTime);
 	if(new_lens_mode == 'poly'){
-		l = new PolyLens(lid, mx, my, groupid);
+		l = new PolyLens(lid, mx, my, groupid, sampleId, startTime, endTime);
 	}else if (new_lens_mode == 'ellipse'){
-		l = new EllipseLens(lid, mx, my, groupid);
+		l = new EllipseLens(lid, mx, my, groupid, sampleId, startTime, endTime);
 	}else if (new_lens_mode == 'rect'){
-		l = new RectLens(lid, mx, my, groupid);
+		l = new RectLens(lid, mx, my, groupid, sampleId, startTime, endTime);
 	}
 	SAC_FILTER_CHANGED = true; lid += 1;
 	selected_lens = v; building_lens_id = v;
@@ -553,4 +633,74 @@ function calculatePolygonArea(X, Y, numPoints)
 	}	
 	area = Math.abs(area/2);
 	return area;
+}
+
+function formatMilliseconds(ms) {
+    ms = Math.round(ms / 10) * 10; // round to nearest 10ms
+    const hours = Math.floor(ms / 3600000);
+    const minutes = Math.floor((ms % 3600000) / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    const hundredths = Math.round((ms % 1000) / 10);
+
+    const paddedMinutes = minutes.toString().padStart(2, '0');
+    const paddedSeconds = seconds.toString().padStart(2, '0');
+    const paddedHundredths = hundredths.toString().padStart(2, '0');
+
+    return `${hours}:${paddedMinutes}:${paddedSeconds}.${paddedHundredths}`;
+}
+
+function parseTimeString(timeStr) {
+    const [hms, ms = "0"] = timeStr.split(".");
+    const [hours, minutes, seconds] = hms.split(":").map(Number);
+    const hundredths = Number(ms);
+
+    return (
+        hours * 3600000 +
+        minutes * 60000 +
+        seconds * 1000 +
+        hundredths * 10
+    );
+}
+
+function handleAOITimeChange(time, isString) {
+	if (isString) {
+		time = parseTimeString(time);
+	}
+
+	for (let i = 0; i < base_lenses.length; i++) {
+		const lens = base_lenses[i];
+		if (!lens) {
+			console.warn(`base_lens[${i}] is undefined`);
+			continue;
+		}
+
+		if (!Array.isArray(lens.timeRanges)) {
+			lens.timeRanges = [{ start: lens.startTime ?? 0, end: lens.endTime ?? 0 }];
+		}
+
+		lens.included = lens.timeRanges.some(range => time >= range.start && time <= range.end);
+
+		const lensElem = document.getElementById(`lens_${i}_c`);
+		if (lensElem) {
+			lensElem.innerHTML = lens.included
+				? '<i class="fas fa-eye"></i>'
+				: '<i class="fas fa-eye-slash"></i>';
+			lensElem.checked = lens.included;
+		} else {
+			console.log(`Element lens_${i}_c not found`);
+		}
+	}
+}
+
+function addExtraTimeRow(lensId) {
+	const lens = base_lenses[lensId];
+
+	lens.timeRanges.push({ start: 0, end: 0 });
+
+	const container = document.getElementById(`lens_${lensId}_values`);
+	if (container) {
+		container.innerHTML = lens.make_controls();
+	} else {
+		console.warn(`Container lens_${lensId}_values not found`);
+	}
 }
