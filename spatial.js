@@ -959,9 +959,12 @@ let compute_fore_list = () => {
 		  
 		// construct relevance list with all three sets of locations
 		FORE_LIST = [];
+				// Before FORE_LIST.push:
+		t0 = DATASETS[selected_data].tmin;
+		t1 = DATASETS[selected_data].tmax;
 		for(let i = 0; i<fixs_list.length; i++){
 			for(let j = 0; j<fixs_list[i].length - 1; j++){
-				if( fixs_list[i][j].t > toi_list[i].tmin && fixs_list[i][j].t < toi_list[i].tmax){
+				if( fixs_list[i][j].t > t0 && fixs_list[i][j].t < t1){
 					before = j<fixs_list[i].length-1 && fixs_list[i][j+1].in_selected;
 					now = fixs_list[i][j].in_selected;
 					after = j>0 && fixs_list[i][j-1].in_selected;
@@ -970,14 +973,19 @@ let compute_fore_list = () => {
 						
 						lens_bin = Math.floor(lens_bins*(Math.PI+Math.atan2(l.centy-OFFSET_Y-fixs_list[i][j].y, l.centx-OFFSET_X-fixs_list[i][j].x))/SPATIAL.TWO_PI) % lens_bins;
 						angle = SPATIAL.TWO_PI*((lens_bin+0.5)/lens_bins);
-						time_bin = Math.floor( time_bins * (fixs_list[i][j].t -toi_list[i].tmin) / (toi_list[i].tmax - toi_list[i].tmin) ) % time_bins;
+						time_bin = Math.floor(time_bins * (fixs_list[i][j].t - t0) / (t1 - t0));
+						time_bin = Math.max(0, Math.min(time_bins - 1, time_bin)); // Clamp to valid range
 						lens_vals[lens_bin] += 0.75*s;
 						time_vals[time_bin] += 0.75*s;
+
+				
+						//let max_bin_value = Math.max(time_vals);
+						//let normalized_height = (time_vals[time_bin] / max_bin_value) * max_display_height;
 						
 						FORE_LIST.push({fix:fixs_list[i][j], before:before, after:after, size:s,
 								spatial_x:fixs_list[i][j].x * pos_ratio + ground_x, spatial_y:fixs_list[i][j].y * pos_ratio + ground_y,
 								lens_x: (l.centx-OFFSET_X) * pos_ratio + ground_x + lens_vals[lens_bin]*Math.cos(angle), lens_y: (l.centy-OFFSET_Y) * pos_ratio + ground_y  + lens_vals[lens_bin]*Math.sin(angle),
-								time_x: 200 + (spatial_width-300) * Math.max(0, Math.min(1, (fixs_list[i][j].t - t0)/(t1 - t0))), time_y: spatial_height - time_vals[time_bin]
+								time_x:(time_bin * (spatial_width-300))/time_bins + 200, time_y: spatial_height - time_vals[time_bin]
 								});
 						
 						lens_vals[lens_bin] += 0.75*s;
