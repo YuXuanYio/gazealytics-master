@@ -403,9 +403,9 @@ lensbox = '<div class="dragger" draggable="true" ondragend="dragEnd()" ondragove
 + '<div class="tool inner_button"><button id="lens_#_l" checked="true" > <i class="fas fa-lock-open"></i> </button><span class="tip">Lock the lens with current values</span></div>'
 + '<div class="tool inner_button"><button onclick="delete_lens(#);"> <i class="far fa-trash-alt"></i> </button><span class="tip">Delete the lens</span></div>'
 + '<div style="display: flex; gap: 8px; align-items: center; margin: 3px">'
-+ '<label>Screen ID<br><input class="num" type="number" id="lens_#_screen_id" name="#name" style="width:70px" value="screen id" step=1 min=1></label>'
-+ '<label>App ID<br><input class="num" type="number" id="lens_#_app_id" name="#name" style="width:70px" value="application id" min=1 step=1></label>'
-+ '<label>Interface ID<br><input class="num" type="number" id="lens_#_interface_id" name="#name" style="width:70px" value="interface id" min=1 step=1></label>'
++ '<label>Screen ID<br><input class="num" type="number" id="lens_#_screen_id" name="#name" style="width:70px" step=1 min=1></label>'
++ '<label>App ID<br><input class="num" type="number" id="lens_#_app_id" name="#name" style="width:70px" min=1 step=1></label>'
++ '<label>Interface ID<br><input class="num" type="number" id="lens_#_interface_id" name="#name" style="width:70px" min=1 step=1></label>'
 +'<button id="lens_#_aoi_done" onclick="save_aoi(#);"><i class="fas fa-check-circle"></i></button></div>'
 + '<div id="lens_#_values" class="hidden"></div></div>';
 lid = 0; selected_lens = -1; building_lens_id = -1;
@@ -473,14 +473,33 @@ function lenses_update(){
 function save_aoi(id){
 	const doneBtn=document.getElementById(`lens_${id}_aoi_done`)
 	const icon = doneBtn.querySelector('i');
-	if(document.getElementById(`lens_${id}_screen_id` == '') || 
-	document.getElementById(`lens_${id}_application_id` == '') || 
-	document.getElementById(`lens_${id}_interface_id` == '')){
+	const screenEl = document.getElementById(`lens_${id}_screen_id`);
+	const appEl = document.getElementById(`lens_${id}_app_id`);
+	const interfaceEl = document.getElementById(`lens_${id}_interface_id`);
+	
+	const screenVal = screenEl?.value?.trim();
+	const appVal = appEl?.value?.trim();
+	const interfaceVal = interfaceEl?.value?.trim();
+
+	if (!screenVal || !appVal || !interfaceVal) {
 		alert('Values cannot be empty');
-	} else {
-		icon.style.color="green";
-		alert('AOI saved successfully!');
+		return;
 	}
+
+	icon.style.color="green";
+
+	const targetLens = lenses.find(lens => lens.id === id);
+	if(targetLens) {
+		targetLens.screen_id = screenVal;
+		targetLens.app_id = appVal;
+		targetLens.interface_id = interfaceVal;
+	} else {
+		console.log('Target lens not found');
+	}
+
+	window.lenses = targetLens;
+	console.log('target lens:', targetLens)
+	alert('AOI saved successfully!');
 }
 function find_lens(X, Y){
 

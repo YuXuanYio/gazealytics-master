@@ -1,0 +1,17 @@
+<html>
+    <body>
+        <div style="justify-content: center; align-items: center;"><h3>AOI Hierarchy</h3></div>
+        <div style="display: flex; gap: 5px;" id="hierarchyDisplay">Filter By:
+	    <div class="tool"><button type="button" id="filter_screen_id">Screen</button></div>
+	    <div class="tool"><button type="button" id="application_screen_id">Application</button></div>
+	    <div class="tool"><button type="button" id="application_screen_id">Interface</button></div></div>
+    
+    <script>
+        window.onload=function(){
+            const mainWindow=window.opener;
+            const lenses=mainWindow.targetLenses;
+            console.log('lensss: ' + lenses);            
+        }
+    </script>
+    </body>	
+</html>

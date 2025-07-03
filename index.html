@@ -309,13 +309,14 @@
 					<div class="tool"><button type="button" class="toggler" id="lenstype_2" onclick="select_lenstype(2);">Rectangle</button><span class="tip">Make Rectangle AOIs</span></div>
 					<div class="tool"><button href="help.html" target="popup" onclick="window.open('help.html#aois','name','width=600,height=400')"><i class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 					<br>
-					Filter By:
-					<div class="tool"><button type="button" id="filter_sample_id">Sample</button><span class="tip">Filters the AOIs by the sample</span></div>
-					<div class="tool"><button type="button" id="filter_screen_id">Screen</button><span class="tip">Filters the AOIs by the screen</span></div>
-					<div class="tool"><button type="button" id="application_screen_id">Application</button><span class="tip">Filters the AOIs by the application</span></div>
-					<div class="tool"><button type="button" id="application_screen_id">Interface</button><span class="tip">Filters the AOIs by the interface</span></div>
-					<br>
-					<div class="tool"><button type="button" class="toggler toggle-on" id="show_lenslabel" onclick="click_showlabel();">Labels</button><span class="tip">Toggles visibility of labels within the AOIs on spatial canvas</span></div>
+					<div style="display: flex; gap: 5px; align-items: center; justify-content: center;">
+  					<div class="tool"><button type="button" class="toggler toggle-on" id="show_lenslabel" onclick="click_showlabel();">Labels</button><span class="tip">Toggles visibility of labels within the AOIs on spatial canvas</span></div>
+
+					<div class="tool">
+					<button type="button" href="hierarchy.html" target="popup" id="hierarchy_popup" onclick="window.open('hierarchy.html','name','width=400, height=400')">Show Hierarchy</button>
+    				<span class="tip">Open AOI hierarchy popup</span>
+  					</div></div>
+
 				</center>
 				
 				<ul id='lenslist' class="data_list"></ul>
