@@ -355,7 +355,7 @@ let timelinesketch = (p) => {
 							}
 							p.strokeWeight(0);
 							if(!startTimeLabelDrawn && p.textAscent(s)*2<d){p.text( format_time(data.tois[w].tmin/1000), 90-p.textWidth( format_time(data.tois[w].tmin/1000) ), h+d-(.1*d) ); startTimeLabelDrawn = true;}
-							if(textAscent(s)<d){p.text( format_time(data.tois[w].tmax/1000), p.width-90, h+d-(.1*d) ); startTimeLabelDrawn = true;}
+							if(p.textAscent(s)<d){p.text( format_time(data.tois[w].tmax/1000), p.width-90, h+d-(.1*d) );}
 							row++;
 						}	
 					}
