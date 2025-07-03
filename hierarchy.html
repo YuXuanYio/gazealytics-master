@@ -1,17 +1,162 @@
 <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>AOI Hierarchy</title>
+        <style>
+            body { margin: 15px; background-color: #f4f4f4; }
+            h3, h4 { color: #333; }
+            #hierarchyDisplay {
+                background-color: #fff;
+                border: 1px solid #ddd;
+                padding: 15px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .tree-list ul {
+                list-style-type: none;
+                padding-left: 20px;
+                margin: 5px 0;
+            }
+            .tree-list li {
+                margin: 3px 0;
+                font-size: 14px;
+                color: #555;
+            }
+            .tree-list li.level-screen,
+            .tree-list li.level-app,
+            .tree-list li.level-interface {
+                font-weight: bold;
+                color: #222;
+                cursor: pointer;
+            }
+            .tree-list li.level-aoi {
+                font-weight: normal;
+                color: #007bff;
+            }
+            .tree-list li.collapsed > ul {
+                display: none;
+            }
+            .toggle-icon {
+                margin-right: 5px;
+                display: inline-block;
+                width: 12px;
+                text-align: center;
+            }
+            .toggle-icon.expanded::before { content: '↳'; } 
+            .toggle-icon.collapsed::before { content: '→'; } 
+        </style>
+    </head>
     <body>
-        <div style="justify-content: center; align-items: center;"><h3>AOI Hierarchy</h3></div>
-        <div style="display: flex; gap: 5px;" id="hierarchyDisplay">Filter By:
-	    <div class="tool"><button type="button" id="filter_screen_id">Screen</button></div>
-	    <div class="tool"><button type="button" id="application_screen_id">Application</button></div>
-	    <div class="tool"><button type="button" id="application_screen_id">Interface</button></div></div>
-    
-    <script>
-        window.onload=function(){
-            const mainWindow=window.opener;
-            const lenses=mainWindow.targetLenses;
-            console.log('lensss: ' + lenses);            
-        }
-    </script>
-    </body>	
+        <div style="text-align: center;"><h3>AOI Hierarchy</h3></div>
+        <div style="display: flex; gap: 5px; margin-bottom: 15px;" id="filterButtons">Filter By:
+            <button type="button" id="filter_screen_id">Screen</button>
+            <button type="button" id="filter_app_id">Application</button>
+            <button type="button" id="filter_interface_id">Interface</button>
+        </div>
+
+        <div id="hierarchyDisplay">
+            Loading AOI data...
+        </div>
+
+        <script>
+            window.onload = function() {
+                const mainWindow = window.opener;
+                const lenses = mainWindow.lenses || []; 
+                const hierarchyDisplay = document.getElementById('hierarchyDisplay');
+                hierarchyDisplay.innerHTML = ''; 
+
+                if (lenses.length === 0) {
+                    hierarchyDisplay.innerHTML = "<p>No AOIs have been created yet or saved with full hierarchy details.</p>";
+                    return;
+                }
+
+                const hierarchy = {}; // screenId -> appId -> interfaceId -> [lens_objects]
+                lenses.forEach(lens => {
+                    const screenId = lens.screen_id;
+                    const appId = lens.app_id;
+                    const interfaceId = lens.interface_id;
+                    const lensName = lens.name; 
+                    const lensId = lens.id;
+
+                    // include lenses that have all three hierarchy levels defined
+                    if (screenId && appId && interfaceId && lensName) {
+                        if (!hierarchy[screenId]) {
+                            hierarchy[screenId] = {};
+                        }
+                        if (!hierarchy[screenId][appId]) {
+                            hierarchy[screenId][appId] = {};
+                        }
+                        if (!hierarchy[screenId][appId][interfaceId]) {
+                            hierarchy[screenId][appId][interfaceId] = [];
+                        }
+                        hierarchy[screenId][appId][interfaceId].push({ id: lensId, name: lensName });
+                    }
+                });
+
+                // if no lenses meet the hierarchy criteria after filtering
+                if (Object.keys(hierarchy).length === 0) {
+                    hierarchyDisplay.innerHTML = "<p>No AOIs found with complete Screen, Application, and Interface IDs.</p>";
+                    return;
+                }
+
+
+                // HTML tree structure
+                let treeHtml = '<ul class="tree-list">';
+
+                for (const screenId in hierarchy) {
+                    const screenNodeId = `screen-${screenId}`;
+                    treeHtml += `<li id="${screenNodeId}" class="level-screen expanded">`; 
+                    treeHtml += `<span class="fas fa-caret-down"></span>Screen ID: ${screenId}`;
+                    treeHtml += '<ul>'; // application level
+                    for (const appId in hierarchy[screenId]) {
+                        const appNodeId = `app-${screenId}-${appId}`;
+                        treeHtml += `<li id="${appNodeId}" class="level-app expanded">`;
+                        treeHtml += `<span class="toggle-icon expanded"></span>Application ID: ${appId}`;
+                        treeHtml += '<ul>'; // interface level
+                        for (const interfaceId in hierarchy[screenId][appId]) {
+                            const interfaceNodeId = `interface-${screenId}-${appId}-${interfaceId}`;
+                            treeHtml += `<li id="${interfaceNodeId}" class="level-interface expanded">`;
+                            treeHtml += `<span class="toggle-icon expanded"></span>Interface ID: ${interfaceId}`;
+                            treeHtml += '<ul>'; // lenses within this interface
+                            hierarchy[screenId][appId][interfaceId].forEach(aoi => {
+                                treeHtml += `<li class="level-aoi">AOI: ${aoi.name}</li>`;
+                            });
+                            treeHtml += '</ul>'; // end lenses ul
+                            treeHtml += '</li>'; // end interface li
+                        }
+                        treeHtml += '</ul>'; // end app ul
+                        treeHtml += '</li>'; // end app li
+                    }
+                    treeHtml += '</ul>'; // end screen ul
+                    treeHtml += '</li>'; // end screen li
+                }
+                treeHtml += '</ul>'; // end top level ul
+
+                hierarchyDisplay.innerHTML = treeHtml;
+
+                // click handlers for collapse/expand
+                const toggleNodes = document.querySelectorAll('.level-screen, .level-app, .level-interface');
+                toggleNodes.forEach(node => {
+                    node.addEventListener('click', function(event) {
+                        // toggle if the click is directly on the list item itself (not children)
+                        if (event.target === this || event.target.classList.contains('toggle-icon')) {
+                            this.classList.toggle('collapsed');
+                            this.classList.toggle('expanded');
+                            const icon = this.querySelector('.toggle-icon');
+                            if (icon) {
+                                icon.classList.toggle('collapsed');
+                                icon.classList.toggle('expanded');
+                            }
+                            event.stopPropagation(); 
+                        }
+                    });
+                });
+
+                // filtering logic for the buttons
+                document.getElementById('filter_screen_id').onclick = () => {};
+                document.getElementById('filter_app_id').onclick = () => {};
+                document.getElementById('filter_interface_id').onclick = () => {};
+            };
+        </script>
+    </body>
 </html>
