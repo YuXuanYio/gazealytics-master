@@ -140,6 +140,7 @@ let timelinesketch = (p) => {
 		}
 	};
 
+
 	p.draw = () => {
 		// put drawing code here
 		if( VALUED.length == 0 || order_twis.length == 0){ // initial message
@@ -166,6 +167,7 @@ let timelinesketch = (p) => {
 		longest_duration = longdur;
 		TIMELINE.longest_duration = longest_duration; //assigning the value to global variable of longest_duration so that it can be accessed from all files
 		
+
 		try{
 			p.background(black(100)); 
 			p.textFont(f); 
@@ -301,7 +303,9 @@ let timelinesketch = (p) => {
 						continue;
 		
 					let twi_id = 0;	
+
 					for(let w=0; w<data.tois.length && row<TIMELINE_CANVAS.num_of_rows; w++){
+						let startTimeLabelDrawn = false;
 						let bFilteredIn = false;
 						if(data.tois[w] != undefined && data.tois[w].included) {
 							twi_id = data.tois[w].twi_id
@@ -337,7 +341,7 @@ let timelinesketch = (p) => {
 							if(p.textAscent(s)<d){
 								p.text(s.substring(0,9), 4, h+p.textAscent()+(.1*d));
 								// p.text(twi_id < 0 ? "" : base_twis[twi_id].name.substring(0,9), 104, h+p.textAscent()+(.1*d));
-								if(p.textAscent(s)<d){p.text( format_time(data.tois[w].tmin/1000), 104, h+p.textAscent()+(.1*d));}
+								if(!startTimeLabelDrawn && p.textAscent(s)<d){p.text( format_time(data.tois[w].tmin/1000), 104, h+p.textAscent()+(.1*d)); startTimeLabelDrawn = true; }
 								
 								if( VALUED.indexOf(selected_data) == k && TOGGLE_GREEN_BOX_HIGHLIGHTS){
 									//green box
@@ -350,8 +354,8 @@ let timelinesketch = (p) => {
 								}
 							}
 							p.strokeWeight(0);
-							if(p.textAscent(s)*2<d){p.text( format_time(data.tois[w].tmin/1000), 90-p.textWidth( format_time(data.tois[w].tmin/1000) ), h+d-(.1*d) );}
-							if(p.textAscent(s)<d){p.text( format_time(data.tois[w].tmax/1000), p.width-90, h+d-(.1*d) );}
+							if(!startTimeLabelDrawn && p.textAscent(s)*2<d){p.text( format_time(data.tois[w].tmin/1000), 90-p.textWidth( format_time(data.tois[w].tmin/1000) ), h+d-(.1*d) ); startTimeLabelDrawn = true;}
+							if(!startTimeLabelDrawn && p.textAscent(s)<d){p.text( format_time(data.tois[w].tmax/1000), p.width-90, h+d-(.1*d) ); startTimeLabelDrawn = true;}
 							row++;
 						}	
 					}

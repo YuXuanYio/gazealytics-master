@@ -977,7 +977,7 @@ let compute_fore_list = () => {
 						FORE_LIST.push({fix:fixs_list[i][j], before:before, after:after, size:s,
 								spatial_x:fixs_list[i][j].x * pos_ratio + ground_x, spatial_y:fixs_list[i][j].y * pos_ratio + ground_y,
 								lens_x: (l.centx-OFFSET_X) * pos_ratio + ground_x + lens_vals[lens_bin]*Math.cos(angle), lens_y: (l.centy-OFFSET_Y) * pos_ratio + ground_y  + lens_vals[lens_bin]*Math.sin(angle),
-								time_x: (time_bin * (spatial_width-200))/time_bins + 100, time_y: spatial_height - time_vals[time_bin]
+								time_x: 200 + (spatial_width-300) * Math.max(0, Math.min(1, (fixs_list[i][j].t - t0)/(t1 - t0))), time_y: spatial_height - time_vals[time_bin]
 								});
 						
 						lens_vals[lens_bin] += 0.75*s;
@@ -991,6 +991,7 @@ let compute_fore_list = () => {
 		
 	}catch (error) { console.error(error); foreground_changed = true; }
 };
+
 
 SPLIT_STATE = [1.0, 0.0, 0.0]; STEPS = 20;
 
