@@ -117,28 +117,30 @@ class PolyLens{
 				g += '<tr><th><input class="num" type="number" onchange="base_lenses['+this.id+'].x['+i+']=parseFloat(this.value);lenses_update()" style="width:80px" value='+this.x[i]+'></th>';
 				g += '<th><input class="num" type="number" onchange="base_lenses['+this.id+'].y['+i+']=parseFloat(this.value);lenses_update()" style="width:80px" value='+this.y[i]+'></th></tr>';
 			}
-			g += '<tr><th> Start Time: </th><th> End Time: </th></tr>';
-			g += `<tbody id="time_row_${this.id}">`;
+
+			g += '<tr><th>Start Time:</th><th>End Time:</th><th></th></tr>';
 
 			this.timeRanges.forEach((range, i) => {
 				g += `<tr>
-					<th>
+					<td>
 						<input class="num" type="text"
 							onchange="base_lenses[${this.id}].edit_start_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
 							style="width:80px"
 							value="${formatMilliseconds(range.start)}">
-					</th>
-					<th>
+					</td>
+					<td>
 						<input class="num" type="text"
 							onchange="base_lenses[${this.id}].edit_end_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
 							style="width:80px"
-							value="${formatMilliseconds(range.end)}">`;
-
-				if (i === this.timeRanges.length - 1) {
-					g += `<button type="button" onclick="event.stopPropagation(); addExtraTimeRow(${this.id})" style="margin-left:5px;">+</button>`;
-				}
-
-				g += `</th></tr>`;
+							value="${formatMilliseconds(range.end)}">
+					</td>
+					<td style="vertical-align: middle;">
+						<div style="display: flex; gap: 4px;">
+							${this.timeRanges.length > 1 ? `<button type="button" onclick="event.stopPropagation(); removeTimeRow(${this.id}, ${i})">-</button>` : ''}
+							${i === this.timeRanges.length - 1 ? `<button type="button" onclick="event.stopPropagation(); addExtraTimeRow(${this.id})">+</button>` : ''}
+						</div>
+					</td>
+				</tr>`;
 			});
 
 			g += `</tbody>`;
@@ -306,28 +308,29 @@ class EllipseLens{
 			g += '<tr><th><input class="num" type="number" onchange="base_lenses['+this.id+'].x2=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.x2+'></th>';
 			g += '<th><input class="num" type="number" onchange="base_lenses['+this.id+'].y2=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.y2+'></th></tr>';
 			
-			g += '<tr><th> Start Time: </th><th> End Time: </th></tr>';
-			g += `<tbody id="time_row_${this.id}">`;
+			g += '<tr><th>Start Time:</th><th>End Time:</th><th></th></tr>';
 
 			this.timeRanges.forEach((range, i) => {
 				g += `<tr>
-					<th>
+					<td>
 						<input class="num" type="text"
 							onchange="base_lenses[${this.id}].edit_start_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
 							style="width:80px"
 							value="${formatMilliseconds(range.start)}">
-					</th>
-					<th>
+					</td>
+					<td>
 						<input class="num" type="text"
 							onchange="base_lenses[${this.id}].edit_end_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
 							style="width:80px"
-							value="${formatMilliseconds(range.end)}">`;
-
-				if (i === this.timeRanges.length - 1) {
-					g += `<button type="button" onclick="event.stopPropagation(); addExtraTimeRow(${this.id})" style="margin-left:5px;">+</button>`;
-				}
-
-				g += `</th></tr>`;
+							value="${formatMilliseconds(range.end)}">
+					</td>
+					<td style="vertical-align: middle;">
+						<div style="display: flex; gap: 4px;">
+							${this.timeRanges.length > 1 ? `<button type="button" onclick="event.stopPropagation(); removeTimeRow(${this.id}, ${i})">-</button>` : ''}
+							${i === this.timeRanges.length - 1 ? `<button type="button" onclick="event.stopPropagation(); addExtraTimeRow(${this.id})">+</button>` : ''}
+						</div>
+					</td>
+				</tr>`;
 			});
 
 			g += `</tbody>`;
@@ -702,5 +705,18 @@ function addExtraTimeRow(lensId) {
 		container.innerHTML = lens.make_controls();
 	} else {
 		console.warn(`Container lens_${lensId}_values not found`);
+	}
+}
+
+function removeTimeRow(lensId, index) {
+	const lens = base_lenses[lensId];
+
+	if (lens.timeRanges.length > 1) {
+		lens.timeRanges.splice(index, 1);
+	}
+
+	const container = document.getElementById(`lens_${lensId}_values`);
+	if (container) {
+		container.innerHTML = lens.make_controls();
 	}
 }
