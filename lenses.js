@@ -402,6 +402,11 @@ lensbox = '<div class="dragger" draggable="true" ondragend="dragEnd()" ondragove
 + '<input class="num" type="number" id="lens_#_lensegroup" style="width:50px" value = 1 step=1 min=1 max=20>'
 + '<div class="tool inner_button"><button id="lens_#_l" checked="true" > <i class="fas fa-lock-open"></i> </button><span class="tip">Lock the lens with current values</span></div>'
 + '<div class="tool inner_button"><button onclick="delete_lens(#);"> <i class="far fa-trash-alt"></i> </button><span class="tip">Delete the lens</span></div>'
++ '<div style="display: flex; gap: 8px; align-items: center; margin: 3px">'
++ '<label>Screen ID<br><input class="num" type="number" id="lens_#_screen_id" name="#name" style="width:70px" value="screen id" step=1 min=1></label>'
++ '<label>App ID<br><input class="num" type="number" id="lens_#_app_id" name="#name" style="width:70px" value="application id" min=1 step=1></label>'
++ '<label>Interface ID<br><input class="num" type="number" id="lens_#_interface_id" name="#name" style="width:70px" value="interface id" min=1 step=1></label>'
++'<button id="lens_#_aoi_done" onclick="save_aoi(#);"><i class="fas fa-check-circle"></i></button></div>'
 + '<div id="lens_#_values" class="hidden"></div></div>';
 lid = 0; selected_lens = -1; building_lens_id = -1;
 lenses = []; order_lenses = []; base_lenses = []; new_lens_mode = 'poly';
@@ -441,13 +446,41 @@ function create_lens(mx, my){
 		// console.log('class', ec, 'target', e.target);
 	}
 	document.getElementById('lens_'+v+'_c').checked = true;
-	document.getElementById('lens_'+v+'_c').onclick = function(){ document.getElementById('sort_dropdown').value = 'No_sort'; load_controls(); matrix_changed = true;timeline_changed=true;  this.checked = !this.checked; if(this.checked){this.innerHTML='<i class="fas fa-eye"></i>';}else{this.innerHTML='<i class="fas fa-eye-slash"></i>';} }
+	document.getElementById('lens_'+v+'_c').onclick = function(){ 
+		document.getElementById('sort_dropdown').value = 'No_sort'; 
+		load_controls(); 
+		matrix_changed = true;
+		timeline_changed=true;  
+		this.checked = !this.checked; 
+		if(this.checked){
+			this.innerHTML='<i class="fas fa-eye"></i>';
+		}else{
+			this.innerHTML='<i class="fas fa-eye-slash"></i>';
+		} 
+	}
 	document.getElementById('lens_'+v+'_l').checked = false;
-	document.getElementById('lens_'+v+'_l').onclick = function(){ this.checked = !this.checked; if(this.checked){this.innerHTML='<i class="fas fa-lock"></i>';}else{this.innerHTML='<i class="fas fa-lock-open"></i>';} }
+	document.getElementById('lens_'+v+'_l').onclick = function(){ 
+		this.checked = !this.checked; 
+		if(this.checked){
+			this.innerHTML='<i class="fas fa-lock"></i>';
+		}else{this.innerHTML='<i class="fas fa-lock-open"></i>';} 
+	}
 	document.getElementById('lens_'+v+'_lensegroup').value = groupid;
 	}
 function lenses_update(){
 	midground_changed = true; timeline_changed = true; matrix_changed = true; SAC_FILTER_CHANGED = true;
+}
+function save_aoi(id){
+	const doneBtn=document.getElementById(`lens_${id}_aoi_done`)
+	const icon = doneBtn.querySelector('i');
+	if(document.getElementById(`lens_${id}_screen_id` == '') || 
+	document.getElementById(`lens_${id}_application_id` == '') || 
+	document.getElementById(`lens_${id}_interface_id` == '')){
+		alert('Values cannot be empty');
+	} else {
+		icon.style.color="green";
+		alert('AOI saved successfully!');
+	}
 }
 function find_lens(X, Y){
 
