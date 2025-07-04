@@ -377,6 +377,10 @@ function load_zip(){
 								node.setAttribute('onclick', "select_data("+v+")");
 								node.setAttribute('class', 'data_item');
 								document.getElementById('mylist').appendChild(node);
+
+								if (maxEndTime < DATASETS[v].t_end) {
+									maxEndTime = DATASETS[v].t_end;
+								}
 								// add tois
 								for( var i=1; i < DATASETS[v].tois.length; i++ ){
 									ltoi = document.getElementById(v+"_toi");
@@ -427,6 +431,13 @@ function load_zip(){
 							if(selected_data == v)
 								select_data(v);
 						}
+						base_lenses.forEach((lense) => {
+							if (lense.timeRanges === undefined || lense.timeRanges == null) {
+								lense.timeRanges = [];
+								lense.timeRanges.push({start: 0, end: maxEndTime});
+							}
+							lense.processed = false;
+						})
 						if(selected_twi != -1 && document.getElementById("twi_"+selected_twi) != undefined)
 							select_twi(selected_twi);
 						update_all();

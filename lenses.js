@@ -163,7 +163,7 @@ class PolyLens{
 			this.type = 'poly'; this.id = lid; this.name = lid+''; this.locked = false;
 			this.x = [x1]; this.y = [y1]; this.centx = x1; this.centy = y1; this.group = groupid;
 			this.area = 0;
-			this.timeRanges = [{ start: startTime, end: endTime }];
+			this.timeRanges = [{ start: startTime, end: maxEndTime }];
 			this.sampleId = sampleId;
 		}
 }
@@ -356,7 +356,7 @@ class EllipseLens{
 			this.centx = x1; this.centy = y1;
 			this.group = groupid;
 			this.area = 0;
-			this.timeRanges = [{ start: startTime, end: endTime }];
+			this.timeRanges = [{ start: startTime, end: maxEndTime }];
 			this.sampleId = sampleId;
 		}
 }
