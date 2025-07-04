@@ -153,16 +153,24 @@ let spatialsketch = (p) => {
 							tmin = twi.tmin; tmax = twi.tmax; 
 						}							
 						else {
-							tmin = data.tmin; tmax = data.tmax; 
+							tmin = data.tmin; tmax = data.tmax;
 						}							
 						fixs = data.fixs;
+
+						const cursor_pixel_width = (TIMELINE_MOUSEOVER_WINDOW*1000)/(tmax-tmin) * (spatial_width-300);
+						let timeline_left_px = Math.max(200, Math.min(TIMELINE.mouseX, 200 + (spatial_width-300) - cursor_pixel_width));
+						let timeline_right_px = timeline_left_px + cursor_pixel_width;
+
+						let t_left = ((timeline_left_px - 200) / (spatial_width-300)) * (tmax - tmin) + tmin;
+						let t_right = ((timeline_right_px - 200) / (spatial_width-300)) * (tmax - tmin) + tmin;
+
 						v = (TIMELINE.mouseX - 200)/(spatial_width-300)*(tmax-tmin) + tmin;
 						p.stroke( cy(90, data.group) ); 
 						p.strokeWeight(2);
 						if(twi_id > 0) {
 							for(let j=twi.j_min; j<twi.j_max-1; j++){
 								let jt = fixs[j].t;
-								if( jt > v && jt - v < TIMELINE_MOUSEOVER_WINDOW*1000 ){
+								if( jt >= t_left && jt < t_right ){
 									p.line( fixs[j].x*pos_ratio+ground_x, fixs[j].y*pos_ratio+ground_y, fixs[j+1].x*pos_ratio+ground_x, fixs[j+1].y*pos_ratio+ground_y );
 								}else if( jt - v > TIMELINE_MOUSEOVER_WINDOW*1000 ){ j = twi.j_max;}
 							}
@@ -170,7 +178,7 @@ let spatialsketch = (p) => {
 						else {
 							for(let j=0; j<fixs.length-1; j++){
 								let jt = fixs[j].t;
-								if( jt > v && jt - v < TIMELINE_MOUSEOVER_WINDOW*1000 ){
+								if( jt >= t_left && jt < t_right ){
 									p.line( fixs[j].x*pos_ratio+ground_x, fixs[j].y*pos_ratio+ground_y, fixs[j+1].x*pos_ratio+ground_x, fixs[j+1].y*pos_ratio+ground_y );
 								}else if( jt - v > TIMELINE_MOUSEOVER_WINDOW*1000 ){ j = fixs.length;}
 							}

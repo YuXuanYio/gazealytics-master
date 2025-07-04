@@ -518,9 +518,17 @@ let timelinesketch = (p) => {
 				p.text( tstr, p.mouseX - p.textWidth(tstr)/2, timeline_text_position );
 				p.strokeWeight(3); 
 				p.stroke( cy(90, data.group) );
-				tl = Math.max(0, (p.mouseX - 200)/(p.width-300) - 0 );
-				tr = Math.min(1, (p.mouseX - 200)/(p.width-300) + (TIMELINE_MOUSEOVER_WINDOW*1000)/(data.tmax-data.tmin) );
-				p.line( 200 + (spatial_width-300)*tl, timeline_highlight_position, 100 + (spatial_width-200)*tr, timeline_highlight_position);
+
+				const cursor_pixel_width = (TIMELINE_MOUSEOVER_WINDOW*1000)/(data.tmax-data.tmin) * (spatial_width-300);
+				const left = Math.max(200, Math.min(p.mouseX, 200 + (spatial_width-300) - cursor_pixel_width));
+				// Right should be the min of left + cursor_pixel_width and the right edge of the canvas
+
+				const right = Math.min(left + cursor_pixel_width, p.width - 100);
+				
+				//const right = Math.min(left + cursor_pixel_width, 200 + (spatial_width-300));
+				
+				p.line(left, timeline_highlight_position, right, timeline_highlight_position);
+
 				p.strokeWeight(0); 
 			}
 			if(SPATIAL.mouseIsOver_spatial){ p.do_spatial_overlay(); }
