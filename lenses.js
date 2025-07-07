@@ -206,9 +206,12 @@ class PolyLens{
 		}
 
 		edit_priority(priority, index = 0) {
-			this.timeRanges[index].priority = priority;
-			handleAOITimeChange(document.getElementById('timeInput').value, true);
-			console.log("Time Input value: " + document.getElementById('timeInput').value)
+			if (this.isTemporal) {
+				this.timeRanges[index].priority = priority;
+				handleAOITimeChange(document.getElementById('timeInput').value, true);
+			} else {
+				this.currentPriority = priority;
+			}
 		}
 	
 		constructor(lid, x1, y1, groupid){

@@ -4,29 +4,24 @@ function compute_data_firstlens(data_id){
     fixs = DATASETS[data_id].fixs;
 	for(j=0; j<fixs.length; j++){
 		fixs[j].firstlens = lenses.length; // default: not in any lens
+		fixs[j].firstlensegroup = -1;
+
 		for (v=0; v<lenses.length; v++) {
-			if (lenses[v].inside(fixs[j].x, fixs[j].y) && fixs[j].firstlens == lenses.length ) {
+
+			let valid_lens = lenses[v].inside(fixs[j].x, fixs[j].y) && lenses[v].included && lenses[v].checked;
+
+			if (valid_lens && fixs[j].firstlens == lenses.length ) {
 				fixs[j].firstlens = v; // first lens == lenses.length means outside all lenses, used for indirect transitions between lens
 			}
-			else if (lenses[v].inside(fixs[j].x, fixs[j].y) && lenses[v].currentPriority < lenses[fixs[j].firstlens].currentPriority) {
+			else if (valid_lens && lenses[v].currentPriority < lenses[fixs[j].firstlens].currentPriority) {
 				fixs[j].firstlens = v; // first lens == lenses.length means outside all lenses, used for indirect transitions between lens
-				if(v < lenses.length)
-					fixs[j].firstlensegroup = lenses[v].group;
-				else
-					fixs[j].firstlensegroup = -1;
+				fixs[j].firstlensegroup = lenses[v].group;
 			}
 		}
-
-
-
-		// while(v<lenses.length && !lenses[v].inside(fixs[j].x, fixs[j].y) ){ v++; }
-		// fixs[j].firstlens = v; // first lens == lenses.length means outside all lenses, used for indirect transitions between lens		
-		// if(v < lenses.length)
-		// 	fixs[j].firstlensegroup = lenses[v].group;
-		// else
-		// 	fixs[j].firstlensegroup = -1;
     }
 }
+
+
 function compute_compare(data1, data2){
 	
 	if(MATRIX_VIEW_STATE == 'dat_dat')
