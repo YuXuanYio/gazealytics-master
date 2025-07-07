@@ -333,16 +333,35 @@ let spatialsketch = (p) => {
 		}
 		// lenses 
 		if( SHOW_LENS ){
-			for(let i=0; i<order_lenses.length; i++){
-				let l = base_lenses[order_lenses[i]];
-				p.fill(l.col(20)); p.stroke(l.col(60)); p.strokeWeight(2);
-				if( building_lens_id==order_lenses[i] || selected_lens==order_lenses[i]){
-					p.fill(l.col(20)); p.stroke(l.col(75)); p.strokeWeight(5);
+			// Sort base_lenses by currentPriority descending (highest priority first)
+			const sorted_lenses = [...base_lenses]
+				.filter(l => l && l.included && l.checked)
+				.sort((a, b) => a.currentPriority - b.currentPriority);
+
+			for (let i = 0; i < sorted_lenses.length; i++) {
+				let l = sorted_lenses[i];
+				p.fill(l.col(20));
+				p.stroke(l.col(60));
+				p.strokeWeight(2);
+				if (building_lens_id == l.id || selected_lens == l.id) {
+					p.fill(l.col(20));
+					p.stroke(l.col(75));
+					p.strokeWeight(5);
 				}
-				l.draw(p, building_lens_id==order_lenses[i],
-					selected_lens==order_lenses[i],
-					spatial_width, spatial_height);
+				l.draw(
+					p,
+					building_lens_id == l.id,
+					selected_lens == l.id,
+					spatial_width,
+					spatial_height
+				);
+				
+				if (l.currentPriority !== undefined) {
+					// console.log("Rendering lens with ID: " + l.id + " and priority: " + l.currentPriority);
+				}
 			}
+
+
 		}
 	};
 	

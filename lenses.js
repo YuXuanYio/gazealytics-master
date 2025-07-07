@@ -118,7 +118,8 @@ class PolyLens{
 				g += '<th><input class="num" type="number" onchange="base_lenses['+this.id+'].y['+i+']=parseFloat(this.value);lenses_update()" style="width:80px" value='+this.y[i]+'></th></tr>';
 			}
 
-			g += '<tr><th>Start Time:</th><th>End Time:</th><th></th></tr>';
+			g += '<tr><th>Start Time:</th><th>End Time:</th><th>Order:</th><th></th></tr>';
+
 
 			this.timeRanges.forEach((range, i) => {
 				g += `<tr>
@@ -133,6 +134,12 @@ class PolyLens{
 							onchange="base_lenses[${this.id}].edit_end_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
 							style="width:80px"
 							value="${formatMilliseconds(range.end)}">
+					</td>
+					<td>
+						<input class="num" type="text"
+							onchange="base_lenses[${this.id}].edit_priority(parseInt(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+							style="width:32px"
+							value="${range.priority !== undefined ? range.priority : 1}">
 					</td>
 					<td style="vertical-align: middle;">
 						<div style="display: flex; gap: 4px;">
@@ -150,20 +157,28 @@ class PolyLens{
 		}
 
 		edit_start_time(start, index = 0) {
+			console.log("test")
 			this.timeRanges[index].start = start;
-			handleAOITimeChange(start, isString=false);
+			handleAOITimeChange(start, false);
 		}
 
 		edit_end_time(end, index = 0) {
 			this.timeRanges[index].end = end;
-			handleAOITimeChange(end, isString=false);
+			handleAOITimeChange(end, false);
+		}
+
+		edit_priority(priority, index = 0) {
+			this.timeRanges[index].priority = priority;
+			handleAOITimeChange(document.getElementById('timeInput').value, true);
+			console.log("Time Input value: " + document.getElementById('timeInput').value)
 		}
 	
 		constructor(lid, x1, y1, groupid, sampleId, startTime, endTime){
 			this.type = 'poly'; this.id = lid; this.name = lid+''; this.locked = false;
 			this.x = [x1]; this.y = [y1]; this.centx = x1; this.centy = y1; this.group = groupid;
 			this.area = 0;
-			this.timeRanges = [{ start: startTime, end: maxEndTime }];
+			this.timeRanges = [{ start: startTime, end: maxEndTime, priority: 1 }];
+			this.currentPriority = 1;
 			this.sampleId = sampleId;
 		}
 }
@@ -308,7 +323,7 @@ class EllipseLens{
 			g += '<tr><th><input class="num" type="number" onchange="base_lenses['+this.id+'].x2=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.x2+'></th>';
 			g += '<th><input class="num" type="number" onchange="base_lenses['+this.id+'].y2=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.y2+'></th></tr>';
 			
-			g += '<tr><th>Start Time:</th><th>End Time:</th><th></th></tr>';
+			g += '<tr><th>Start Time:</th><th>End Time:</th><th>Order:</th><th></th></tr>';
 
 			this.timeRanges.forEach((range, i) => {
 				g += `<tr>
@@ -323,6 +338,12 @@ class EllipseLens{
 							onchange="base_lenses[${this.id}].edit_end_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
 							style="width:80px"
 							value="${formatMilliseconds(range.end)}">
+					</td>
+					<td>
+						<input class="num" type="number"
+							onchange="base_lenses[${this.id}].edit_priority(parseInt(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+							style="width:32px"
+							value="${range.priority !== undefined ? range.priority : 1}">
 					</td>
 					<td style="vertical-align: middle;">
 						<div style="display: flex; gap: 4px;">
@@ -348,6 +369,10 @@ class EllipseLens{
 			handleAOITimeChange(end, isString=false);
 		}
 
+		edit_priority(priority, index = 0) {
+			this.timeRanges[index].priority = priority;
+		}
+
 		constructor(lid, x1, y1, groupid, sampleId, startTime, endTime){
 			this.type = 'ellipse'; this.id = lid; this.name = lid+''; this.locked = false;
 			this.x1 = x1; this.y1 = y1;
@@ -356,7 +381,8 @@ class EllipseLens{
 			this.centx = x1; this.centy = y1;
 			this.group = groupid;
 			this.area = 0;
-			this.timeRanges = [{ start: startTime, end: maxEndTime }];
+			this.timeRanges = [{ start: startTime, end: maxEndTime, priority: 1 }];
+			this.currentPriority = 1;
 			this.sampleId = sampleId;
 		}
 }
@@ -678,10 +704,17 @@ function handleAOITimeChange(time, isString) {
 		}
 
 		if (!Array.isArray(lens.timeRanges)) {
-			lens.timeRanges = [{ start: lens.startTime ?? 0, end: lens.endTime ?? 0 }];
+			lens.timeRanges = [{ start: lens.startTime ?? 0, end: lens.endTime ?? 0, priority: lens.priority ?? 1 }];
 		}
 
 		lens.included = lens.timeRanges.some(range => time >= range.start && time <= range.end);
+		
+		// Find the current time range for the lens, set its current priority to that time range's priority
+		const currentRange = lens.timeRanges.find(range => time >= range.start && time <= range.end);
+		if (currentRange) {
+			lens.currentPriority = currentRange.priority;
+		}
+
 
 		const lensElem = document.getElementById(`lens_${i}_c`);
 		if (lensElem) {
@@ -698,7 +731,7 @@ function handleAOITimeChange(time, isString) {
 function addExtraTimeRow(lensId) {
 	const lens = base_lenses[lensId];
 
-	lens.timeRanges.push({ start: 0, end: 0 });
+	lens.timeRanges.push({ start: 0, end: 0, priority: 1 });
 
 	const container = document.getElementById(`lens_${lensId}_values`);
 	if (container) {
@@ -719,4 +752,14 @@ function removeTimeRow(lensId, index) {
 	if (container) {
 		container.innerHTML = lens.make_controls();
 	}
+}
+
+// Sorts lenses by their priority, highest priority first (1 is the highest priority)
+function handleAOIPChanged() {
+	let priority_lenses = base_lenses.map(lens => lens.id).sort((a, b) => {
+		const lensA = base_lenses[a];
+		const lensB = base_lenses[b];
+		return lensA.timeRanges[0].priority - lensB.timeRanges[0].priority;
+	});
+	lenses_update();
 }
