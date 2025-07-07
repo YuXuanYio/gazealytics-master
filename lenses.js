@@ -545,29 +545,21 @@ class RectLens extends EllipseLens{
 
 // lens list function
 lensbox = '<div class="dragger" draggable="true" ondragend="dragEnd()" ondragover="dragOver_page(event)" ondragstart="dragStart(event)" id="#_dragger"></div>'
-+ '<div class="controls"><input type="text" id="lens_#_name" name="#name" style="width:70px" value="aoi#">'
-+ '<button id="lens_#_c" checked="true" onclick="not_all_eye("showlens");"> <i class="fas fa-eye"></i> </button>'
-+ '<input class="num" type="number" id="lens_#_lensegroup" style="width:50px" value = 1 step=1 min=1 max=20>'
-+ '<div class="tool inner_button"><button id="lens_#_l" checked="true" > <i class="fas fa-lock-open"></i> </button><span class="tip">Lock the lens with current values</span></div>'
-+ '<div class="tool inner_button"><button onclick="delete_lens(#);"> <i class="far fa-trash-alt"></i> </button><span class="tip">Delete the lens</span></div>'
-+ '<div style="display: flex; gap: 8px; align-items: center; margin: 3px">'
++ '<div class="controls" style="display: flex; flex-direction: column;">'
++ '<div style="display: flex; align-items: center;">'
++ '<input type="text" id="lens_#_name" name="#name" style="width:70px" value="aoi#">'
++ '<button id="lens_#_c" checked="true" onclick="not_all_eye(\'showlens\');"><i class="fas fa-eye"></i></button>'
++ '<input class="num" type="number" id="lens_#_lensegroup" style="width:50px" value="1" step="1" min="1" max="20">'
++ '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button id="lens_#_temporal_btn" onclick="toggleTemporal(#);"><i class="fas fa-clock"></i></button><span class="tip">Make current lens temporal</span></div>'
++ '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button id="lens_#_l" checked="true"><i class="fas fa-lock-open"></i></button><span class="tip">Lock the lens with current value</span></div>'
++ '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button onclick="delete_lens(#);"><i class="far fa-trash-alt"></i></button><span class="tip">Delete the lens</span></div>'
++ '</div>'
++'<div style="display: flex; gap: 8px; align-items: center; margin: 3px">'
 + '<label>Screen ID<br><input class="num" type="number" id="lens_#_screen_id" name="#name" style="width:70px" step=1 min=1></label>'
 + '<label>App ID<br><input class="num" type="number" id="lens_#_app_id" name="#name" style="width:70px" min=1 step=1></label>'
 + '<label>Interface ID<br><input class="num" type="number" id="lens_#_interface_id" name="#name" style="width:70px" min=1 step=1></label>'
 +'<button id="lens_#_aoi_done" onclick="save_aoi(#);"><i class="fas fa-check-circle"></i></button></div>'
 + '<div id="lens_#_values" class="hidden"></div></div>';
-
-// + '<div class="controls" style="display: flex; flex-direction: column;">'
-// + '<div style="display: flex; align-items: center;">'
-// + '<input type="text" id="lens_#_name" name="#name" style="width:70px" value="aoi#">'
-// + '<button id="lens_#_c" checked="true" onclick="not_all_eye(\'showlens\');"><i class="fas fa-eye"></i></button>'
-// + '<input class="num" type="number" id="lens_#_lensegroup" style="width:50px" value="1" step="1" min="1" max="20">'
-// + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button id="lens_#_temporal_btn" onclick="toggleTemporal(#);"><i class="fas fa-clock"></i></button><span class="tip">Make current lens temporal</span></div>'
-// + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button id="lens_#_l" checked="true"><i class="fas fa-lock-open"></i></button><span class="tip">Lock the lens with current value</span></div>'
-// + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button onclick="delete_lens(#);"><i class="far fa-trash-alt"></i></button><span class="tip">Delete the lens</span></div>'
-// + '</div>'
-// + '<div id="lens_#_values" class="hidden"></div>'
-// + '</div>';
 
 lid = 0; selected_lens = -1; building_lens_id = -1;
 lenses = []; order_lenses = []; base_lenses = []; new_lens_mode = 'poly';
