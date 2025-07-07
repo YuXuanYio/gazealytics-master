@@ -121,34 +121,63 @@ class PolyLens{
 			g += '<tr><th>Start Time:</th><th>End Time:</th><th>Order:</th><th></th></tr>';
 
 
-			this.timeRanges.forEach((range, i) => {
-				g += `<tr>
-					<td>
-						<input class="num" type="text"
-							onchange="base_lenses[${this.id}].edit_start_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
-							style="width:80px"
-							value="${formatMilliseconds(range.start)}">
-					</td>
-					<td>
-						<input class="num" type="text"
-							onchange="base_lenses[${this.id}].edit_end_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
-							style="width:80px"
-							value="${formatMilliseconds(range.end)}">
-					</td>
+			if (this.isTemporal) {
+				this.timeRanges.forEach((range, i) => {
+					g += `<tr>
+						<td>
+							<input class="num" type="text"
+								onchange="base_lenses[${this.id}].edit_start_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+								style="width:80px"
+								value="${formatMilliseconds(range.start)}">
+						</td>
+						<td>
+							<input class="num" type="text"
+								onchange="base_lenses[${this.id}].edit_end_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+								style="width:80px"
+								value="${formatMilliseconds(range.end)}">
+						</td>
 					<td>
 						<input class="num" type="text"
 							onchange="base_lenses[${this.id}].edit_priority(parseInt(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
 							style="width:32px"
 							value="${range.priority !== undefined ? range.priority : 1}">
 					</td>
-					<td style="vertical-align: middle;">
-						<div style="display: flex; gap: 4px;">
-							${this.timeRanges.length > 1 ? `<button type="button" onclick="event.stopPropagation(); removeTimeRow(${this.id}, ${i})">-</button>` : ''}
-							${i === this.timeRanges.length - 1 ? `<button type="button" onclick="event.stopPropagation(); addExtraTimeRow(${this.id})">+</button>` : ''}
-						</div>
-					</td>
-				</tr>`;
-			});
+						<td style="vertical-align: middle;">
+							<div style="display: flex; gap: 4px;">
+								${this.timeRanges.length > 1 ? `<button type="button" onclick="event.stopPropagation(); removeTimeRow(${this.id}, ${i})">-</button>` : ''}
+								${i === this.timeRanges.length - 1 ? `<button type="button" onclick="event.stopPropagation(); addExtraTimeRow(${this.id})">+</button>` : ''}
+							</div>
+						</td>
+					</tr>`;
+				});
+			} else {
+				this.timeRanges.forEach((range, i) => {
+					g += `<tr>
+						<td>
+							<input class="num" type="text"
+								onchange="base_lenses[${this.id}].edit_start_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+								style="width:80px"
+								value="${formatMilliseconds(range.start)}" disabled>
+						</td>
+						<td>
+							<input class="num" type="text"
+								onchange="base_lenses[${this.id}].edit_end_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+								style="width:80px"
+								value="${formatMilliseconds(range.end)}" disabled>
+						</td>
+						<td style="vertical-align: middle;">
+							<div style="display: flex; gap: 4px;">
+							${this.timeRanges.length > 1 ? 
+								`<button type="button" onclick="event.stopPropagation(); removeTimeRow(${this.id}, ${i})" disabled>-</button>`  
+								: ''}
+							${i === this.timeRanges.length - 1 ? 
+								`<button type="button" onclick="event.stopPropagation(); addExtraTimeRow(${this.id})" disabled>+</button>` 
+								: ''}
+							</div>
+						</td>
+					</tr>`;
+				});
+			}
 
 			g += `</tbody>`;
 
@@ -157,14 +186,17 @@ class PolyLens{
 		}
 
 		edit_start_time(start, index = 0) {
-			console.log("test")
-			this.timeRanges[index].start = start;
-			handleAOITimeChange(start, false);
+			if (this.isTemporal) {
+				this.timeRanges[index].start = start;
+				handleAOITimeChange(start, false);
+			}
 		}
 
 		edit_end_time(end, index = 0) {
-			this.timeRanges[index].end = end;
-			handleAOITimeChange(end, false);
+			if (this.isTemporal) {
+				this.timeRanges[index].end = end;
+				handleAOITimeChange(end, false);
+			}
 		}
 
 		edit_priority(priority, index = 0) {
@@ -173,13 +205,13 @@ class PolyLens{
 			console.log("Time Input value: " + document.getElementById('timeInput').value)
 		}
 	
-		constructor(lid, x1, y1, groupid, sampleId, startTime, endTime){
+		constructor(lid, x1, y1, groupid){
 			this.type = 'poly'; this.id = lid; this.name = lid+''; this.locked = false;
 			this.x = [x1]; this.y = [y1]; this.centx = x1; this.centy = y1; this.group = groupid;
 			this.area = 0;
-			this.timeRanges = [{ start: startTime, end: maxEndTime, priority: 1 }];
+			this.timeRanges = [{ start: 0, end: maxEndTime, priority: 1 }];
 			this.currentPriority = 1;
-			this.sampleId = sampleId;
+			this.isTemporal = false;
 		}
 }
 class EllipseLens{
@@ -325,34 +357,64 @@ class EllipseLens{
 			
 			g += '<tr><th>Start Time:</th><th>End Time:</th><th>Order:</th><th></th></tr>';
 
-			this.timeRanges.forEach((range, i) => {
-				g += `<tr>
-					<td>
-						<input class="num" type="text"
-							onchange="base_lenses[${this.id}].edit_start_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
-							style="width:80px"
-							value="${formatMilliseconds(range.start)}">
-					</td>
-					<td>
-						<input class="num" type="text"
-							onchange="base_lenses[${this.id}].edit_end_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
-							style="width:80px"
-							value="${formatMilliseconds(range.end)}">
-					</td>
+			if (this.isTemporal) {
+				this.timeRanges.forEach((range, i) => {
+					g += `<tr>
+						<td>
+							<input class="num" type="text"
+								onchange="base_lenses[${this.id}].edit_start_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+								style="width:80px"
+								value="${formatMilliseconds(range.start)}">
+						</td>
+						<td>
+							<input class="num" type="text"
+								onchange="base_lenses[${this.id}].edit_end_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+								style="width:80px"
+								value="${formatMilliseconds(range.end)}">
+						</td>
 					<td>
 						<input class="num" type="number"
 							onchange="base_lenses[${this.id}].edit_priority(parseInt(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
 							style="width:32px"
 							value="${range.priority !== undefined ? range.priority : 1}">
 					</td>
-					<td style="vertical-align: middle;">
-						<div style="display: flex; gap: 4px;">
-							${this.timeRanges.length > 1 ? `<button type="button" onclick="event.stopPropagation(); removeTimeRow(${this.id}, ${i})">-</button>` : ''}
-							${i === this.timeRanges.length - 1 ? `<button type="button" onclick="event.stopPropagation(); addExtraTimeRow(${this.id})">+</button>` : ''}
-						</div>
-					</td>
-				</tr>`;
-			});
+						<td style="vertical-align: middle;">
+							<div style="display: flex; gap: 4px;">
+								${this.timeRanges.length > 1 ? `<button type="button" onclick="event.stopPropagation(); removeTimeRow(${this.id}, ${i})">-</button>` : ''}
+								${i === this.timeRanges.length - 1 ? `<button type="button" onclick="event.stopPropagation(); addExtraTimeRow(${this.id})">+</button>` : ''}
+							</div>
+						</td>
+					</tr>`;
+				});
+			} else {
+				this.timeRanges.forEach((range, i) => {
+					g += `<tr>
+						<td>
+							<input class="num" type="text"
+								onchange="base_lenses[${this.id}].edit_start_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+								style="width:80px"
+								value="${formatMilliseconds(range.start)}" disabled>
+						</td>
+						<td>
+							<input class="num" type="text"
+								onchange="base_lenses[${this.id}].edit_end_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+								style="width:80px"
+								value="${formatMilliseconds(range.end)}" disabled>
+						</td>
+						<td style="vertical-align: middle;">
+							<div style="display: flex; gap: 4px;">
+							${this.timeRanges.length > 1 ? 
+								`<button type="button" onclick="event.stopPropagation(); removeTimeRow(${this.id}, ${i})" disabled>-</button>`  
+								: ''}
+							${i === this.timeRanges.length - 1 ? 
+								`<button type="button" onclick="event.stopPropagation(); addExtraTimeRow(${this.id})" disabled>+</button>` 
+								: ''}
+							</div>
+						</td>
+					</tr>`;
+				});
+			}
+
 
 			g += `</tbody>`;
 
@@ -360,20 +422,24 @@ class EllipseLens{
 		}
 
 		edit_start_time(start, index = 0) {
-			this.timeRanges[index].start = start;
-			handleAOITimeChange(start, isString=false);
+			if (this.isTemporal) {
+				this.timeRanges[index].start = start;
+				handleAOITimeChange(start, false);
+			}
 		}
 
 		edit_end_time(end, index = 0) {
-			this.timeRanges[index].end = end;
-			handleAOITimeChange(end, isString=false);
+			if (this.isTemporal) {
+				this.timeRanges[index].end = end;
+				handleAOITimeChange(end, false);
+			}
 		}
 
 		edit_priority(priority, index = 0) {
 			this.timeRanges[index].priority = priority;
 		}
 
-		constructor(lid, x1, y1, groupid, sampleId, startTime, endTime){
+		constructor(lid, x1, y1, groupid){
 			this.type = 'ellipse'; this.id = lid; this.name = lid+''; this.locked = false;
 			this.x1 = x1; this.y1 = y1;
 			this.x2 = 0; this.y2 = 0;
@@ -381,9 +447,9 @@ class EllipseLens{
 			this.centx = x1; this.centy = y1;
 			this.group = groupid;
 			this.area = 0;
-			this.timeRanges = [{ start: startTime, end: maxEndTime, priority: 1 }];
+			this.timeRanges = [{ start: 0, end: maxEndTime, priority: 1 }];
 			this.currentPriority = 1;
-			this.sampleId = sampleId;
+			this.isTemporal = false;
 		}
 }
 class RectLens extends EllipseLens{
@@ -504,26 +570,31 @@ class RectLens extends EllipseLens{
 
 // lens list function
 lensbox = '<div class="dragger" draggable="true" ondragend="dragEnd()" ondragover="dragOver_page(event)" ondragstart="dragStart(event)" id="#_dragger"></div>'
-+ '<div class="controls"><input type="text" id="lens_#_name" name="#name" style="width:70px" value="aoi#">'
-+ '<button id="lens_#_c" checked="true" onclick="not_all_eye("showlens");"> <i class="fas fa-eye"></i> </button>'
-+ '<input class="num" type="number" id="lens_#_lensegroup" style="width:50px" value = 1 step=1 min=1 max=20>'
-+ '<div class="tool inner_button"><button id="lens_#_l" checked="true" > <i class="fas fa-lock-open"></i> </button><span class="tip">Lock the lens with current values</span></div>'
-+ '<div class="tool inner_button"><button onclick="delete_lens(#);"> <i class="far fa-trash-alt"></i> </button><span class="tip">Delete the lens</span></div>'
-+ '<div id="lens_#_values" class="hidden"></div></div>';
++ '<div class="controls" style="display: flex; flex-direction: column;">'
++ '<div style="display: flex; align-items: center;">'
++ '<input type="text" id="lens_#_name" name="#name" style="width:70px" value="aoi#">'
++ '<button id="lens_#_c" checked="true" onclick="not_all_eye(\'showlens\');"><i class="fas fa-eye"></i></button>'
++ '<input class="num" type="number" id="lens_#_lensegroup" style="width:50px" value="1" step="1" min="1" max="20">'
++ '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button id="lens_#_temporal_btn" onclick="toggleTemporal(#);"><i class="fas fa-clock"></i></button><span class="tip">Make current lens temporal</span></div>'
++ '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button id="lens_#_l" checked="true"><i class="fas fa-lock-open"></i></button><span class="tip">Lock the lens with current value</span></div>'
++ '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button onclick="delete_lens(#);"><i class="far fa-trash-alt"></i></button><span class="tip">Delete the lens</span></div>'
++ '</div>'
++ '<div id="lens_#_values" class="hidden"></div>'
++ '</div>';
+
+
 lid = 0; selected_lens = -1; building_lens_id = -1;
 lenses = []; order_lenses = []; base_lenses = []; new_lens_mode = 'poly';
 lens_type_list = ['poly', 'ellipse', 'rect']; LENS_CREATION_MODE = lens_type_list[0];
 function create_lens(mx, my){
 	v = lid;
 	let groupid = LENSEGROUPS.length + 1;
-	sampleId = selected_data; startTime = DATASETS[selected_data].t_start; endTime = DATASETS[selected_data].t_end; // time in ms
-	console.log("Creating lens with id", v, "at", mx, my, "group", groupid, "sampleId", sampleId, "startTime", startTime, "endTime", endTime);
 	if(new_lens_mode == 'poly'){
-		l = new PolyLens(lid, mx, my, groupid, sampleId, startTime, endTime);
+		l = new PolyLens(lid, mx, my, groupid);
 	}else if (new_lens_mode == 'ellipse'){
-		l = new EllipseLens(lid, mx, my, groupid, sampleId, startTime, endTime);
+		l = new EllipseLens(lid, mx, my, groupid);
 	}else if (new_lens_mode == 'rect'){
-		l = new RectLens(lid, mx, my, groupid, sampleId, startTime, endTime);
+		l = new RectLens(lid, mx, my, groupid);
 	}
 	SAC_FILTER_CHANGED = true; lid += 1;
 	selected_lens = v; building_lens_id = v;
@@ -699,7 +770,6 @@ function handleAOITimeChange(time, isString) {
 	for (let i = 0; i < base_lenses.length; i++) {
 		const lens = base_lenses[i];
 		if (!lens) {
-			console.warn(`base_lens[${i}] is undefined`);
 			continue;
 		}
 
@@ -707,7 +777,7 @@ function handleAOITimeChange(time, isString) {
 			lens.timeRanges = [{ start: lens.startTime ?? 0, end: lens.endTime ?? 0, priority: lens.priority ?? 1 }];
 		}
 
-		lens.included = lens.timeRanges.some(range => time >= range.start && time <= range.end);
+		lens.included = (lens.timeRanges.some(range => time >= range.start && time <= range.end) && lens.isTemporal) || !lens.isTemporal;
 		
 		// Find the current time range for the lens, set its current priority to that time range's priority
 		const currentRange = lens.timeRanges.find(range => time >= range.start && time <= range.end);
@@ -754,12 +824,23 @@ function removeTimeRow(lensId, index) {
 	}
 }
 
-// Sorts lenses by their priority, highest priority first (1 is the highest priority)
-function handleAOIPChanged() {
-	let priority_lenses = base_lenses.map(lens => lens.id).sort((a, b) => {
-		const lensA = base_lenses[a];
-		const lensB = base_lenses[b];
-		return lensA.timeRanges[0].priority - lensB.timeRanges[0].priority;
-	});
-	lenses_update();
+function toggleTemporal(id) {
+	const lens = base_lenses[id];
+	lens.isTemporal = !lens.isTemporal;
+
+	const container = document.getElementById(`lens_${id}_values`);
+	if (container) {
+		container.innerHTML = lens.make_controls();
+	}
+
+	const btn = document.getElementById(`lens_${id}_temporal_btn`);
+	if (btn) {
+		btn.innerHTML = !lens.isTemporal
+			? '<i class="fas fa-clock"></i>'
+			: `
+				<span style="display: inline-flex; align-items: center;">
+				<i class="fas fa-clock"></i>
+				<i class="fas fa-times"></i>
+				</span>`;
+	}
 }
