@@ -796,6 +796,11 @@ function toggleTemporal(id) {
 	const lens = base_lenses[id];
 	lens.isTemporal = !lens.isTemporal;
 
+	const timeInput = document.getElementById(`timeInput`).value;
+	if (timeInput) {
+		handleAOITimeChange(timeInput, true);
+	}
+
 	const container = document.getElementById(`lens_${id}_values`);
 	if (container) {
 		container.innerHTML = lens.make_controls();
