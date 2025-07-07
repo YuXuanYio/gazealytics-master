@@ -308,8 +308,15 @@ function load_zip(){
 								base_lenses[iter].near_start = proto.near_start;
 								base_lenses[iter].move = proto.move;
 								base_lenses[iter].draw = proto.draw;
+								base_lenses[iter].fix_up = proto.fix_up;
 								base_lenses[iter].make_controls = proto.make_controls;
 								// base_lenses[iter].getArea = proto.getArea;
+								base_lenses[iter].edit_start_time = proto.edit_start_time;
+								base_lenses[iter].edit_end_time = proto.edit_end_time;
+							}
+							if (base_lenses[iter].timeRanges === undefined || base_lenses[iter].timeRanges == null) {
+								base_lenses[iter].timeRanges = [];
+								base_lenses[iter].timeRanges.push({start: 0, end: maxEndTime});
 							}
 						}
 						update_lens_colors();
@@ -432,12 +439,11 @@ function load_zip(){
 								select_data(v);
 						}
 						base_lenses.forEach((lense) => {
-							if (lense.timeRanges === undefined || lense.timeRanges == null) {
-								lense.timeRanges = [];
-								lense.timeRanges.push({start: 0, end: maxEndTime});
+							if (lense.timeRanges[0].end === 0) {
+								lense.timeRanges[0].end = maxEndTime;
 							}
-							lense.processed = false;
 						})
+						handleAOITimeChange(0, false);
 						if(selected_twi != -1 && document.getElementById("twi_"+selected_twi) != undefined)
 							select_twi(selected_twi);
 						update_all();
