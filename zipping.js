@@ -308,8 +308,15 @@ function load_zip(){
 								base_lenses[iter].near_start = proto.near_start;
 								base_lenses[iter].move = proto.move;
 								base_lenses[iter].draw = proto.draw;
+								base_lenses[iter].fix_up = proto.fix_up;
 								base_lenses[iter].make_controls = proto.make_controls;
 								// base_lenses[iter].getArea = proto.getArea;
+								base_lenses[iter].edit_start_time = proto.edit_start_time;
+								base_lenses[iter].edit_end_time = proto.edit_end_time;
+							}
+							if (base_lenses[iter].timeRanges === undefined || base_lenses[iter].timeRanges == null) {
+								base_lenses[iter].timeRanges = [];
+								base_lenses[iter].timeRanges.push({start: 0, end: maxEndTime});
 							}
 						}
 						update_lens_colors();
@@ -377,6 +384,10 @@ function load_zip(){
 								node.setAttribute('onclick', "select_data("+v+")");
 								node.setAttribute('class', 'data_item');
 								document.getElementById('mylist').appendChild(node);
+
+								if (maxEndTime < DATASETS[v].t_end) {
+									maxEndTime = DATASETS[v].t_end;
+								}
 								// add tois
 								for( var i=1; i < DATASETS[v].tois.length; i++ ){
 									ltoi = document.getElementById(v+"_toi");
@@ -427,6 +438,12 @@ function load_zip(){
 							if(selected_data == v)
 								select_data(v);
 						}
+						base_lenses.forEach((lense) => {
+							if (lense.timeRanges[0].end === 0) {
+								lense.timeRanges[0].end = maxEndTime;
+							}
+						})
+						handleAOITimeChange(0, false);
 						if(selected_twi != -1 && document.getElementById("twi_"+selected_twi) != undefined)
 							select_twi(selected_twi);
 						update_all();
