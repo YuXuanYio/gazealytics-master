@@ -32,6 +32,8 @@
             .tree-list li.level-aoi {
                 font-weight: normal;
                 color: #007bff;
+                pointer-events: none;
+                cursor: default;
             }
             .tree-list li.collapsed > ul {
                 display: none;
@@ -67,19 +69,19 @@
             <div class="filter-group">
                 <select id="screenFilter">
                     <option value="all">All Screens</option>
-                    </select>
+                </select>
             </div>
 
             <div class="filter-group">
                 <select id="appFilter">
                     <option value="all">All Applications</option>
-                    </select>
+                </select>
             </div>
 
             <div class="filter-group">
                 <select id="interfaceFilter">
                     <option value="all">All Interfaces</option>
-                    </select>
+                </select>
             </div>
         </div>
 
@@ -94,8 +96,7 @@
                 const hierarchyDisplay = document.getElementById('hierarchyDisplay');
                 hierarchyDisplay.innerHTML = ''; 
 
-                const hierarchy = {}; // screenId -> appId -> interfaceId -> [lens_objects]
-
+                const hierarchy = {}; 
                 lensesToRender.forEach(lens => {
                     const screenId = lens.screen_id;
                     const appId = lens.app_id;
@@ -103,24 +104,43 @@
                     const lensName = lens.name; 
                     const lensId = lens.id;
 
-                    // include lenses that have all three hierarchy levels defined
-                    if (screenId && appId && interfaceId && lensName) {
-                        if (!hierarchy[screenId]) {
-                            hierarchy[screenId] = {};
+                    if (!screenId || !lensName) {
+                        return;
+                    }
+
+                    // ensure screen level exists
+                    if (!hierarchy[screenId]) {
+                        hierarchy[screenId] = { _aois: [], applications: {} };
+                    }
+
+                    // if it's an AOI for a Screen itself
+                    if (screenId && !appId && !interfaceId) {
+                        hierarchy[screenId]._aois.push({ id: lensId, name: lensName });
+                    }
+                    // if it has an app ID 
+                    else if (screenId && appId) {
+                        const currentAppLevel = hierarchy[screenId].applications;
+                        if (!currentAppLevel[appId]) {
+                            currentAppLevel[appId] = { _aois: [], interfaces: {} };
                         }
-                        if (!hierarchy[screenId][appId]) {
-                            hierarchy[screenId][appId] = {};
+
+                        if (appId && !interfaceId) {
+                            currentAppLevel[appId]._aois.push({ id: lensId, name: lensName });
                         }
-                        if (!hierarchy[screenId][appId][interfaceId]) {
-                            hierarchy[screenId][appId][interfaceId] = [];
+                        // if it has an interface ID
+                        else if (appId && interfaceId) {
+                            const currentInterfaceLevel = currentAppLevel[appId].interfaces;
+                            if (!currentInterfaceLevel[interfaceId]) {
+                                currentInterfaceLevel[interfaceId] = { _aois: [] };
+                            }
+                            currentInterfaceLevel[interfaceId]._aois.push({ id: lensId, name: lensName });
                         }
-                        hierarchy[screenId][appId][interfaceId].push({ id: lensId, name: lensName });
                     }
                 });
 
                 // if no lenses meet the hierarchy criteria after filtering
                 if (Object.keys(hierarchy).length === 0) {
-                    hierarchyDisplay.innerHTML = "<p>No AOIs found with complete Screen, Application, and Interface IDs matching filters.</p>";
+                    hierarchyDisplay.innerHTML = "<p>No AOIs found matching filters or with valid Screen IDs.</p>";
                     return;
                 }
 
@@ -128,21 +148,44 @@
                 let treeHtml = '<ul class="tree-list">';
 
                 for (const screenId in hierarchy) {
+                    const screenData = hierarchy[screenId];
                     const screenNodeId = `screen-${screenId}`;
-                    treeHtml += `<li id="${screenNodeId}" class="level-screen expanded">`;
+                    treeHtml += `<li id="${screenNodeId}" class="level-screen expanded">`; 
                     treeHtml += `<span class="toggle-icon expanded"></span>Screen ID: ${screenId}`;
+                    
+                    // display AOIs directly under this screen if they exist
+                    if (screenData._aois.length > 0) {
+                        treeHtml += '<ul>';
+                        screenData._aois.forEach(aoi => {
+                            treeHtml += `<li class="level-aoi">AOI: ${aoi.name}</li>`;
+                        });
+                        treeHtml += '</ul>';
+                    }
+
                     treeHtml += '<ul>'; // application level
-                    for (const appId in hierarchy[screenId]) {
+                    for (const appId in screenData.applications) {
+                        const appData = screenData.applications[appId];
                         const appNodeId = `app-${screenId}-${appId}`;
                         treeHtml += `<li id="${appNodeId}" class="level-app expanded">`;
                         treeHtml += `<span class="toggle-icon expanded"></span>Application ID: ${appId}`;
+                        
+                        // display AOIs directly under this application if they exist
+                        if (appData._aois.length > 0) {
+                            treeHtml += '<ul>';
+                            appData._aois.forEach(aoi => {
+                                treeHtml += `<li class="level-aoi">AOI: ${aoi.name}</li>`;
+                            });
+                            treeHtml += '</ul>';
+                        }
+
                         treeHtml += '<ul>'; // interface level
-                        for (const interfaceId in hierarchy[screenId][appId]) {
+                        for (const interfaceId in appData.interfaces) {
+                            const interfaceData = appData.interfaces[interfaceId];
                             const interfaceNodeId = `interface-${screenId}-${appId}-${interfaceId}`;
                             treeHtml += `<li id="${interfaceNodeId}" class="level-interface expanded">`;
                             treeHtml += `<span class="toggle-icon expanded"></span>Interface ID: ${interfaceId}`;
-                            treeHtml += '<ul>'; // lenses within this interface
-                            hierarchy[screenId][appId][interfaceId].forEach(aoi => {
+                            treeHtml += '<ul>'; // lenses within this interface (leaf AOIs)
+                            interfaceData._aois.forEach(aoi => {
                                 treeHtml += `<li class="level-aoi">AOI: ${aoi.name}</li>`;
                             });
                             treeHtml += '</ul>'; // end lenses ul
@@ -162,7 +205,9 @@
                 const toggleNodes = document.querySelectorAll('.level-screen, .level-app, .level-interface');
                 toggleNodes.forEach(node => {
                     node.addEventListener('click', function(event) {
-                        // toggle if the click is directly on the list item itself (not children)
+                        // logic to highlight the lense when clicked on the hierarchy
+                        window.opener.midground_changed = true;
+                        
                         if (event.target === this || event.target.classList.contains('toggle-icon')) {
                             const isCurrentlyExpanded = this.classList.contains('expanded');
 
@@ -175,6 +220,22 @@
                                 icon.classList.toggle('collapsed', isCurrentlyExpanded);
                             }
                             event.stopPropagation();
+                        }
+                        const mainWindow = window.opener;
+                        if (mainWindow && mainWindow.highlightLensesById) {
+                            const nodeId = this.id;
+                            console.log('nodeID: ', nodeId);
+                            
+                            const parts = nodeId.split('-');
+                            const levelType = parts[0];
+                            const id = parts.slice(1).join('-');
+
+                            // all child AOIs and their IDs to the main window
+                            const allLenses = mainWindow.lenses || [];
+                            const relevantId = parts[parts.length - 1];
+                            const aoiIdsToHighlight = getChildAoiIds(allLenses, levelType, relevantId);
+                            console.log('highlight: ', aoiIdsToHighlight);
+                            mainWindow.highlightLensesById(aoiIdsToHighlight);
                         }
                     });
                 });
@@ -231,26 +292,53 @@
                 const selectedInterface = document.getElementById('interfaceFilter').value;
 
                 let filteredLenses = allLensesData.filter(lens => {
-                    // three hierarchy levels must be defined for a lens to be considered for filtering and display
-                    const hasAllHierarchyData = lens.screen_id !== undefined && lens.screen_id !== null &&
-                                                lens.app_id !== undefined && lens.app_id !== null &&
-                                                lens.interface_id !== undefined && lens.interface_id !== null;
-
-                    // lens is excluded from filtering if missing
-                    if (!hasAllHierarchyData) {
+                    // AOI must have at least a screen_id to be considered valid for the hierarchy
+                    if (lens.screen_id === undefined || lens.screen_id === null) {
                         return false;
                     }
 
-                    // convert lens IDs to string for comparison
+                    // check if the lens matches the selected screen filter
                     const matchesScreen = (selectedScreen === 'all' || String(lens.screen_id) === selectedScreen);
-                    const matchesApp = (selectedApp === 'all' || String(lens.app_id) === selectedApp);
-                    const matchesInterface = (selectedInterface === 'all' || String(lens.interface_id) === selectedInterface);
+                    if (!matchesScreen) {
+                        return false;
+                    }
+
+                    const matchesApp = (selectedApp === 'all' || (lens.app_id !== undefined && lens.app_id !== null && String(lens.app_id) === selectedApp));
+                    if (!matchesApp) {
+                        return false;
+                    }
+
+                    const matchesInterface = (selectedInterface === 'all' || (lens.interface_id !== undefined && lens.interface_id !== null && String(lens.interface_id) === selectedInterface));
+                    if (!matchesInterface) {
+                        return false;
+                    }
                     
-                    return matchesScreen && matchesApp && matchesInterface;
+                    return true;
                 });
 
                 renderHierarchy(filteredLenses);
             }
+
+            function getChildAoiIds(lenses, filterType, filterId) {
+                const ids = new Set();
+                lenses.forEach(lens => {
+                    let isMatch = false;
+                    if (filterType === 'screen' && String(lens.screen_id) === filterId) {
+                        isMatch = true;
+                    } else if (filterType === 'app' && String(lens.app_id) === filterId) {
+                        isMatch = true;
+                    } else if (filterType === 'interface' && String(lens.interface_id) === filterId) {
+                        isMatch = true;
+                    } else if (filterType === 'aoi' && String(lens.id) === filterId) {
+                        isMatch = true;
+                    }
+                    
+                    if (isMatch && lens.id !== undefined) {
+                        ids.add(lens.id);
+                    }
+            });
+            return Array.from(ids);
+        }
 
             window.onload = function() {
                 const mainWindow = window.opener;

@@ -481,8 +481,8 @@ function save_aoi(id){
 	const appVal = appEl?.value?.trim();
 	const interfaceVal = interfaceEl?.value?.trim();
 
-	if (!screenVal || !appVal || !interfaceVal) {
-		alert('Values cannot be empty');
+	if (!screenVal && !appVal && !interfaceVal) {
+		alert('All values cannot be empty');
 		return;
 	}
 
