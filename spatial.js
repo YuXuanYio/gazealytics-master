@@ -333,35 +333,16 @@ let spatialsketch = (p) => {
 		}
 		// lenses 
 		if( SHOW_LENS ){
-			// Sort base_lenses by currentPriority descending (highest priority first)
-			const sorted_lenses = [...base_lenses]
-				.filter(l => l && l.included && l.checked)
-				.sort((a, b) => a.currentPriority - b.currentPriority);
-
-			for (let i = 0; i < sorted_lenses.length; i++) {
-				let l = sorted_lenses[i];
-				p.fill(l.col(20));
-				p.stroke(l.col(60));
-				p.strokeWeight(2);
-				if (building_lens_id == l.id || selected_lens == l.id) {
-					p.fill(l.col(20));
-					p.stroke(l.col(75));
-					p.strokeWeight(5);
+			for(let i=0; i<order_lenses.length; i++){
+				let l = base_lenses[order_lenses[i]];
+				p.fill(l.col(20)); p.stroke(l.col(60)); p.strokeWeight(2);
+				if( building_lens_id==order_lenses[i] || selected_lens==order_lenses[i]){
+					p.fill(l.col(20)); p.stroke(l.col(75)); p.strokeWeight(5);
 				}
-				l.draw(
-					p,
-					building_lens_id == l.id,
-					selected_lens == l.id,
-					spatial_width,
-					spatial_height
-				);
-				
-				if (l.currentPriority !== undefined) {
-					// console.log("Rendering lens with ID: " + l.id + " and priority: " + l.currentPriority);
-				}
+				l.draw(p, building_lens_id==order_lenses[i],
+					selected_lens==order_lenses[i],
+					spatial_width, spatial_height);
 			}
-
-
 		}
 	};
 	
@@ -524,6 +505,7 @@ let draw_fixs = (canvas) => {
 	}catch (error) { console.error(error); background_changed = true; }
 };
 
+
 function compute_hit_any_aoi_rate_by_twi(HAAR, data, group, twi, fixs){
 	for(let j = twi.j_min; j<twi.j_max; j++){
 		if(fixs[j] != undefined){
@@ -544,6 +526,8 @@ function compute_hit_any_aoi_rate(){
 			//filter by twi_mode		
 			let data = DATASETS[v]; let fixs = data.fixs; 
 			let group = DATASETS[v].group;
+
+			// assign_fixations_to_lenses(fixs, lenses);
 
 			//filter fixations by TWI_MODE
 			if(TWI_MODE == 2 && selected_twi != -1 && data.tois[data.toi_id] != undefined && data.tois[data.toi_id].included) {

@@ -313,10 +313,14 @@ function load_zip(){
 								// base_lenses[iter].getArea = proto.getArea;
 								base_lenses[iter].edit_start_time = proto.edit_start_time;
 								base_lenses[iter].edit_end_time = proto.edit_end_time;
+								base_lenses[iter].edit_priority = proto.edit_priority;
 							}
 							if (base_lenses[iter].timeRanges === undefined || base_lenses[iter].timeRanges == null) {
 								base_lenses[iter].timeRanges = [];
-								base_lenses[iter].timeRanges.push({start: 0, end: maxEndTime});
+								base_lenses[iter].timeRanges.push({start: 0, end: maxEndTime, priority: 1});
+							}
+							if (base_lenses[iter].currentPriority === undefined || base_lenses[iter].currentPriority == null) {
+								base_lenses[iter].currentPriority = 1;
 							}
 						}
 						update_lens_colors();

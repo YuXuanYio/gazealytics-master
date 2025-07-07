@@ -136,12 +136,12 @@ class PolyLens{
 								style="width:80px"
 								value="${formatMilliseconds(range.end)}">
 						</td>
-					<td>
-						<input class="num" type="text"
-							onchange="base_lenses[${this.id}].edit_priority(parseInt(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
-							style="width:32px"
-							value="${range.priority !== undefined ? range.priority : 1}">
-					</td>
+						<td>
+							<input class="num" type="text"
+								onchange="base_lenses[${this.id}].edit_priority(parseInt(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+								style="width:32px"
+								value="${range.priority !== undefined ? range.priority : 1}">
+						</td>
 						<td style="vertical-align: middle;">
 							<div style="display: flex; gap: 4px;">
 								${this.timeRanges.length > 1 ? `<button type="button" onclick="event.stopPropagation(); removeTimeRow(${this.id}, ${i})">-</button>` : ''}
@@ -164,6 +164,12 @@ class PolyLens{
 								onchange="base_lenses[${this.id}].edit_end_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
 								style="width:80px"
 								value="${formatMilliseconds(range.end)}" disabled>
+						</td>
+						<td>
+							<input class="num" type="text"
+								onchange="base_lenses[${this.id}].edit_priority(parseInt(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+								style="width:32px"
+								value="${this.currentPriority}">
 						</td>
 						<td style="vertical-align: middle;">
 							<div style="display: flex; gap: 4px;">
@@ -372,12 +378,12 @@ class EllipseLens{
 								style="width:80px"
 								value="${formatMilliseconds(range.end)}">
 						</td>
-					<td>
-						<input class="num" type="number"
-							onchange="base_lenses[${this.id}].edit_priority(parseInt(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
-							style="width:32px"
-							value="${range.priority !== undefined ? range.priority : 1}">
-					</td>
+						<td>
+							<input class="num" type="number"
+								onchange="base_lenses[${this.id}].edit_priority(parseInt(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+								style="width:32px"
+								value="${range.priority !== undefined ? range.priority : 1}">
+						</td>
 						<td style="vertical-align: middle;">
 							<div style="display: flex; gap: 4px;">
 								${this.timeRanges.length > 1 ? `<button type="button" onclick="event.stopPropagation(); removeTimeRow(${this.id}, ${i})">-</button>` : ''}
@@ -400,6 +406,12 @@ class EllipseLens{
 								onchange="base_lenses[${this.id}].edit_end_time(parseTimeString(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
 								style="width:80px"
 								value="${formatMilliseconds(range.end)}" disabled>
+						</td>
+						<td>
+							<input class="num" type="number"
+								onchange="base_lenses[${this.id}].edit_priority(parseInt(this.value), ${i});base_lenses[${this.id}].fix_up();lenses_update()"
+								style="width:32px"
+								value="${this.currentPriority}">
 						</td>
 						<td style="vertical-align: middle;">
 							<div style="display: flex; gap: 4px;">
@@ -436,7 +448,13 @@ class EllipseLens{
 		}
 
 		edit_priority(priority, index = 0) {
-			this.timeRanges[index].priority = priority;
+			if (this.isTemporal) {
+				this.timeRanges[index].priority = priority;
+				handleAOITimeChange(document.getElementById('timeInput').value, true);
+				// console.log("Time Input value: " + document.getElementById('timeInput').value)
+			} else {
+				this.currentPriority = priority;
+			}
 		}
 
 		constructor(lid, x1, y1, groupid){
