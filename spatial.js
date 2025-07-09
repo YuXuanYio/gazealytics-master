@@ -158,7 +158,7 @@ let spatialsketch = (p) => {
 						fixs = data.fixs;
 
 						const cursor_pixel_width = (TIMELINE_MOUSEOVER_WINDOW*1000)/(tmax-tmin) * (spatial_width-300);
-						let timeline_left_px = Math.max(200, Math.min(TIMELINE.mouseX, 200 + (spatial_width-300) - cursor_pixel_width));
+						let timeline_left_px = Math.max(200, Math.min(TIMELINE.mouseX - cursor_pixel_width/2, 200 + (spatial_width-300) - cursor_pixel_width));
 						let timeline_right_px = timeline_left_px + cursor_pixel_width;
 
 						let t_left = ((timeline_left_px - 200) / (spatial_width-300)) * (tmax - tmin) + tmin;

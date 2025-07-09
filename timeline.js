@@ -520,9 +520,7 @@ let timelinesketch = (p) => {
 				p.stroke( cy(90, data.group) );
 
 				const cursor_pixel_width = (TIMELINE_MOUSEOVER_WINDOW*1000)/(data.tmax-data.tmin) * (spatial_width-300);
-				const left = Math.max(200, Math.min(p.mouseX, 200 + (spatial_width-300) - cursor_pixel_width));
-				// Right should be the min of left + cursor_pixel_width and the right edge of the canvas
-
+				const left = Math.max(200, Math.min(p.mouseX - cursor_pixel_width/2, 200 + (spatial_width-300) - cursor_pixel_width));
 				const right = Math.min(left + cursor_pixel_width, p.width - 100);
 				
 				//const right = Math.min(left + cursor_pixel_width, 200 + (spatial_width-300));
