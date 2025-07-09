@@ -876,3 +876,27 @@ function toggleTemporal(id) {
 				</span>`;
 	}
 }
+
+function handleAOIFilterChange(filterType) {
+  base_lenses.forEach((lens, i) => {
+    if (filterType === 'temporal') {
+      lens.included = lens.isTemporal;
+    } else if (filterType === 'non-temporal') {
+      lens.included = !lens.isTemporal;
+    } else {
+      lens.included = true;
+    }
+
+    const lensElem = document.getElementById(`lens_${i}_c`);
+    if (lensElem) {
+      lensElem.innerHTML = lens.included
+        ? '<i class="fas fa-eye"></i>'
+        : '<i class="fas fa-eye-slash"></i>';
+      lensElem.checked = lens.included;
+    } else {
+      console.log(`Element lens_${i}_c not found`);
+    }
+  });
+
+  lenses_update();
+}

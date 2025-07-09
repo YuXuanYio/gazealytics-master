@@ -317,6 +317,16 @@
     				<span class="tip">Open AOI hierarchy popup</span>
   					</div></div>
 					<div class="tool">
+					<label for="aoiFilterSelect">Filter AOIs:</label>
+					<select id="aoiFilterSelect" onchange="handleAOIFilterChange(this.value)">
+						<option value="all">Show all AOIs</option>
+						<option value="temporal">Show only temporal AOIs</option>
+						<option value="non-temporal">Show only non-temporal AOIs</option>
+					</select>
+					<span class="tip">Filter AOIs by temporal property</span>
+					</div>
+
+					<div class="tool">
 						<label for="timeInput">Time (H:MM:SS.ms):</label>
 						<input type="text" id="timeInput" placeholder="0:00:00.00" onchange="handleAOITimeChange(this.value, isString=true)" value="0:00:00.00" style="width:100px;">
 						<span class="tip">Enter time in H:MM:SS.ms format</span>
