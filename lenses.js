@@ -112,7 +112,7 @@ class PolyLens{
 				this.area = this.getArea();
 		}
 		make_controls(){
-			var g = "";
+			var g = '<tr><th>Coordinates:</th></tr>';
 			for(var i=0; i<this.x.length; i++){
 				g += '<tr><th><input class="num" type="number" onchange="base_lenses['+this.id+'].x['+i+']=parseFloat(this.value);lenses_update()" style="width:80px" value='+this.x[i]+'></th>';
 				g += '<th><input class="num" type="number" onchange="base_lenses['+this.id+'].y['+i+']=parseFloat(this.value);lenses_update()" style="width:80px" value='+this.y[i]+'></th></tr>';
@@ -191,6 +191,10 @@ class PolyLens{
 				handleAOITimeChange(end, false);
 			}
 		}
+
+		edit_hierarchy(h1, h2, h3){
+			this.h1 = h1; this.h2 = h2; this.h3 = h3;
+		}
 	
 		constructor(lid, x1, y1, groupid){
 			this.type = 'poly'; this.id = lid; this.name = lid+''; this.locked = false;
@@ -198,6 +202,7 @@ class PolyLens{
 			this.area = 0;
 			this.timeRanges = [{ start: 0, end: maxEndTime }];
 			this.isTemporal = false;
+			this.h1 = -1; this.h2 = -1; this.h3 = -1; //hirarchical id for the lens, h1 for top level.
 		}
 }
 class EllipseLens{
@@ -336,7 +341,8 @@ class EllipseLens{
 				this.area = this.getArea();
 		}
 		make_controls() {
-			let g = '<tr><th><input class="num" type="number" onchange="base_lenses['+this.id+'].x1=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.x1+'></th>';
+			let g = '<tr><th>Coordinates:</th></tr>';
+			g += '<tr><th><input class="num" type="number" onchange="base_lenses['+this.id+'].x1=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.x1+'></th>';
 			g += '<th><input class="num" type="number" onchange="base_lenses['+this.id+'].y1=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.y1+'></th></tr>';
 			g += '<tr><th><input class="num" type="number" onchange="base_lenses['+this.id+'].x2=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.x2+'></th>';
 			g += '<th><input class="num" type="number" onchange="base_lenses['+this.id+'].y2=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.y2+'></th></tr>';
@@ -415,6 +421,10 @@ class EllipseLens{
 			}
 		}
 
+		edit_hierarchy(h1, h2, h3){
+			this.h1 = h1; this.h2 = h2; this.h3 = h3;
+		}
+
 		constructor(lid, x1, y1, groupid){
 			this.type = 'ellipse'; this.id = lid; this.name = lid+''; this.locked = false;
 			this.x1 = x1; this.y1 = y1;
@@ -425,6 +435,7 @@ class EllipseLens{
 			this.area = 0;
 			this.timeRanges = [{ start: 0, end: maxEndTime }];
 			this.isTemporal = false;
+			this.h1 = -1; this.h2 = -1; this.h3 = -1; //hirarchical id for the lens, h1 for top level.
 		}
 }
 class RectLens extends EllipseLens{
@@ -643,9 +654,7 @@ function save_aoi(id){
 
 	const targetLens = lenses.find(lens => lens.id === id);
 	if(targetLens) {
-		targetLens.screen_id = screenVal;
-		targetLens.app_id = appVal;
-		targetLens.interface_id = interfaceVal;
+		targetLens.edit_hierarchy(screenVal, appVal, interfaceVal);
 	} else {
 		console.log('Target lens not found');
 	}

@@ -98,9 +98,9 @@
 
                 const hierarchy = {}; 
                 lensesToRender.forEach(lens => {
-                    const screenId = lens.screen_id;
-                    const appId = lens.app_id;
-                    const interfaceId = lens.interface_id;
+                    const screenId = lens.h1;
+                    const appId = lens.h2;
+                    const interfaceId = lens.h3;
                     const lensName = lens.name; 
                     const lensId = lens.id;
 
@@ -258,9 +258,9 @@
                 const uniqueInterfaceIds = new Set();
 
                 lensesData.forEach(lens => {
-                    if (lens.screen_id) uniqueScreenIds.add(lens.screen_id);
-                    if (lens.app_id) uniqueAppIds.add(lens.app_id);
-                    if (lens.interface_id) uniqueInterfaceIds.add(lens.interface_id);
+                    if (lens.h1) uniqueScreenIds.add(lens.h1);
+                    if (lens.h2) uniqueAppIds.add(lens.h2);
+                    if (lens.h3) uniqueInterfaceIds.add(lens.h3);
                 });
 
                 Array.from(uniqueScreenIds).sort((a, b) => { return String(a).localeCompare(String(b), undefined, {numeric: true}); }).forEach(id => {
@@ -290,25 +290,24 @@
                 const selectedScreen = document.getElementById('screenFilter').value;
                 const selectedApp = document.getElementById('appFilter').value;
                 const selectedInterface = document.getElementById('interfaceFilter').value;
-
                 let filteredLenses = allLensesData.filter(lens => {
                     // AOI must have at least a screen_id to be considered valid for the hierarchy
-                    if (lens.screen_id === undefined || lens.screen_id === null) {
+                    if (lens.h1 === undefined || lens.h1 === null) {
                         return false;
                     }
 
                     // check if the lens matches the selected screen filter
-                    const matchesScreen = (selectedScreen === 'all' || String(lens.screen_id) === selectedScreen);
+                    const matchesScreen = (selectedScreen === 'all' || String(lens.h1) === selectedScreen);
                     if (!matchesScreen) {
                         return false;
                     }
 
-                    const matchesApp = (selectedApp === 'all' || (lens.app_id !== undefined && lens.app_id !== null && String(lens.app_id) === selectedApp));
+                    const matchesApp = (selectedApp === 'all' || (lens.h2 !== undefined && lens.h2 !== null && String(lens.h2) === selectedApp));
                     if (!matchesApp) {
                         return false;
                     }
 
-                    const matchesInterface = (selectedInterface === 'all' || (lens.interface_id !== undefined && lens.interface_id !== null && String(lens.interface_id) === selectedInterface));
+                    const matchesInterface = (selectedInterface === 'all' || (lens.h3 !== undefined && lens.h3 !== null && String(lens.h3) === selectedInterface));
                     if (!matchesInterface) {
                         return false;
                     }
@@ -323,11 +322,11 @@
                 const ids = new Set();
                 lenses.forEach(lens => {
                     let isMatch = false;
-                    if (filterType === 'screen' && String(lens.screen_id) === filterId) {
+                    if (filterType === 'screen' && String(lens.h1) === filterId) {
                         isMatch = true;
-                    } else if (filterType === 'app' && String(lens.app_id) === filterId) {
+                    } else if (filterType === 'app' && String(lens.h2) === filterId) {
                         isMatch = true;
-                    } else if (filterType === 'interface' && String(lens.interface_id) === filterId) {
+                    } else if (filterType === 'interface' && String(lens.h3) === filterId) {
                         isMatch = true;
                     } else if (filterType === 'aoi' && String(lens.id) === filterId) {
                         isMatch = true;
