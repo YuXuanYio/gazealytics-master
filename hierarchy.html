@@ -224,16 +224,18 @@
                         const mainWindow = window.opener;
                         if (mainWindow && mainWindow.highlightLensesById) {
                             const nodeId = this.id;
-                            console.log('nodeID: ', nodeId);
+                            console.log('nodeID: ', nodeId); //screen-1
                             
                             const parts = nodeId.split('-');
                             const levelType = parts[0];
-                            const id = parts.slice(1).join('-');
+                            const idsToMatch = parts.slice(1);
+                            console.log('parts: ', parts);
+                            console.log('ids to match: ', idsToMatch);
 
                             // all child AOIs and their IDs to the main window
                             const allLenses = mainWindow.lenses || [];
-                            const relevantId = parts[parts.length - 1];
-                            const aoiIdsToHighlight = getChildAoiIds(allLenses, levelType, relevantId);
+                            const relevantId = parts[parts.length - 1]; 
+                            const aoiIdsToHighlight = getChildAoiIds(allLenses, levelType, idsToMatch);
                             console.log('highlight: ', aoiIdsToHighlight);
                             mainWindow.highlightLensesById(aoiIdsToHighlight);
                         }
@@ -316,23 +318,28 @@
                     return true;
                 });
 
+                const idsToHighlight = filteredLenses.map(lens => lens.id);
+
+                const mainWindow = window.opener;
+                if (mainWindow && mainWindow.highlightLensesById) {
+                    mainWindow.highlightLensesById(idsToHighlight);
+                }
+
                 renderHierarchy(filteredLenses);
             }
 
-            function getChildAoiIds(lenses, filterType, filterId) {
+            function getChildAoiIds(lenses, filterType, idsToMatch) {
                 const ids = new Set();
                 lenses.forEach(lens => {
                     let isMatch = false;
-                    if (filterType === 'screen' && String(lens.screen_id) === filterId) {
+                    if (filterType === 'screen' && String(lens.screen_id) === idsToMatch[0]) {
                         isMatch = true;
-                    } else if (filterType === 'app' && String(lens.app_id) === filterId) {
+                    } else if (filterType === 'app' && String(lens.screen_id) === idsToMatch[0] && String(lens.app_id) === idsToMatch[1]) {
                         isMatch = true;
-                    } else if (filterType === 'interface' && String(lens.interface_id) === filterId) {
-                        isMatch = true;
-                    } else if (filterType === 'aoi' && String(lens.id) === filterId) {
+                    } else if (filterType === 'interface' && String(lens.screen_id) === idsToMatch[0] && String(lens.app_id) === idsToMatch[1] && String(lens.interface_id) === idsToMatch[2]) {
                         isMatch = true;
                     }
-                    
+
                     if (isMatch && lens.id !== undefined) {
                         ids.add(lens.id);
                     }
