@@ -487,6 +487,15 @@ function delete_item(id){
 	}
 	make_dynamic_legend();	
 }
+function select_data_by_name(sampleName) {
+    for (let i = 0; i < DATASETS.length; i++) {
+        if (DATASETS[i].name === sampleName) {
+            select_data(i);
+            return;
+        }
+    }
+    console.warn("Sample with name '" + sampleName + "' not found.");
+}
 function select_data(id){
 	list = document.getElementById('mylist').children;
 	for(i =0;i < list.length; i++){

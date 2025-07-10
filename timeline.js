@@ -107,8 +107,12 @@ let timelinesketch = (p) => {
 				k = Math.floor((p.mouseY*lenses.length)/timeline_highlight_position);
 				selected_lens = k;
 			}else if( (TIME_DATA=="data"||TIME_DATA=='all'||TIME_DATA=='group') && TIMELINE_CANVAS.num_of_rows > 0){
-				k = Math.floor((p.mouseY*TIMELINE_CANVAS.num_of_rows)/timeline_highlight_position);
-				select_data(k);
+				k = Math.floor((p.mouseY*TIMELINE_CANVAS.num_of_rows)/timeline_highlight_position);				
+				let sampleIndex = VALUED[k];
+				let sampleName = DATASETS[sampleIndex].name;
+				// console.log("Selected Data: " + sampleName);
+
+				select_data_by_name(sampleName);
 				// selected_data = k;
 			}else{return;}
 			background_changed = true; timeline_changed=true; matrix_changed = true; return;
