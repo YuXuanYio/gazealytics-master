@@ -238,6 +238,28 @@ function load_zip(){
 									base_lenses[v].group = v % LENS_COLOURS.length;								
 								
 								item.value = base_lenses[v].group;
+
+								// Temporal stuff
+								item = document.getElementById('lens_'+v+'_screen_id');
+								if(base_lenses[v].h1 != undefined && base_lenses[v].h1 != null){
+									item.value = base_lenses[v].h1;
+								}
+								item = document.getElementById('lens_'+v+'_app_id');
+								if(base_lenses[v].h2 != undefined && base_lenses[v].h2 != null){
+									item.value = base_lenses[v].h2;
+								}
+								item = document.getElementById('lens_'+v+'_interface_id');
+								if(base_lenses[v].h3 != undefined && base_lenses[v].h3 != null){
+									item.value = base_lenses[v].h3;
+								}
+								item = document.getElementById('lens_'+v+'_temporal_btn');
+								item.checked = base_lenses[v].isTemporal;
+								if(item.checked){
+									item.innerHTML='<span style="display: inline-flex; align-items: center;"><i class="fas fa-clock"></i><i class="fas fa-times"></i></span>';
+								}else{
+									item.innerHTML='<i class="fas fa-clock"></i>';
+								}
+
 							}
 						}
 						//process the remaining lenses
@@ -282,6 +304,11 @@ function load_zip(){
 									base_lenses[v].group = v % LENS_COLOURS.length;								
 								
 								item.value = base_lenses[v].group;
+								item = document.getElementById('lens_'+v+'_screen_id');
+								console.log(base_lenses[v]);
+								if(base_lenses[v].h1 != undefined && base_lenses[v].h1 != null){
+									item.value = base_lenses[v].h1;
+								}
 								
 								console.log("aoi json: "+base_lenses.map(aoi => aoi.group));
 								// console.log("document.getElementById(["+v+"].group="+document.getElementById('lens_'+v+'_lensegroup'));		
@@ -308,12 +335,11 @@ function load_zip(){
 								base_lenses[iter].near_start = proto.near_start;
 								base_lenses[iter].move = proto.move;
 								base_lenses[iter].draw = proto.draw;
-								base_lenses[iter].fix_up = proto.fix_up;
 								base_lenses[iter].make_controls = proto.make_controls;
 								// base_lenses[iter].getArea = proto.getArea;
 								base_lenses[iter].edit_start_time = proto.edit_start_time;
 								base_lenses[iter].edit_end_time = proto.edit_end_time;
-								base_lenses[iter].edit_priority = proto.edit_priority;
+								base_lenses[iter].edit_hierarchy = proto.edit_hierarchy;
 							}
 							if (base_lenses[iter].timeRanges === undefined || base_lenses[iter].timeRanges == null) {
 								base_lenses[iter].timeRanges = [];

@@ -2,6 +2,24 @@ let backimage, cropimage;
 let Minimap;
 let SpatialBackground, SpatialMidground, SpatialForeground;
 let SpatialCanvas;
+let highlighted_lenses = [];
+
+function highlightLensesById(arrayOfIds) {
+    highlighted_lenses = []; // clear previous highlights
+    if (!arrayOfIds || arrayOfIds.length === 0) {
+        background_changed = true;
+        return;
+    }
+
+    // finding the index for each lens ID
+    for (const id of arrayOfIds) {
+        const lensIndex = base_lenses.findIndex(lens => lens.id === id);
+        if (lensIndex !== -1) {
+            highlighted_lenses.push(lensIndex);
+        }
+    }
+    background_changed = true; // trigger a redraw
+}
 
 let spatialsketch = (p) => {
 	let f = {
@@ -334,13 +352,29 @@ let spatialsketch = (p) => {
 		// lenses 
 		if( SHOW_LENS ){
 			for(let i=0; i<order_lenses.length; i++){
-				let l = base_lenses[order_lenses[i]];
-				p.fill(l.col(20)); p.stroke(l.col(60)); p.strokeWeight(2);
-				if( building_lens_id==order_lenses[i] || selected_lens==order_lenses[i]){
-					p.fill(l.col(20)); p.stroke(l.col(75)); p.strokeWeight(5);
+				let lens_index = order_lenses[i];
+				let l = base_lenses[lens_index];
+
+				let currentFill = l.col(20);
+				let currentStroke = l.col(60);
+				let currentWeight = 2;
+
+				// highlighting logic
+				if (highlighted_lenses.includes(lens_index)) {
+					currentFill = l.col(40);
+					currentWeight = 6;
+				} else if (building_lens_id === lens_index || selected_lens === lens_index) {
+					currentFill = l.col(20);
+					currentStroke = l.col(75);
+					currentWeight = 5;
 				}
-				l.draw(p, building_lens_id==order_lenses[i],
-					selected_lens==order_lenses[i],
+
+				p.fill(currentFill);
+				p.stroke(currentStroke);
+				p.strokeWeight(currentWeight);
+
+				l.draw(p, building_lens_id === lens_index,
+					selected_lens === lens_index,
 					spatial_width, spatial_height);
 			}
 		}

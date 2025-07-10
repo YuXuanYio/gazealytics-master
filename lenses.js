@@ -112,7 +112,7 @@ class PolyLens{
 				this.area = this.getArea();
 		}
 		make_controls(){
-			var g = "";
+			var g = '<tr><th>Coordinates:</th></tr>';
 			for(var i=0; i<this.x.length; i++){
 				g += '<tr><th><input class="num" type="number" onchange="base_lenses['+this.id+'].x['+i+']=parseFloat(this.value);lenses_update()" style="width:80px" value='+this.x[i]+'></th>';
 				g += '<th><input class="num" type="number" onchange="base_lenses['+this.id+'].y['+i+']=parseFloat(this.value);lenses_update()" style="width:80px" value='+this.y[i]+'></th></tr>';
@@ -205,6 +205,10 @@ class PolyLens{
 			}
 		}
 
+		edit_hierarchy(h1, h2, h3){
+			this.h1 = h1; this.h2 = h2; this.h3 = h3;
+		}
+
 		edit_priority(priority, index = 0) {
 			if (this.isTemporal) {
 				this.timeRanges[index].priority = priority;
@@ -221,6 +225,7 @@ class PolyLens{
 			this.timeRanges = [{ start: 0, end: maxEndTime, priority: 1 }];
 			this.currentPriority = 1;
 			this.isTemporal = false;
+			this.h1 = -1; this.h2 = -1; this.h3 = -1; //hirarchical id for the lens, h1 for top level.
 		}
 }
 class EllipseLens{
@@ -359,7 +364,8 @@ class EllipseLens{
 				this.area = this.getArea();
 		}
 		make_controls() {
-			let g = '<tr><th><input class="num" type="number" onchange="base_lenses['+this.id+'].x1=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.x1+'></th>';
+			let g = '<tr><th>Coordinates:</th></tr>';
+			g += '<tr><th><input class="num" type="number" onchange="base_lenses['+this.id+'].x1=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.x1+'></th>';
 			g += '<th><input class="num" type="number" onchange="base_lenses['+this.id+'].y1=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.y1+'></th></tr>';
 			g += '<tr><th><input class="num" type="number" onchange="base_lenses['+this.id+'].x2=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.x2+'></th>';
 			g += '<th><input class="num" type="number" onchange="base_lenses['+this.id+'].y2=parseFloat(this.value);base_lenses['+this.id+'].fix_up();lenses_update()" style="width:80px" value='+this.y2+'></th></tr>';
@@ -450,6 +456,10 @@ class EllipseLens{
 			}
 		}
 
+		edit_hierarchy(h1, h2, h3){
+			this.h1 = h1; this.h2 = h2; this.h3 = h3;
+		}
+
 		edit_priority(priority, index = 0) {
 			if (this.isTemporal) {
 				this.timeRanges[index].priority = priority;
@@ -471,6 +481,7 @@ class EllipseLens{
 			this.timeRanges = [{ start: 0, end: maxEndTime, priority: 1 }];
 			this.currentPriority = 1;
 			this.isTemporal = false;
+			this.h1 = -1; this.h2 = -1; this.h3 = -1; //hirarchical id for the lens, h1 for top level.
 		}
 }
 class RectLens extends EllipseLens{
@@ -600,9 +611,12 @@ lensbox = '<div class="dragger" draggable="true" ondragend="dragEnd()" ondragove
 + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button id="lens_#_l" checked="true"><i class="fas fa-lock-open"></i></button><span class="tip">Lock the lens with current value</span></div>'
 + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button onclick="delete_lens(#);"><i class="far fa-trash-alt"></i></button><span class="tip">Delete the lens</span></div>'
 + '</div>'
-+ '<div id="lens_#_values" class="hidden"></div>'
-+ '</div>';
-
++'<div style="display: flex; gap: 8px; align-items: center; margin: 3px">'
++ '<label>Screen ID<br><input class="num" type="number" id="lens_#_screen_id" name="#name" style="width:70px" step=1 min=1></label>'
++ '<label>App ID<br><input class="num" type="number" id="lens_#_app_id" name="#name" style="width:70px" min=1 step=1></label>'
++ '<label>Interface ID<br><input class="num" type="number" id="lens_#_interface_id" name="#name" style="width:70px" min=1 step=1></label>'
++'<button id="lens_#_aoi_done" onclick="save_aoi(#);"><i class="fas fa-check-circle"></i></button></div>'
++ '<div id="lens_#_values" class="hidden"></div></div>';
 
 lid = 0; selected_lens = -1; building_lens_id = -1;
 lenses = []; order_lenses = []; base_lenses = []; new_lens_mode = 'poly';
@@ -642,13 +656,58 @@ function create_lens(mx, my){
 		// console.log('class', ec, 'target', e.target);
 	}
 	document.getElementById('lens_'+v+'_c').checked = true;
-	document.getElementById('lens_'+v+'_c').onclick = function(){ document.getElementById('sort_dropdown').value = 'No_sort'; load_controls(); matrix_changed = true;timeline_changed=true;  this.checked = !this.checked; if(this.checked){this.innerHTML='<i class="fas fa-eye"></i>';}else{this.innerHTML='<i class="fas fa-eye-slash"></i>';} }
+	document.getElementById('lens_'+v+'_c').onclick = function(){ 
+		document.getElementById('sort_dropdown').value = 'No_sort'; 
+		load_controls(); 
+		matrix_changed = true;
+		timeline_changed=true;  
+		this.checked = !this.checked; 
+		if(this.checked){
+			this.innerHTML='<i class="fas fa-eye"></i>';
+		}else{
+			this.innerHTML='<i class="fas fa-eye-slash"></i>';
+		} 
+	}
 	document.getElementById('lens_'+v+'_l').checked = false;
-	document.getElementById('lens_'+v+'_l').onclick = function(){ this.checked = !this.checked; if(this.checked){this.innerHTML='<i class="fas fa-lock"></i>';}else{this.innerHTML='<i class="fas fa-lock-open"></i>';} }
+	document.getElementById('lens_'+v+'_l').onclick = function(){ 
+		this.checked = !this.checked; 
+		if(this.checked){
+			this.innerHTML='<i class="fas fa-lock"></i>';
+		}else{this.innerHTML='<i class="fas fa-lock-open"></i>';} 
+	}
 	document.getElementById('lens_'+v+'_lensegroup').value = groupid;
 	}
 function lenses_update(){
 	midground_changed = true; timeline_changed = true; matrix_changed = true; SAC_FILTER_CHANGED = true;
+}
+function save_aoi(id){
+	const doneBtn=document.getElementById(`lens_${id}_aoi_done`)
+	const icon = doneBtn.querySelector('i');
+	const screenEl = document.getElementById(`lens_${id}_screen_id`);
+	const appEl = document.getElementById(`lens_${id}_app_id`);
+	const interfaceEl = document.getElementById(`lens_${id}_interface_id`);
+	
+	const screenVal = screenEl?.value?.trim();
+	const appVal = appEl?.value?.trim();
+	const interfaceVal = interfaceEl?.value?.trim();
+
+	if (!screenVal && !appVal && !interfaceVal) {
+		alert('All values cannot be empty');
+		return;
+	}
+
+	icon.style.color="green";
+
+	const targetLens = lenses.find(lens => lens.id === id);
+	if(targetLens) {
+		targetLens.edit_hierarchy(screenVal, appVal, interfaceVal);
+	} else {
+		console.log('Target lens not found');
+	}
+
+	window.lenses = targetLens;
+	console.log('target lens:', targetLens)
+	alert('AOI saved successfully!');
 }
 function find_lens(X, Y){
 
@@ -849,6 +908,11 @@ function toggleTemporal(id) {
 	const lens = base_lenses[id];
 	lens.isTemporal = !lens.isTemporal;
 
+	const timeInput = document.getElementById(`timeInput`).value;
+	if (timeInput) {
+		handleAOITimeChange(timeInput, true);
+	}
+
 	const container = document.getElementById(`lens_${id}_values`);
 	if (container) {
 		container.innerHTML = lens.make_controls();
@@ -864,4 +928,28 @@ function toggleTemporal(id) {
 				<i class="fas fa-times"></i>
 				</span>`;
 	}
+}
+
+function handleAOIFilterChange(filterType) {
+  base_lenses.forEach((lens, i) => {
+    if (filterType === 'temporal') {
+      lens.included = lens.isTemporal;
+    } else if (filterType === 'non-temporal') {
+      lens.included = !lens.isTemporal;
+    } else {
+      lens.included = true;
+    }
+
+    const lensElem = document.getElementById(`lens_${i}_c`);
+    if (lensElem) {
+      lensElem.innerHTML = lens.included
+        ? '<i class="fas fa-eye"></i>'
+        : '<i class="fas fa-eye-slash"></i>';
+      lensElem.checked = lens.included;
+    } else {
+      console.log(`Element lens_${i}_c not found`);
+    }
+  });
+
+  lenses_update();
 }
