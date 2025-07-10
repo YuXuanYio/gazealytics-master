@@ -54,6 +54,7 @@ let matrix_changed_retry = 0;
 var TIMELINE_HIGHLIGHT = {
     tmin: null,
     tmax: null,
+	fixs: null,
 };
 
 function display(bool){ if(bool){return 'block';}else{return 'none';} }
