@@ -157,12 +157,22 @@ let spatialsketch = (p) => {
 						}							
 						fixs = data.fixs;
 
+						//console.log("tmin: " + tmin + ", tmax: " + tmax);
+
+						tmin = window.TIMELINE_HIGHLIGHT.tmin
+						tmax = window.TIMELINE_HIGHLIGHT.tmax
+
 						const cursor_pixel_width = (TIMELINE_MOUSEOVER_WINDOW*1000)/(tmax-tmin) * (spatial_width-300);
 						let timeline_left_px = Math.max(200, Math.min(TIMELINE.mouseX - cursor_pixel_width/2, 200 + (spatial_width-300) - cursor_pixel_width));
-						let timeline_right_px = timeline_left_px + cursor_pixel_width;
+						let timeline_right_px = Math.min(timeline_left_px + cursor_pixel_width, p.width-100);
+
+
+						// console.log("timeline_left_px: " + timeline_left_px + ", timeline_right_px: " + timeline_right_px);
 
 						let t_left = ((timeline_left_px - 200) / (spatial_width-300)) * (tmax - tmin) + tmin;
 						let t_right = ((timeline_right_px - 200) / (spatial_width-300)) * (tmax - tmin) + tmin;
+						
+						// console.log("t_left: " + t_left + ", t_right: " + t_right);
 
 						v = (TIMELINE.mouseX - 200)/(spatial_width-300)*(tmax-tmin) + tmin;
 						p.stroke( cy(90, data.group) ); 

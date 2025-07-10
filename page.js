@@ -51,6 +51,11 @@ EXPORT_CROP_TIMELINE_CANVAS = true;
 TOGGLE_GREEN_BOX_HIGHLIGHTS = true;
 let matrix_changed_retry = 0;
 
+TIMELINE_HIGHLIGHT = {
+    tmin: null,
+    tmax: null,
+};
+
 function display(bool){ if(bool){return 'block';}else{return 'none';} }
 function update_all(){ background_changed=true; midground_changed=true; matrix_changed=true; timeline_changed=true; update_topos=true; }
 
