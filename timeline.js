@@ -519,8 +519,8 @@ let timelinesketch = (p) => {
 				p.strokeWeight(3); 
 				p.stroke( cy(90, data.group) );
 
-				window.TIMELINE_HIGHLIGHT.tmin = data.tmin;
-				window.TIMELINE_HIGHLIGHT.tmax = data.tmax;
+				TIMELINE_HIGHLIGHT.tmin = data.tmin;
+				TIMELINE_HIGHLIGHT.tmax = data.tmax;
 
 				const cursor_pixel_width = (TIMELINE_MOUSEOVER_WINDOW*1000)/(data.tmax-data.tmin) * (spatial_width-300);
 				const left = Math.max(200, Math.min(p.mouseX - cursor_pixel_width/2, 200 + (spatial_width-300) - cursor_pixel_width));

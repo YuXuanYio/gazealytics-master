@@ -159,8 +159,8 @@ let spatialsketch = (p) => {
 
 						//console.log("tmin: " + tmin + ", tmax: " + tmax);
 
-						tmin = window.TIMELINE_HIGHLIGHT.tmin
-						tmax = window.TIMELINE_HIGHLIGHT.tmax
+						tmin = TIMELINE_HIGHLIGHT.tmin
+						tmax = TIMELINE_HIGHLIGHT.tmax
 
 						const cursor_pixel_width = (TIMELINE_MOUSEOVER_WINDOW*1000)/(tmax-tmin) * (spatial_width-300);
 						let timeline_left_px = Math.max(200, Math.min(TIMELINE.mouseX - cursor_pixel_width/2, 200 + (spatial_width-300) - cursor_pixel_width));

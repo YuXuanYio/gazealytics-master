@@ -51,7 +51,7 @@ EXPORT_CROP_TIMELINE_CANVAS = true;
 TOGGLE_GREEN_BOX_HIGHLIGHTS = true;
 let matrix_changed_retry = 0;
 
-TIMELINE_HIGHLIGHT = {
+var TIMELINE_HIGHLIGHT = {
     tmin: null,
     tmax: null,
 };
