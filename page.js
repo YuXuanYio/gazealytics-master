@@ -6,7 +6,7 @@ SPATIAL_CANVAS_HEIGHT_PERCENTAGE = 0.7; // percentage of the browser innerHeight
 CANVAS_BOX_HEIGHT_PERCENTAGE = 0.97; // percentage of the browser innerHeight
 MATRIX_CENTER_WIDTH_PERCERTAGE_OVER_INTERFACE_LAYOUT = 38; // percentage of the matrix center of the interface layout
 INTERFACE_LAYOUT_OVER_WINDOWS_WIDTH = 0.88; // percentage of interface_layout width over windows
-RESIZE_CONTROL_PADDING = 30; 
+RESIZE_CONTROL_PADDING = 5; 
 
 spatial_width = window.innerWidth * SPATIAL_CANVAS_WIDTH_PERCENTAGE;
 spatial_height = window.innerHeight * SPATIAL_CANVAS_HEIGHT_PERCENTAGE;
