@@ -340,6 +340,7 @@ function load_zip(){
 								base_lenses[iter].edit_start_time = proto.edit_start_time;
 								base_lenses[iter].edit_end_time = proto.edit_end_time;
 								base_lenses[iter].edit_hierarchy = proto.edit_hierarchy;
+								base_lenses[iter].edit_priority = proto.edit_priority;
 							}
 							if (base_lenses[iter].timeRanges === undefined || base_lenses[iter].timeRanges == null) {
 								base_lenses[iter].timeRanges = [];
