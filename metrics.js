@@ -13,6 +13,7 @@ function compute_data_firstlens(data_id){
 			if (valid_lens && fixs[j].firstlens == lenses.length ) {
 				fixs[j].firstlens = v; // first lens == lenses.length means outside all lenses, used for indirect transitions between lens
 			}
+
 			else if (valid_lens && lenses[v].currentPriority < lenses[fixs[j].firstlens].currentPriority) {
 				fixs[j].firstlens = v; // first lens == lenses.length means outside all lenses, used for indirect transitions between lens
 				fixs[j].firstlensegroup = lenses[v].group;
@@ -238,14 +239,32 @@ function compute_toi_metrics(data_id, toi_id){
 			toi.number_saccades++;
 		}		
 		
+		let highest_priority_lens = lenses.length; // default: not in any lens
 		for(var l=0; l<lenses.length; l++){
-			if(lenses[l].inside(fixs[j].x, fixs[j].y)){				
-				toi.lenscount[l] += 1;
-				toi.lenstime[l] += fixs[j].dt;
+			
+			let valid_lens = lenses[l].inside(fixs[j].x, fixs[j].y) && lenses[l].included && lenses[l].checked;
+			if (valid_lens && highest_priority_lens == lenses.length ) {
+				highest_priority_lens = l // fixs[j].firstlens = l; // first lens == lenses.length means outside all lenses, used for indirect transitions between lens
 			}
+
+			else if (valid_lens && lenses[l].currentPriority < lenses[highest_priority_lens].currentPriority) {
+				highest_priority_lens = l;
+				
+				//fixs[j].firstlens = l; // first lens == lenses.length means outside all lenses, used for indirect transitions between lens
+				//fixs[j].firstlensegroup = lenses[l].group;
+			}
+			// if(lenses[l].inside(fixs[j].x, fixs[j].y)){				
+			// 	toi.lenscount[l] += 1;
+			// 	toi.lenstime[l] += fixs[j].dt;
+			// }
 		}
+
+		toi.lenscount[highest_priority_lens] += 1;
+		toi.lenstime[highest_priority_lens] += fixs[j].dt;
+
 		if(fixs[j].firstlens == undefined) {
 			//KT: handle exceptional case where fixs[j].firstlens is undefined
+			console.log("fixs[j].firstlens is undefined for fixs[j] with t: "+fixs[j].t+", x: "+fixs[j].x+", y: "+fixs[j].y);
 			let v = 0;
 			while(v<lenses.length && !lenses[v].inside(fixs[j].x, fixs[j].y) ){ v++; }
 			fixs[j].firstlens = v;
