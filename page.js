@@ -429,7 +429,9 @@ function load_controls(){
 		//update video with the time
 		if(VIDEO_LINKING && selected_data != -1 && DATASETS[selected_data] != null && DATASETS[selected_data] != undefined && 
 			currentVideoObj != null && currentVideoObj != undefined) {
-				
+			
+			console.log("Updating video time to: " + (TIME_ANIMATE * VIDEOS[selected_data].videoobj.duration()));
+			
 			//get time from dataset
 			let data = DATASETS[selected_data]; toi = data.tois[ data.toi_id ];
 			let longest_duration = data.tmax - data.tmin;
