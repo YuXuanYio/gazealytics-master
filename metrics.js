@@ -244,19 +244,12 @@ function compute_toi_metrics(data_id, toi_id){
 			
 			let valid_lens = lenses[l].inside(fixs[j].x, fixs[j].y) && lenses[l].included && lenses[l].checked;
 			if (valid_lens && highest_priority_lens == lenses.length ) {
-				highest_priority_lens = l // fixs[j].firstlens = l; // first lens == lenses.length means outside all lenses, used for indirect transitions between lens
+				highest_priority_lens = l
 			}
 
 			else if (valid_lens && lenses[l].currentPriority < lenses[highest_priority_lens].currentPriority) {
 				highest_priority_lens = l;
-				
-				//fixs[j].firstlens = l; // first lens == lenses.length means outside all lenses, used for indirect transitions between lens
-				//fixs[j].firstlensegroup = lenses[l].group;
 			}
-			// if(lenses[l].inside(fixs[j].x, fixs[j].y)){				
-			// 	toi.lenscount[l] += 1;
-			// 	toi.lenstime[l] += fixs[j].dt;
-			// }
 		}
 
 		toi.lenscount[highest_priority_lens] += 1;
@@ -276,16 +269,27 @@ function compute_toi_metrics(data_id, toi_id){
 		toi.firstlens.push(fixs[j].firstlens);
 		toi.firstlensegroup.push(fixs[j].firstlensegroup);
 		
-		// add to lense group
+
+		if (highest_priority_lens == lenses.length) {
+			// not in any lens, so we skip the rest of the loop
+			continue;
+		}
+
 		for(let l=0; l<ORDERLENSEGROUPIDARRAYINDEX.length; l++) {
-			for(let l2=0; l2<lenses.length; l2++){
-				if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] == undefined || LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] == null)
-					console.log("ORDERLENSEGROUPIDARRAYINDEX: "+ORDERLENSEGROUPIDARRAYINDEX+", ORDERLENSEGROUPIDARRAYINDEX["+l+"]="+ORDERLENSEGROUPIDARRAYINDEX[l]+"; LENSEGROUPS: "+LENSEGROUPS.map(x=> x.group));
-				if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] != undefined && lenses[l2].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]].group && lenses[l2].inside(fixs[j].x, fixs[j].y)){
-					toi.lensegroup_lenscount[l] += 1;
-					toi.lensegroup_lenstime[l] += fixs[j].dt;
-				}
-			}	
+			if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] != undefined && lenses[highest_priority_lens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]].group && lenses[highest_priority_lens].inside(fixs[j].x, fixs[j].y)){
+				toi.lensegroup_lenscount[l] += 1;
+				toi.lensegroup_lenstime[l] += fixs[j].dt;
+			}
+
+
+			// for(let l2=0; l2<lenses.length; l2++){
+			// 	if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] == undefined || LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] == null)
+			// 		console.log("ORDERLENSEGROUPIDARRAYINDEX: "+ORDERLENSEGROUPIDARRAYINDEX+", ORDERLENSEGROUPIDARRAYINDEX["+l+"]="+ORDERLENSEGROUPIDARRAYINDEX[l]+"; LENSEGROUPS: "+LENSEGROUPS.map(x=> x.group));
+			// 	if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] != undefined && lenses[l2].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]].group && lenses[l2].inside(fixs[j].x, fixs[j].y)){
+			// 		toi.lensegroup_lenscount[l] += 1;
+			// 		toi.lensegroup_lenstime[l] += fixs[j].dt;
+			// 	}
+			// }	
 		}				
 	}
 		
