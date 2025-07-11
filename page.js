@@ -429,9 +429,7 @@ function load_controls(){
 		//update video with the time
 		if(VIDEO_LINKING && selected_data != -1 && DATASETS[selected_data] != null && DATASETS[selected_data] != undefined && 
 			currentVideoObj != null && currentVideoObj != undefined) {
-			
-			console.log("Updating video time to: " + (TIME_ANIMATE * VIDEOS[selected_data].videoobj.duration()));
-			
+							
 			//get time from dataset
 			let data = DATASETS[selected_data]; toi = data.tois[ data.toi_id ];
 			let longest_duration = data.tmax - data.tmin;
@@ -446,7 +444,7 @@ function load_controls(){
 				}
 			}
 			//set video time
-			VIDEOS[selected_data].videoobj.time((ts*VIDEOS[selected_data].videoobj.duration())/TimeLine.width);
+			VIDEOS[selected_data].videoobj.time(TIME_ANIMATE * VIDEOS[selected_data].videoobj.duration());
 		}
 		background_changed = true; timeline_changed = true;
 	}else if( TIME_PLAY && TIME_ANIMATE < 1.0 ){
