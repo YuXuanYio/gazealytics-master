@@ -309,8 +309,23 @@
 					<div class="tool"><button type="button" class="toggler" id="lenstype_2" onclick="select_lenstype(2);">Rectangle</button><span class="tip">Make Rectangle AOIs</span></div>
 					<div class="tool"><button href="help.html" target="popup" onclick="window.open('help.html#aois','name','width=600,height=400')"><i class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 					<br>
-					<div class="tool"><button type="button" class="toggler toggle-on" id="show_lenslabel" onclick="click_showlabel();">Labels</button><span class="tip">Toggles visibility of labels within the AOIs on spatial canvas</span></div>
-					<br>
+					<div style="display: flex; gap: 5px; align-items: center; justify-content: center;">
+  					<div class="tool"><button type="button" class="toggler toggle-on" id="show_lenslabel" onclick="click_showlabel();">Labels</button><span class="tip">Toggles visibility of labels within the AOIs on spatial canvas</span></div>
+
+					<div class="tool">
+					<button type="button" href="hierarchy.html" target="popup" id="hierarchy_popup" onclick="window.open('hierarchy.html','name','width=500, height=400')">Show Hierarchy</button>
+    				<span class="tip">Open AOI hierarchy popup</span>
+  					</div></div>
+					<div class="tool">
+					<label for="aoiFilterSelect">Filter AOIs:</label>
+					<select id="aoiFilterSelect" onchange="handleAOIFilterChange(this.value)">
+						<option value="all">Show all AOIs</option>
+						<option value="temporal">Show only temporal AOIs</option>
+						<option value="non-temporal">Show only non-temporal AOIs</option>
+					</select>
+					<span class="tip">Filter AOIs by temporal property</span>
+					</div>
+
 					<div class="tool">
 						<label for="timeInput">Time (H:MM:SS.ms):</label>
 						<input type="text" id="timeInput" placeholder="0:00:00.00" onchange="handleAOITimeChange(this.value, isString=true)" value="0:00:00.00" style="width:100px;">

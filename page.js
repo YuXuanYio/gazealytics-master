@@ -929,6 +929,7 @@ function click_showlens(){
 			}			
 		}
 	}
+	matrix_changed = true; //  foreground_changed = true;
 }
 function click_showlabel(){
 	document.getElementById('show_lenslabel').classList.toggle( 'toggle-on' );
