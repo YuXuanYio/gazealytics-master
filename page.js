@@ -6,7 +6,7 @@ SPATIAL_CANVAS_HEIGHT_PERCENTAGE = 0.7; // percentage of the browser innerHeight
 CANVAS_BOX_HEIGHT_PERCENTAGE = 0.97; // percentage of the browser innerHeight
 MATRIX_CENTER_WIDTH_PERCERTAGE_OVER_INTERFACE_LAYOUT = 38; // percentage of the matrix center of the interface layout
 INTERFACE_LAYOUT_OVER_WINDOWS_WIDTH = 0.88; // percentage of interface_layout width over windows
-RESIZE_CONTROL_PADDING = 30; 
+RESIZE_CONTROL_PADDING = 5; 
 
 spatial_width = window.innerWidth * SPATIAL_CANVAS_WIDTH_PERCENTAGE;
 spatial_height = window.innerHeight * SPATIAL_CANVAS_HEIGHT_PERCENTAGE;
@@ -50,6 +50,12 @@ EXPORT_METRIC_CANVAS = true;
 EXPORT_CROP_TIMELINE_CANVAS = true;
 TOGGLE_GREEN_BOX_HIGHLIGHTS = true;
 let matrix_changed_retry = 0;
+
+var TIMELINE_HIGHLIGHT = {
+    tmin: null,
+    tmax: null,
+	fixs: null,
+};
 
 function display(bool){ if(bool){return 'block';}else{return 'none';} }
 function update_all(){ background_changed=true; midground_changed=true; matrix_changed=true; timeline_changed=true; update_topos=true; }
@@ -424,7 +430,9 @@ function load_controls(){
 		//update video with the time
 		if(VIDEO_LINKING && selected_data != -1 && DATASETS[selected_data] != null && DATASETS[selected_data] != undefined && 
 			currentVideoObj != null && currentVideoObj != undefined) {
-				
+			
+			console.log("Updating video time to: " + (TIME_ANIMATE * VIDEOS[selected_data].videoobj.duration()));
+			
 			//get time from dataset
 			let data = DATASETS[selected_data]; toi = data.tois[ data.toi_id ];
 			let longest_duration = data.tmax - data.tmin;
