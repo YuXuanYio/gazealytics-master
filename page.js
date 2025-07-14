@@ -423,9 +423,10 @@ function load_controls(){
 		FORE_SIZE = parseFloat(document.getElementById("fore_size_sl").noUiSlider.get());
 		foreground_changed = true; 
 	}
+	let currentScrubbedTime = maxEndTime * TIME_ANIMATE;
 	if( !TIMELINE_SLIDER_DISABLED && TIME_ANIMATE != parseFloat(document.getElementById("time_animate_sl").noUiSlider.get())){
 		TIME_ANIMATE = parseFloat(document.getElementById("time_animate_sl").noUiSlider.get());
-
+		handleAOITimeChange(currentScrubbedTime, false);
 		//update video with the time
 		if(VIDEO_LINKING && selected_data != -1 && DATASETS[selected_data] != null && DATASETS[selected_data] != undefined && 
 			currentVideoObj != null && currentVideoObj != undefined) {
@@ -448,6 +449,7 @@ function load_controls(){
 		}
 		background_changed = true; timeline_changed = true;
 	}else if( TIME_PLAY && TIME_ANIMATE < 1.0 ){
+		handleAOITimeChange(currentScrubbedTime, false);
 		if(VIDEO_LINKING && selected_data != -1 && VIDEOS[selected_data] != null && VIDEOS[selected_data] != undefined && 
 			currentVideoObj != null && currentVideoObj != undefined) {
 			
@@ -925,6 +927,7 @@ function click_showlens(){
 			}			
 		}
 	}
+	matrix_changed = true; //  foreground_changed = true;
 }
 function click_showlabel(){
 	document.getElementById('show_lenslabel').classList.toggle( 'toggle-on' );

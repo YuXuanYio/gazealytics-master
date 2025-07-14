@@ -46,6 +46,7 @@ let toi_end = 0;
 let previous_toi_name = "";
 let current_toi_id = 0;
 let tois_to_be_added = [];
+let maxEndTime = 0;
 
 class Node {
     constructor(data) {
@@ -226,6 +227,10 @@ function new_file(){
 		if( newdata.initialised ){ // new load is valid, accept it
 			var id = DATASETS.length; DATASETS.push(newdata); VIDEOS.push({}); cid = DATASETS.length;
 			
+			if (maxEndTime < newdata.t_end) {
+				maxEndTime = newdata.t_end;
+			}
+
 			q = databox.replace(/#/g, id);
 			var node = document.createElement("li");
 			node.innerHTML = q; node.id = id;

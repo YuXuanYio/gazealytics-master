@@ -1,17 +1,28 @@
 
 
 function compute_data_firstlens(data_id){
-	fixs = DATASETS[data_id].fixs;
+    fixs = DATASETS[data_id].fixs;
 	for(j=0; j<fixs.length; j++){
-		v = 0;
-		while(v<lenses.length && !lenses[v].inside(fixs[j].x, fixs[j].y) ){ v++; }
-		fixs[j].firstlens = v; // first lens == lenses.length means outside all lenses, used for indirect transitions between lens		
-		if(v < lenses.length)
-			fixs[j].firstlensegroup = lenses[v].group;
-		else
-			fixs[j].firstlensegroup = -1;
-	}
+		fixs[j].firstlens = lenses.length; // default: not in any lens
+		fixs[j].firstlensegroup = -1;
+
+		for (v=0; v<lenses.length; v++) {
+
+			let valid_lens = lenses[v].inside(fixs[j].x, fixs[j].y) && lenses[v].included && lenses[v].checked;
+
+			if (valid_lens && fixs[j].firstlens == lenses.length ) {
+				fixs[j].firstlens = v; // first lens == lenses.length means outside all lenses, used for indirect transitions between lens
+			}
+
+			else if (valid_lens && lenses[v].currentPriority < lenses[fixs[j].firstlens].currentPriority) {
+				fixs[j].firstlens = v; // first lens == lenses.length means outside all lenses, used for indirect transitions between lens
+				fixs[j].firstlensegroup = lenses[v].group;
+			}
+		}
+    }
 }
+
+
 function compute_compare(data1, data2){
 	
 	if(MATRIX_VIEW_STATE == 'dat_dat')
@@ -228,14 +239,25 @@ function compute_toi_metrics(data_id, toi_id){
 			toi.number_saccades++;
 		}		
 		
+		let highest_priority_lens = lenses.length; // default: not in any lens
 		for(var l=0; l<lenses.length; l++){
-			if(lenses[l].inside(fixs[j].x, fixs[j].y)){				
-				toi.lenscount[l] += 1;
-				toi.lenstime[l] += fixs[j].dt;
+			
+			let valid_lens = lenses[l].inside(fixs[j].x, fixs[j].y) && lenses[l].included && lenses[l].checked;
+			if (valid_lens && highest_priority_lens == lenses.length ) {
+				highest_priority_lens = l
+			}
+
+			else if (valid_lens && lenses[l].currentPriority < lenses[highest_priority_lens].currentPriority) {
+				highest_priority_lens = l;
 			}
 		}
+
+		toi.lenscount[highest_priority_lens] += 1;
+		toi.lenstime[highest_priority_lens] += fixs[j].dt;
+
 		if(fixs[j].firstlens == undefined) {
 			//KT: handle exceptional case where fixs[j].firstlens is undefined
+			console.log("fixs[j].firstlens is undefined for fixs[j] with t: "+fixs[j].t+", x: "+fixs[j].x+", y: "+fixs[j].y);
 			let v = 0;
 			while(v<lenses.length && !lenses[v].inside(fixs[j].x, fixs[j].y) ){ v++; }
 			fixs[j].firstlens = v;
@@ -247,16 +269,27 @@ function compute_toi_metrics(data_id, toi_id){
 		toi.firstlens.push(fixs[j].firstlens);
 		toi.firstlensegroup.push(fixs[j].firstlensegroup);
 		
-		// add to lense group
+
+		if (highest_priority_lens == lenses.length) {
+			// not in any lens, so we skip the rest of the loop
+			continue;
+		}
+
 		for(let l=0; l<ORDERLENSEGROUPIDARRAYINDEX.length; l++) {
-			for(let l2=0; l2<lenses.length; l2++){
-				if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] == undefined || LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] == null)
-					console.log("ORDERLENSEGROUPIDARRAYINDEX: "+ORDERLENSEGROUPIDARRAYINDEX+", ORDERLENSEGROUPIDARRAYINDEX["+l+"]="+ORDERLENSEGROUPIDARRAYINDEX[l]+"; LENSEGROUPS: "+LENSEGROUPS.map(x=> x.group));
-				if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] != undefined && lenses[l2].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]].group && lenses[l2].inside(fixs[j].x, fixs[j].y)){
-					toi.lensegroup_lenscount[l] += 1;
-					toi.lensegroup_lenstime[l] += fixs[j].dt;
-				}
-			}	
+			if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] != undefined && lenses[highest_priority_lens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]].group && lenses[highest_priority_lens].inside(fixs[j].x, fixs[j].y)){
+				toi.lensegroup_lenscount[l] += 1;
+				toi.lensegroup_lenstime[l] += fixs[j].dt;
+			}
+
+
+			// for(let l2=0; l2<lenses.length; l2++){
+			// 	if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] == undefined || LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] == null)
+			// 		console.log("ORDERLENSEGROUPIDARRAYINDEX: "+ORDERLENSEGROUPIDARRAYINDEX+", ORDERLENSEGROUPIDARRAYINDEX["+l+"]="+ORDERLENSEGROUPIDARRAYINDEX[l]+"; LENSEGROUPS: "+LENSEGROUPS.map(x=> x.group));
+			// 	if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] != undefined && lenses[l2].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]].group && lenses[l2].inside(fixs[j].x, fixs[j].y)){
+			// 		toi.lensegroup_lenscount[l] += 1;
+			// 		toi.lensegroup_lenstime[l] += fixs[j].dt;
+			// 	}
+			// }	
 		}				
 	}
 		
