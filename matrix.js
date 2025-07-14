@@ -403,8 +403,18 @@ let matrixsketch = (p) => {
 
 		for(let i = 0; i<VIDEOS.length; i++) {
 			if(VIDEOS[i].videoobj != null && VIDEOS[i].videoobj != undefined) {
-				VIDEOS[i].videoobj.size(matrix_width*0.8, matrix_height*0.8);
-				VIDEOS[i].videoobj.position(matrix_width*0.2, matrix_height*0.2 + data_top_height + matrix_wrapper_height - matrix_center_height);
+				// Position video to align exactly with the matrix center rectangle
+				let matrix_center_div = document.getElementById("matrix_center");
+				let matrix_rect = matrix_center_div.getBoundingClientRect();
+				
+				// Use the exact matrix center coordinates and size
+				let video_x = matrix_rect.left + window.scrollX;
+				let video_y = matrix_rect.top + window.scrollY;
+				let video_width = matrix_rect.width;
+				let video_height = matrix_rect.height;
+		
+				VIDEOS[i].videoobj.position(video_x, video_y);
+				VIDEOS[i].videoobj.size(video_width, video_height);
 			}
 		}
 		p.resizeCanvas(matrix_width, matrix_height);
@@ -1047,9 +1057,6 @@ let matrixsketch = (p) => {
 			}	
 			if(videoinput == null || videoinput == undefined) 
 			{
-				let data_top_height = Math.floor(p.windowHeight*DATA_TOP_HEIGHT_PERCENTAGE);
-				let matrix_wrapper_height = Math.floor(p.windowHeight*MATRIX_WRAPPER_HEIGHT_PERCENTAGE);
-				let matrix_center_height = Math.floor(p.windowHeight*MATRIX_CANVAS_HEIGHT_PERCENTAGE);
 				videoinput = p.createFileInput(p.load_video);
 				videoinput.parent("selectfileinput");
 			}						
@@ -1101,13 +1108,18 @@ let matrixsketch = (p) => {
 		VIDEOS[selected_data].videofilename = file.name;
 		currentVideoObj.showControls(); 
 
-		//compute position for videoobj
-		let data_top_height = Math.floor(p.windowHeight*DATA_TOP_HEIGHT_PERCENTAGE);
-		let matrix_wrapper_height = Math.floor(p.windowHeight*MATRIX_WRAPPER_HEIGHT_PERCENTAGE);
-		let matrix_center_height = Math.floor(p.windowHeight*MATRIX_CANVAS_HEIGHT_PERCENTAGE);
-
-		currentVideoObj.position(matrix_width*0.2, matrix_height*0.2 + data_top_height + matrix_wrapper_height - matrix_center_height);
-		currentVideoObj.size(matrix_width*0.8, matrix_height*0.8);
+		// Position video to align exactly with the matrix center rectangle
+		let matrix_center_div = document.getElementById("matrix_center");
+		let matrix_rect = matrix_center_div.getBoundingClientRect();
+		
+		// Use the exact matrix center coordinates and size
+		let video_x = matrix_rect.left + window.scrollX;
+		let video_y = matrix_rect.top + window.scrollY;
+		let video_width = matrix_rect.width;
+		let video_height = matrix_rect.height;
+		
+		currentVideoObj.position(video_x, video_y);
+		currentVideoObj.size(video_width, video_height);
 
 		if(toi_start_timestamp_button == null) {
 			toi_start_timestamp_button = p.createButton('Set TWI Start Time');
