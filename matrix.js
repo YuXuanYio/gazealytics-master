@@ -408,8 +408,8 @@ let matrixsketch = (p) => {
 				let matrix_rect = matrix_center_div.getBoundingClientRect();
 				
 				// Use the exact matrix center coordinates and size
-				let video_x = matrix_rect.left + window.scrollX;
-				let video_y = matrix_rect.top + window.scrollY;
+				let video_x = matrix_rect.left
+				let video_y = matrix_rect.top
 				let video_width = matrix_rect.width;
 				let video_height = matrix_rect.height;
 		
@@ -1074,6 +1074,7 @@ let matrixsketch = (p) => {
 				currentVideoObj = VIDEOS[selected_data].videoobj;
 			}	
 			currentVideoObj.show();
+			console.log("This is updating")
 		}
 		document.getElementById("selecteddataset").innerHTML = DATASETS[selected_data].name;
 	};
@@ -1113,8 +1114,8 @@ let matrixsketch = (p) => {
 		let matrix_rect = matrix_center_div.getBoundingClientRect();
 		
 		// Use the exact matrix center coordinates and size
-		let video_x = matrix_rect.left + window.scrollX;
-		let video_y = matrix_rect.top + window.scrollY;
+		let video_x = matrix_rect.left
+		let video_y = matrix_rect.top
 		let video_width = matrix_rect.width;
 		let video_height = matrix_rect.height;
 		
