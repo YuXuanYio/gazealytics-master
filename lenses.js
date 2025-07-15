@@ -851,9 +851,14 @@ function removeTimeRow(lensId, index) {
 	}
 }
 
-function toggleTemporal(id) {
+function toggleTemporal(id, state = null) {
 	const lens = base_lenses[id];
-	lens.isTemporal = !lens.isTemporal;
+
+	if (typeof state === "boolean") {
+		lens.isTemporal = state;
+	} else {
+		lens.isTemporal = !lens.isTemporal;
+	}
 
 	const timeInput = document.getElementById(`timeInput`).value;
 	if (timeInput) {
@@ -869,34 +874,90 @@ function toggleTemporal(id) {
 	if (btn) {
 		btn.innerHTML = !lens.isTemporal
 			? '<i class="fas fa-clock"></i>'
-			: `
-				<span style="display: inline-flex; align-items: center;">
+			: `<span style="display: inline-flex; align-items: center;">
 				<i class="fas fa-clock"></i>
-				<i class="fas fa-times"></i>
-				</span>`;
+				<i class="fas fa-times"></i></span>`;
 	}
 }
 
 function handleAOIFilterChange(filterType) {
-  base_lenses.forEach((lens, i) => {
-    if (filterType === 'temporal') {
-      lens.included = lens.isTemporal;
-    } else if (filterType === 'non-temporal') {
-      lens.included = !lens.isTemporal;
-    } else {
-      lens.included = true;
-    }
+	base_lenses.forEach((lens, i) => {
+	if (filterType === 'temporal') {
+		lens.included = lens.isTemporal;
+	} else if (filterType === 'non-temporal') {
+		lens.included = !lens.isTemporal;
+	} else {
+		lens.included = true;
+	}
 
-    const lensElem = document.getElementById(`lens_${i}_c`);
-    if (lensElem) {
-      lensElem.innerHTML = lens.included
-        ? '<i class="fas fa-eye"></i>'
-        : '<i class="fas fa-eye-slash"></i>';
-      lensElem.checked = lens.included;
-    } else {
-      console.log(`Element lens_${i}_c not found`);
-    }
-  });
+	const lensElem = document.getElementById(`lens_${i}_c`);
+	if (lensElem) {
+		lensElem.innerHTML = lens.included
+		? '<i class="fas fa-eye"></i>'
+		: '<i class="fas fa-eye-slash"></i>';
+		lensElem.checked = lens.included;
+	} else {
+		console.log(`Element lens_${i}_c not found`);
+	}
+	});
 
-  lenses_update();
+	lenses_update();
 }
+
+function updateLensToggleVisual(id, included) {
+	const lensElem = document.getElementById(`lens_${id}_c`);
+	if (lensElem) {
+		lensElem.innerHTML = included
+			? '<i class="fas fa-eye"></i>'
+			: '<i class="fas fa-eye-slash"></i>';
+		lensElem.checked = included;
+	} else {
+		console.log(`Element lens_${id}_c not found`);
+	}
+}
+
+
+function handleTWIChange() {
+	for (const toi of toisOfSelectedTwi) {
+		const tstart = toi.tmin;
+		const tend = toi.tmax;
+
+		for (let i = 0; i < base_lenses.length; i++) {
+			const lens = base_lenses[i];
+			const lensTimeRanges = lens.timeRanges;
+
+			let isStatic = false;
+			let isPartial = false;
+
+			for (let j = 0; j < lensTimeRanges.length; j++) {
+				const range = lensTimeRanges[j];
+
+				if (range.start <= tstart && range.end >= tend) {
+					isStatic = true;
+					break;
+				}
+
+				if (range.end >= tstart && range.start <= tend) {
+					isPartial = true;
+				}
+			}
+
+			if (isStatic) {
+				lens.included = true;
+				toggleTemporal(i, false);
+			} else if (isPartial) {
+				lens.included = true;
+				toggleTemporal(i, true);
+			} else {
+				lens.included = false;
+			}
+
+			updateLensToggleVisual(i, lens.included);
+			console.log(`Lens ${lens.name} included: ${lens.included}, Static: ${isStatic}, Temporal: ${isPartial}`);
+		}
+	}
+
+	lenses_update();
+}
+
+
