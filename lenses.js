@@ -873,7 +873,7 @@ function handleAOITimeChange(time, isString) {
 				: '<i class="fas fa-eye-slash"></i>';
 			lensElem.checked = lens.included;
 		} else {
-			console.log(`Element lens_${i}_c not found`);
+			// console.log(`Element lens_${i}_c not found`);
 		}
 	}
 }
