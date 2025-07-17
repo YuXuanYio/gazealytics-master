@@ -269,7 +269,6 @@ function compute_toi_metrics(data_id, toi_id){
 		toi.firstlens.push(fixs[j].firstlens);
 		toi.firstlensegroup.push(fixs[j].firstlensegroup);
 		
-
 		if (highest_priority_lens == lenses.length) {
 			// not in any lens, so we skip the rest of the loop
 			continue;
@@ -280,17 +279,19 @@ function compute_toi_metrics(data_id, toi_id){
 				toi.lensegroup_lenscount[l] += 1;
 				toi.lensegroup_lenstime[l] += fixs[j].dt;
 			}
+		}	
 
 
-			// for(let l2=0; l2<lenses.length; l2++){
-			// 	if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] == undefined || LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] == null)
-			// 		console.log("ORDERLENSEGROUPIDARRAYINDEX: "+ORDERLENSEGROUPIDARRAYINDEX+", ORDERLENSEGROUPIDARRAYINDEX["+l+"]="+ORDERLENSEGROUPIDARRAYINDEX[l]+"; LENSEGROUPS: "+LENSEGROUPS.map(x=> x.group));
-			// 	if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] != undefined && lenses[l2].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]].group && lenses[l2].inside(fixs[j].x, fixs[j].y)){
-			// 		toi.lensegroup_lenscount[l] += 1;
-			// 		toi.lensegroup_lenstime[l] += fixs[j].dt;
-			// 	}
-			// }	
-		}				
+		// This needs to be recursive because the parent lens might also have a parent lens
+		// and we want to count the time spent in the parent lens as well.
+		let parent_lens = lenses[highest_priority_lens].parent;
+		let parent_lens_index = lenses.indexOf(parent_lens);
+
+		if (parent_lens_index != -1 && parent_lens_index < lenses.length) {
+			toi.lenscount[parent_lens_index] += 1;
+			toi.lenstime[parent_lens_index] += fixs[j].dt;
+		}
+		
 	}
 		
 	toi.j_max = j;
