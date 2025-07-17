@@ -107,8 +107,12 @@ let timelinesketch = (p) => {
 				k = Math.floor((p.mouseY*lenses.length)/timeline_highlight_position);
 				selected_lens = k;
 			}else if( (TIME_DATA=="data"||TIME_DATA=='all'||TIME_DATA=='group') && TIMELINE_CANVAS.num_of_rows > 0){
-				k = Math.floor((p.mouseY*TIMELINE_CANVAS.num_of_rows)/timeline_highlight_position);
-				select_data(k);
+				k = Math.floor((p.mouseY*TIMELINE_CANVAS.num_of_rows)/timeline_highlight_position);				
+				let sampleIndex = VALUED[k];
+				let sampleName = DATASETS[sampleIndex].name;
+				// console.log("Selected Data: " + sampleName);
+
+				select_data_by_name(sampleName);
 				// selected_data = k;
 			}else{return;}
 			background_changed = true; timeline_changed=true; matrix_changed = true; return;
@@ -140,6 +144,7 @@ let timelinesketch = (p) => {
 		}
 	};
 
+
 	p.draw = () => {
 		// put drawing code here
 		if( VALUED.length == 0 || order_twis.length == 0){ // initial message
@@ -166,6 +171,7 @@ let timelinesketch = (p) => {
 		longest_duration = longdur;
 		TIMELINE.longest_duration = longest_duration; //assigning the value to global variable of longest_duration so that it can be accessed from all files
 		
+
 		try{
 			p.background(black(100)); 
 			p.textFont(f); 
@@ -301,7 +307,9 @@ let timelinesketch = (p) => {
 						continue;
 		
 					let twi_id = 0;	
+
 					for(let w=0; w<data.tois.length && row<TIMELINE_CANVAS.num_of_rows; w++){
+						let startTimeLabelDrawn = false;
 						let bFilteredIn = false;
 						if(data.tois[w] != undefined && data.tois[w].included) {
 							twi_id = data.tois[w].twi_id
@@ -337,7 +345,7 @@ let timelinesketch = (p) => {
 							if(p.textAscent(s)<d){
 								p.text(s.substring(0,9), 4, h+p.textAscent()+(.1*d));
 								// p.text(twi_id < 0 ? "" : base_twis[twi_id].name.substring(0,9), 104, h+p.textAscent()+(.1*d));
-								if(p.textAscent(s)<d){p.text( format_time(data.tois[w].tmin/1000), 104, h+p.textAscent()+(.1*d));}
+								if(!startTimeLabelDrawn && p.textAscent(s)<d){p.text( format_time(data.tois[w].tmin/1000), 104, h+p.textAscent()+(.1*d)); startTimeLabelDrawn = true; }
 								
 								if( VALUED.indexOf(selected_data) == k && TOGGLE_GREEN_BOX_HIGHLIGHTS){
 									//green box
@@ -350,7 +358,7 @@ let timelinesketch = (p) => {
 								}
 							}
 							p.strokeWeight(0);
-							if(p.textAscent(s)*2<d){p.text( format_time(data.tois[w].tmin/1000), 90-p.textWidth( format_time(data.tois[w].tmin/1000) ), h+d-(.1*d) );}
+							if(!startTimeLabelDrawn && p.textAscent(s)*2<d){p.text( format_time(data.tois[w].tmin/1000), 90-p.textWidth( format_time(data.tois[w].tmin/1000) ), h+d-(.1*d) ); startTimeLabelDrawn = true;}
 							if(p.textAscent(s)<d){p.text( format_time(data.tois[w].tmax/1000), p.width-90, h+d-(.1*d) );}
 							row++;
 						}	
@@ -514,9 +522,18 @@ let timelinesketch = (p) => {
 				p.text( tstr, p.mouseX - p.textWidth(tstr)/2, timeline_text_position );
 				p.strokeWeight(3); 
 				p.stroke( cy(90, data.group) );
-				tl = Math.max(0, (p.mouseX - 200)/(p.width-300) - 0 );
-				tr = Math.min(1, (p.mouseX - 200)/(p.width-300) + (TIMELINE_MOUSEOVER_WINDOW*1000)/(data.tmax-data.tmin) );
-				p.line( 200 + (spatial_width-300)*tl, timeline_highlight_position, 100 + (spatial_width-200)*tr, timeline_highlight_position);
+
+				// Storing the required data so that the saccades drawn in Spatial match the timespan denoted by the timeline highlight
+				TIMELINE_HIGHLIGHT.tmin = data.tmin;
+				TIMELINE_HIGHLIGHT.tmax = data.tmax;
+				TIMELINE_HIGHLIGHT.fixs = data.fixs;
+
+				const cursor_pixel_width = (TIMELINE_MOUSEOVER_WINDOW*1000)/(data.tmax-data.tmin) * (spatial_width-300);
+				const left = Math.max(200, Math.min(p.mouseX - cursor_pixel_width/2, 200 + (spatial_width-300) - cursor_pixel_width));
+				const right = Math.min(left + cursor_pixel_width, p.width - 100);
+				
+				p.line(left, timeline_highlight_position, right, timeline_highlight_position);
+
 				p.strokeWeight(0); 
 			}
 			if(SPATIAL.mouseIsOver_spatial){ p.do_spatial_overlay(); }

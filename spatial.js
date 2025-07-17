@@ -186,16 +186,26 @@ let spatialsketch = (p) => {
 							tmin = twi.tmin; tmax = twi.tmax; 
 						}							
 						else {
-							tmin = data.tmin; tmax = data.tmax; 
+							tmin = data.tmin; tmax = data.tmax;
 						}							
-						fixs = data.fixs;
+						fixs = TIMELINE_HIGHLIGHT.fixs;
+						tmin = TIMELINE_HIGHLIGHT.tmin
+						tmax = TIMELINE_HIGHLIGHT.tmax
+
+						const cursor_pixel_width = (TIMELINE_MOUSEOVER_WINDOW*1000)/(tmax-tmin) * (spatial_width-300);
+						let timeline_left_px = Math.max(200, Math.min(TIMELINE.mouseX - cursor_pixel_width/2, 200 + (spatial_width-300) - cursor_pixel_width));
+						let timeline_right_px = Math.min(timeline_left_px + cursor_pixel_width, p.width-100);
+
+						let t_left = ((timeline_left_px - 200) / (spatial_width-300)) * (tmax - tmin) + tmin;
+						let t_right = ((timeline_right_px - 200) / (spatial_width-300)) * (tmax - tmin) + tmin;
+						
 						v = (TIMELINE.mouseX - 200)/(spatial_width-300)*(tmax-tmin) + tmin;
 						p.stroke( cy(90, data.group) ); 
 						p.strokeWeight(2);
 						if(twi_id > 0) {
 							for(let j=twi.j_min; j<twi.j_max-1; j++){
 								let jt = fixs[j].t;
-								if( jt > v && jt - v < TIMELINE_MOUSEOVER_WINDOW*1000 ){
+								if( jt >= t_left && jt < t_right ){
 									p.line( fixs[j].x*pos_ratio+ground_x, fixs[j].y*pos_ratio+ground_y, fixs[j+1].x*pos_ratio+ground_x, fixs[j+1].y*pos_ratio+ground_y );
 								}else if( jt - v > TIMELINE_MOUSEOVER_WINDOW*1000 ){ j = twi.j_max;}
 							}
@@ -203,7 +213,7 @@ let spatialsketch = (p) => {
 						else {
 							for(let j=0; j<fixs.length-1; j++){
 								let jt = fixs[j].t;
-								if( jt > v && jt - v < TIMELINE_MOUSEOVER_WINDOW*1000 ){
+								if( jt >= t_left && jt < t_right ){
 									p.line( fixs[j].x*pos_ratio+ground_x, fixs[j].y*pos_ratio+ground_y, fixs[j+1].x*pos_ratio+ground_x, fixs[j+1].y*pos_ratio+ground_y );
 								}else if( jt - v > TIMELINE_MOUSEOVER_WINDOW*1000 ){ j = fixs.length;}
 							}
@@ -558,6 +568,7 @@ let draw_fixs = (canvas) => {
 	}catch (error) { console.error(error); background_changed = true; }
 };
 
+
 function compute_hit_any_aoi_rate_by_twi(HAAR, data, group, twi, fixs){
 	for(let j = twi.j_min; j<twi.j_max; j++){
 		if(fixs[j] != undefined){
@@ -578,6 +589,8 @@ function compute_hit_any_aoi_rate(){
 			//filter by twi_mode		
 			let data = DATASETS[v]; let fixs = data.fixs; 
 			let group = DATASETS[v].group;
+
+			// assign_fixations_to_lenses(fixs, lenses);
 
 			//filter fixations by TWI_MODE
 			if(TWI_MODE == 2 && selected_twi != -1 && data.tois[data.toi_id] != undefined && data.tois[data.toi_id].included) {
@@ -1012,9 +1025,12 @@ let compute_fore_list = () => {
 		  
 		// construct relevance list with all three sets of locations
 		FORE_LIST = [];
+				// Before FORE_LIST.push:
+		t0 = DATASETS[selected_data].tmin;
+		t1 = DATASETS[selected_data].tmax;
 		for(let i = 0; i<fixs_list.length; i++){
 			for(let j = 0; j<fixs_list[i].length - 1; j++){
-				if( fixs_list[i][j].t > toi_list[i].tmin && fixs_list[i][j].t < toi_list[i].tmax){
+				if( fixs_list[i][j].t > t0 && fixs_list[i][j].t < t1){
 					before = j<fixs_list[i].length-1 && fixs_list[i][j+1].in_selected;
 					now = fixs_list[i][j].in_selected;
 					after = j>0 && fixs_list[i][j-1].in_selected;
@@ -1023,14 +1039,19 @@ let compute_fore_list = () => {
 						
 						lens_bin = Math.floor(lens_bins*(Math.PI+Math.atan2(l.centy-OFFSET_Y-fixs_list[i][j].y, l.centx-OFFSET_X-fixs_list[i][j].x))/SPATIAL.TWO_PI) % lens_bins;
 						angle = SPATIAL.TWO_PI*((lens_bin+0.5)/lens_bins);
-						time_bin = Math.floor( time_bins * (fixs_list[i][j].t -toi_list[i].tmin) / (toi_list[i].tmax - toi_list[i].tmin) ) % time_bins;
+						time_bin = Math.floor(time_bins * (fixs_list[i][j].t - t0) / (t1 - t0));
+						time_bin = Math.max(0, Math.min(time_bins - 1, time_bin)); // Clamp to valid range
 						lens_vals[lens_bin] += 0.75*s;
 						time_vals[time_bin] += 0.75*s;
+
+				
+						//let max_bin_value = Math.max(time_vals);
+						//let normalized_height = (time_vals[time_bin] / max_bin_value) * max_display_height;
 						
 						FORE_LIST.push({fix:fixs_list[i][j], before:before, after:after, size:s,
 								spatial_x:fixs_list[i][j].x * pos_ratio + ground_x, spatial_y:fixs_list[i][j].y * pos_ratio + ground_y,
 								lens_x: (l.centx-OFFSET_X) * pos_ratio + ground_x + lens_vals[lens_bin]*Math.cos(angle), lens_y: (l.centy-OFFSET_Y) * pos_ratio + ground_y  + lens_vals[lens_bin]*Math.sin(angle),
-								time_x: (time_bin * (spatial_width-200))/time_bins + 100, time_y: spatial_height - time_vals[time_bin]
+								time_x:(time_bin * (spatial_width-300))/time_bins + 200, time_y: spatial_height - time_vals[time_bin]
 								});
 						
 						lens_vals[lens_bin] += 0.75*s;
@@ -1044,6 +1065,7 @@ let compute_fore_list = () => {
 		
 	}catch (error) { console.error(error); foreground_changed = true; }
 };
+
 
 SPLIT_STATE = [1.0, 0.0, 0.0]; STEPS = 20;
 

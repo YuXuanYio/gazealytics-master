@@ -6,7 +6,7 @@ SPATIAL_CANVAS_HEIGHT_PERCENTAGE = 0.7; // percentage of the browser innerHeight
 CANVAS_BOX_HEIGHT_PERCENTAGE = 0.97; // percentage of the browser innerHeight
 MATRIX_CENTER_WIDTH_PERCERTAGE_OVER_INTERFACE_LAYOUT = 38; // percentage of the matrix center of the interface layout
 INTERFACE_LAYOUT_OVER_WINDOWS_WIDTH = 0.88; // percentage of interface_layout width over windows
-RESIZE_CONTROL_PADDING = 30; 
+RESIZE_CONTROL_PADDING = 5; 
 
 spatial_width = window.innerWidth * SPATIAL_CANVAS_WIDTH_PERCENTAGE;
 spatial_height = window.innerHeight * SPATIAL_CANVAS_HEIGHT_PERCENTAGE;
@@ -30,7 +30,7 @@ var offset_ydata = 0; //offset data in relation to other elements (e.g. backgrou
 DEFAULT_SYMMETRIC_SORT = 'No_sort';
 PREVIOUS_MATRIX_DATA_STATE = '';
 NUM_RETRY_BEFORE_DATA_LOADED = 0;
-VIDEO_LINKING = true;
+VIDEO_LINKING = false;
 VIDEO_IN_PLAY = false;
 TIMELINE_SLIDER_DISABLED = false;
 DAT_MODE = 0; // to filter datasets selected for metrics (default-0: "All Samples", 1: "selected Sample", 2: "selected Sample group")
@@ -50,6 +50,12 @@ EXPORT_METRIC_CANVAS = true;
 EXPORT_CROP_TIMELINE_CANVAS = true;
 TOGGLE_GREEN_BOX_HIGHLIGHTS = true;
 let matrix_changed_retry = 0;
+
+var TIMELINE_HIGHLIGHT = {
+    tmin: null,
+    tmax: null,
+	fixs: null,
+};
 
 function display(bool){ if(bool){return 'block';}else{return 'none';} }
 function update_all(){ background_changed=true; midground_changed=true; matrix_changed=true; timeline_changed=true; update_topos=true; }
@@ -418,17 +424,16 @@ function load_controls(){
 		foreground_changed = true; 
 	}
 	let currentScrubbedTime = maxEndTime * TIME_ANIMATE;
-	if( !TIMELINE_SLIDER_DISABLED && TIME_ANIMATE != parseFloat(document.getElementById("time_animate_sl").noUiSlider.get())){
+	if( !TIME_PLAY && TIME_ANIMATE != parseFloat(document.getElementById("time_animate_sl").noUiSlider.get())){
 		TIME_ANIMATE = parseFloat(document.getElementById("time_animate_sl").noUiSlider.get());
 		handleAOITimeChange(currentScrubbedTime, false);
-		//update video with the time
+		//update video with the time, only if the video is not playing
 		if(VIDEO_LINKING && selected_data != -1 && DATASETS[selected_data] != null && DATASETS[selected_data] != undefined && 
-			currentVideoObj != null && currentVideoObj != undefined) {
-				
+			currentVideoObj != null && currentVideoObj != undefined && !TIME_PLAY) {
+							
 			//get time from dataset
 			let data = DATASETS[selected_data]; toi = data.tois[ data.toi_id ];
 			let longest_duration = data.tmax - data.tmin;
-			let ts = 0;
 
 			if(lenses.length == 0){
 				for(let j = toi.j_min; j < toi.j_max && (data.fixs[j].t - data.tmin)/longest_duration < TIME_ANIMATE; j++){
@@ -439,21 +444,25 @@ function load_controls(){
 				}
 			}
 			//set video time
-			VIDEOS[selected_data].videoobj.time((ts*VIDEOS[selected_data].videoobj.duration())/TimeLine.width);
+			VIDEOS[selected_data].videoobj.time(TIME_ANIMATE * VIDEOS[selected_data].videoobj.duration());
 		}
 		background_changed = true; timeline_changed = true;
 	}else if( TIME_PLAY && TIME_ANIMATE < 1.0 ){
-		handleAOITimeChange(currentScrubbedTime, false);
+		
+		// If video is playing, we need to update the time animate slider proportionally to the video time
 		if(VIDEO_LINKING && selected_data != -1 && VIDEOS[selected_data] != null && VIDEOS[selected_data] != undefined && 
 			currentVideoObj != null && currentVideoObj != undefined) {
 			
-			TIME_ANIMATE = Math.min( 1.0, TIME_ANIMATE + 0.01/100 );
+			// TIME_ANIMATE = Math.min( 1.0, TIME_ANIMATE + 0.01/100 );
+			TIME_ANIMATE = currentVideoObj.time() / currentVideoObj.duration();
 			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );
 		}
 		else {
 			TIME_ANIMATE = Math.min( 1.0, TIME_ANIMATE + 0.01 );
 			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );		
 		}
+		currentScrubbedTime = maxEndTime * TIME_ANIMATE
+		handleAOITimeChange(currentScrubbedTime, false);
 		background_changed = true; timeline_changed = true;
 	}
 	if( SACC_BRIGHT != parseFloat(document.getElementById("sacc_bright_sl").noUiSlider.get())){
@@ -862,6 +871,7 @@ function click_time_play(){
 	TIME_PLAY = document.getElementById('time_play').classList.value.includes('toggle-on');
 	background_changed = true;
 
+	/*
 	if (TIME_PLAY) {
 		TIMELINE_SLIDER_DISABLED = true;
 		document.getElementById("time_animate_sl").setAttribute('disabled', true);
@@ -869,7 +879,7 @@ function click_time_play(){
 	else {
 		TIMELINE_SLIDER_DISABLED = false;
 		document.getElementById("time_animate_sl").removeAttribute('disabled');
-	}
+	} */
 		
 		
 	if(TIME_PLAY && VIDEO_LINKING && selected_data != -1 && DATASETS[selected_data] != null && DATASETS[selected_data] != undefined && 
@@ -879,11 +889,12 @@ function click_time_play(){
 		VIDEOS[selected_data].videoobj.loop();
 		
 	}
+	
 	else if(!TIME_PLAY && VIDEO_LINKING && selected_data != -1 && VIDEOS[selected_data] != null && VIDEOS[selected_data] != undefined && 
 		currentVideoObj != null && currentVideoObj != undefined) {
 		VIDEOS[selected_data].videoobj.pause();
-		let timelinetime = TT(Math.floor(VIDEOS[selected_data].videoobj.time()*1000));
-		document.getElementById("time_animate_sl").noUiSlider.set( parseFloat(timelinetime/TimeLine.width).toFixed(2) );
+		//let timelinetime = TT(Math.floor(VIDEOS[selected_data].videoobj.time()*1000));
+		//document.getElementById("time_animate_sl").noUiSlider.set( parseFloat(timelinetime/TimeLine.width).toFixed(2) );
 	}
 }
 function click_size(){
@@ -921,6 +932,7 @@ function click_showlens(){
 			}			
 		}
 	}
+	matrix_changed = true; //  foreground_changed = true;
 }
 function click_showlabel(){
 	document.getElementById('show_lenslabel').classList.toggle( 'toggle-on' );
