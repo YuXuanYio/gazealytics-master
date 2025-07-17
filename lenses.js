@@ -851,7 +851,7 @@ function removeTimeRow(lensId, index) {
 	}
 }
 
-function toggleTemporal(id, state = null) {
+function toggleTemporal(id, state = null, accountForTime = true) {
 	const lens = base_lenses[id];
 
 	if (typeof state === "boolean") {
@@ -861,7 +861,7 @@ function toggleTemporal(id, state = null) {
 	}
 
 	const timeInput = document.getElementById(`timeInput`).value;
-	if (timeInput) {
+	if (timeInput && accountForTime) {
 		handleAOITimeChange(timeInput, true);
 	}
 
@@ -944,16 +944,17 @@ function handleTWIChange() {
 
 			if (isStatic) {
 				lens.included = true;
-				toggleTemporal(i, false);
+				toggleTemporal(i, false, false);
 			} else if (isPartial) {
 				lens.included = true;
-				toggleTemporal(i, true);
+				toggleTemporal(i, true, false);
 			} else {
 				lens.included = false;
 			}
 
 			updateLensToggleVisual(i, lens.included);
-			console.log(`Lens ${lens.name} included: ${lens.included}, Static: ${isStatic}, Temporal: ${isPartial}`);
+			if (lens.name == "aoi25") {console.log(`Lens ${lens.name} included: ${lens.included}, Static: ${isStatic}, Temporal: ${isPartial}`)};
+				
 		}
 	}
 
