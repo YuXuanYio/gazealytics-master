@@ -918,6 +918,11 @@ function updateLensToggleVisual(id, included) {
 
 
 function handleTWIChange() {
+	const showlensEl = document.getElementById('showlens');
+	if (showlensEl && showlensEl.innerHTML.includes('slash')) {
+		return;
+	}
+
 	for (const toi of toisOfSelectedTwi) {
 		const tstart = toi.tmin;
 		const tend = toi.tmax;
