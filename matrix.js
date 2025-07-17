@@ -397,9 +397,6 @@ let matrixsketch = (p) => {
 			document.getElementsByClassName("data_box")[0].style.height = data_box_height+"px";	
 		}
 		
-		let data_top_height = Math.floor(p.windowHeight*DATA_TOP_HEIGHT_PERCENTAGE);
-		let matrix_wrapper_height = Math.floor(p.windowHeight*MATRIX_WRAPPER_HEIGHT_PERCENTAGE);
-		let matrix_center_height = Math.floor(p.windowHeight*MATRIX_CANVAS_HEIGHT_PERCENTAGE);
 
 		for(let i = 0; i<VIDEOS.length; i++) {
 			if(VIDEOS[i].videoobj != null && VIDEOS[i].videoobj != undefined) {
@@ -1037,6 +1034,7 @@ let matrixsketch = (p) => {
 			return; 
 		}
 		
+		// If the video object is set and has a source, display the video filename
 		if(VIDEOS[selected_data].videoobj != null && VIDEOS[selected_data].videoobj != undefined && VIDEOS[selected_data].videoobj.src.length > 0) {
 			if(currentVideoObj != null && currentVideoObj != undefined && VIDEOS[selected_data].videoobj.src != currentVideoObj.src) {
 				currentVideoObj.pause();
@@ -1048,6 +1046,7 @@ let matrixsketch = (p) => {
 				currentVideoObj = VIDEOS[selected_data].videoobj;
 			currentVideoObj.show();
 		}
+		// If the video object is not set or has no source, create a file input for loading a video
 		else if(VIDEOS[selected_data].videofilename == null || VIDEOS[selected_data].videofilename == undefined || VIDEOS[selected_data].videofilename.length == 0) {
 			if(currentVideoObj != null && currentVideoObj != undefined){
 				currentVideoObj.pause();
@@ -1058,9 +1057,21 @@ let matrixsketch = (p) => {
 			if(videoinput == null || videoinput == undefined) 
 			{
 				videoinput = p.createFileInput(p.load_video);
+				videoinput.id("videoinput");
 				videoinput.parent("selectfileinput");
-			}						
+			} else {
+				videoinput.elt.value = null; // Reset the file input
+				document.getElementById("videofilename").innerHTML = "No video loaded";
+			}
+			
+			// Change the file input to the selected dataset's video file if it exists
+			// if(VIDEOS[selected_data].videoobj != null && VIDEOS[selected_data].videoobj != undefined && VIDEOS[selected_data].videoobj.src.length > 0) {
+			// 	videoinput.elt.value = VIDEOS[selected_data].videoobj.src;
+			// }
+
+
 		}
+		// If the video object is set and has a source, display the video filename
 		else {
 			document.getElementById("videofilename").innerHTML = VIDEOS[selected_data].videofilename;
 			if(currentVideoObj != null && currentVideoObj != undefined) {
@@ -1145,6 +1156,7 @@ let delete_video = () => {
 				VIDEOS[selected_data].videoobj = null;
 				VIDEOS[selected_data].videofilename = "";
 				document.getElementById("videofilename").innerHTML = "";
+				document.getElementById("videoinput").value = null;
 				currentVideoObj = null;
 			}			
 	}
