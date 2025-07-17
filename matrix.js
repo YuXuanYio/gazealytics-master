@@ -1059,17 +1059,7 @@ let matrixsketch = (p) => {
 				videoinput = p.createFileInput(p.load_video);
 				videoinput.id("videoinput");
 				videoinput.parent("selectfileinput");
-			} else {
-				videoinput.elt.value = null; // Reset the file input
-				document.getElementById("videofilename").innerHTML = "No video loaded";
 			}
-			
-			// Change the file input to the selected dataset's video file if it exists
-			// if(VIDEOS[selected_data].videoobj != null && VIDEOS[selected_data].videoobj != undefined && VIDEOS[selected_data].videoobj.src.length > 0) {
-			// 	videoinput.elt.value = VIDEOS[selected_data].videoobj.src;
-			// }
-
-
 		}
 		// If the video object is set and has a source, display the video filename
 		else {
