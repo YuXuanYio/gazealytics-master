@@ -208,20 +208,16 @@ class PolyLens{
 		edit_hierarchy(h1, h2, h3){
 			this.h1 = h1; this.h2 = h2; this.h3 = h3;
 
-			// Set parent lens. If h3 is -1, it means is an h2 level lens, its parent is h1.
-
-			// h3 level lens
+			// Set parent lens. If h3 is not -1, it means is an h3 level lens, its parent is h2.
 			if (h3 !== -1) {
-				// Find the lens with the matching h3
-				const parentLens = base_lenses.find(lens => lens.h3 === -1 && lens.h2 === h2 && lens.h1 === h1);
+				// Find the lens with the matching h2
+				const parentLens = base_lenses.find(lens => lens.h2 === h2 && lens.h1 === h1 && lens.h3 === -1);
 				if (parentLens) {
 					this.parentLens = parentLens;
 				}
-			}
-			// h2 level lens
-			else if (h3 === -1 && h2 !== -1) {
-				// Find the lens with the matching h2
-				const parentLens = base_lenses.find(lens => lens.h3 === -1 && lens.h2 === -1 && lens.h1 === h1);
+			} else if (h3 === -1 && h2 !== -1) {
+				// Find the lens with the matching h1
+				const parentLens = base_lenses.find(lens => lens.h1 === h1 && lens.h2 === -1 && lens.h3 === -1);
 				if (parentLens) {
 					this.parentLens = parentLens;
 				}
@@ -247,6 +243,7 @@ class PolyLens{
 			this.currentPriority = 1;
 			this.isTemporal = false;
 			this.h1 = -1; this.h2 = -1; this.h3 = -1; //hirarchical id for the lens, h1 for top level.
+			this.parentLens = null; // parent lens for h3/h2 level lenses
 		}
 }
 class EllipseLens{
@@ -480,16 +477,16 @@ class EllipseLens{
 		edit_hierarchy(h1, h2, h3){
 			this.h1 = h1; this.h2 = h2; this.h3 = h3;
 
-			// Set parent lens. If h3 is -1, it means is an h2 level lens, its parent is h1.
-			if (h3 === -1) {
+			// Set parent lens. If h3 is not -1, it means is an h3 level lens, its parent is h2.
+			if (h3 !== -1) {
 				// Find the lens with the matching h2
-				const parentLens = base_lenses.find(lens => lens.h2 === h2 && lens.h1 === h1);
+				const parentLens = base_lenses.find(lens => lens.h2 === h2 && lens.h1 === h1 && lens.h3 === -1);
 				if (parentLens) {
 					this.parentLens = parentLens;
 				}
-			} else if (h2 === -1) {
+			} else if (h3 === -1 && h2 !== -1) {
 				// Find the lens with the matching h1
-				const parentLens = base_lenses.find(lens => lens.h1 === h1);
+				const parentLens = base_lenses.find(lens => lens.h1 === h1 && lens.h2 === -1 && lens.h3 === -1);
 				if (parentLens) {
 					this.parentLens = parentLens;
 				}
@@ -519,6 +516,7 @@ class EllipseLens{
 			this.currentPriority = 1;
 			this.isTemporal = false;
 			this.h1 = -1; this.h2 = -1; this.h3 = -1; //hirarchical id for the lens, h1 for top level.
+			this.parentLens = null; // parent lens for h3/h2 level lenses
 		}
 }
 class RectLens extends EllipseLens{

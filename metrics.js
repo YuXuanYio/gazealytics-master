@@ -252,8 +252,16 @@ function compute_toi_metrics(data_id, toi_id){
 			}
 		}
 
+		if (highest_priority_lens == lenses.length) {
+			// not in any lens, so we skip the rest of the loop
+			continue;
+		}
+
 		toi.lenscount[highest_priority_lens] += 1;
 		toi.lenstime[highest_priority_lens] += fixs[j].dt;
+
+		// recusrively compute parent fixations
+		compute_parent_fixations(lenses[highest_priority_lens]);
 
 		if(fixs[j].firstlens == undefined) {
 			//KT: handle exceptional case where fixs[j].firstlens is undefined
@@ -268,30 +276,13 @@ function compute_toi_metrics(data_id, toi_id){
 		}			
 		toi.firstlens.push(fixs[j].firstlens);
 		toi.firstlensegroup.push(fixs[j].firstlensegroup);
-		
-		if (highest_priority_lens == lenses.length) {
-			// not in any lens, so we skip the rest of the loop
-			continue;
-		}
 
 		for(let l=0; l<ORDERLENSEGROUPIDARRAYINDEX.length; l++) {
 			if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] != undefined && lenses[highest_priority_lens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]].group && lenses[highest_priority_lens].inside(fixs[j].x, fixs[j].y)){
 				toi.lensegroup_lenscount[l] += 1;
 				toi.lensegroup_lenstime[l] += fixs[j].dt;
 			}
-		}	
-
-
-		// This needs to be recursive because the parent lens might also have a parent lens
-		// and we want to count the time spent in the parent lens as well.
-		let parent_lens = lenses[highest_priority_lens].parent;
-		let parent_lens_index = lenses.indexOf(parent_lens);
-
-		if (parent_lens_index != -1 && parent_lens_index < lenses.length) {
-			toi.lenscount[parent_lens_index] += 1;
-			toi.lenstime[parent_lens_index] += fixs[j].dt;
 		}
-		
 	}
 		
 	toi.j_max = j;
@@ -468,6 +459,37 @@ function compute_toi_metrics(data_id, toi_id){
 				if( vx1 != vx2 || vy1 != vy2){ toi.grid_transitions[ vx1 * GRID_N + vy1 ][ vx2 * GRID_N + vy2 ] += fixs[j].dt; }
 			}
 		}
+	}
+}
+
+// Recrusively addes fixations to the parent lens
+function compute_parent_fixations(lens) {
+	
+	// This needs to be recursive because the parent lens might also have a parent lens
+	// and we want to count the time spent in the parent lens as well.
+	let parent_lens = lens.parentLens;
+
+	if (parent_lens === undefined || parent_lens.id === undefined) {
+		return;
+	}
+
+	// find index of parent lens in lenses with the id of parent_lens
+	let parent_lens_index = -1;
+	for (let i = 0; i < lenses.length; i++) {
+		if (lenses[i].id === parent_lens.id) {
+			parent_lens_index = i;
+			break;
+		}
+	}
+
+	console.log("Computing parent fixations for lens: " + lens.id + ", parent lens index: " + parent_lens_index);
+
+	if (parent_lens_index !== -1) {
+		console.log("Adding fixation to parent lens: " + parent_lens_index);
+		toi.lenscount[parent_lens_index] += 1;
+		toi.lenstime[parent_lens_index] += fixs[j].dt;
+
+		compute_parent_fixations(lenses[parent_lens_index]);
 	}
 }
 
