@@ -3,6 +3,8 @@ let TIMELINE_CANVAS;
 let TIMELINE_draggableRecty = 0;
 let TIMELINE_draggingY = false; // Is the object being dragged?
 let datname;
+let global_tmin = Infinity;
+let global_tmax = -Infinity;
 
 let timelinesketch = (p) => {
 	//PFont  f; PFont  fb; // the font used for general text writing applications. defined in setup
@@ -15,6 +17,9 @@ let timelinesketch = (p) => {
 		"fontName": "Arial",
 		"fontSize": 18
 	}; 
+
+	const BOOKMARK_ROW_HEIGHT = 20;
+	const DATA_ROW_VERTICAL_OFFSET = BOOKMARK_ROW_HEIGHT + 5;
 
 	p.mouseIsOver_timeline = false; 
 	p.mouseIsPressed_timeline = false; 
@@ -41,7 +46,8 @@ let timelinesketch = (p) => {
 		
 		p.initConfig(p.windowWidth, p.windowHeight);
 		
-		TimeLine = p.createGraphics(spatial_width-300, Math.floor(timeline_height), p.P2D);
+		let data_timeline_graphic_height = Math.floor(timeline_canvas_height - DATA_ROW_VERTICAL_OFFSET);
+		TimeLine = p.createGraphics(spatial_width-300, Math.floor(data_timeline_graphic_height), p.P2D);
 		
 		p.colorMode(p.HSB, 100);
 		TIMELINE = p;
@@ -167,7 +173,13 @@ let timelinesketch = (p) => {
 		for(let v=0; v<VALUED.length; v++){
 			let dat = DATASETS[VALUED[v]];
 			longdur = Math.max(longdur, dat.tmax - dat.tmin);
+
+			if (dat.included) { // Only consider included datasets
+				global_tmin = Math.min(global_tmin, dat.tmin);
+				global_tmax = Math.max(global_tmax, dat.tmax);
+			}
 		}
+
 		longest_duration = longdur;
 		TIMELINE.longest_duration = longest_duration; //assigning the value to global variable of longest_duration so that it can be accessed from all files
 		
@@ -182,6 +194,13 @@ let timelinesketch = (p) => {
 				timeline_changed = false;
 				TimeLine.colorMode(p.HSB, 100);
 				TimeLine.background(black(100));
+
+			if (TIME_DATA == 'data' || TIME_DATA == 'all' || TIME_DATA == 'group') {
+				draw_temporal_aoi_bookmarks(p, TimeLine, BOOKMARK_ROW_HEIGHT)
+            }
+				TimeLine.push();
+				TimeLine.translate(0, DATA_ROW_VERTICAL_OFFSET);
+
 				if(TIME_DATA=='lens'){
 					draw_time_lens(TimeLine);
 				}else if(TIME_DATA=='data'){
@@ -193,8 +212,31 @@ let timelinesketch = (p) => {
 				}else if(TIME_DATA=='saccadetype'){
 					draw_time_saccadetype(TimeLine);
 				}	
+				TimeLine.pop();
 			}
 			p.image(TimeLine, 200, 0);
+
+            // draw Temp AOI and global times directly on the main canvas (p)
+            if (TIME_DATA == 'data' || TIME_DATA == 'all' || TIME_DATA == 'group') {
+                if (isFinite(global_tmin) && isFinite(global_tmax)) {
+                    p.fill(white(100));
+                    p.textFont('Arial', 16);
+
+                    p.textAlign(p.LEFT);
+                    p.text("Temp AOI", 4, BOOKMARK_ROW_HEIGHT / 2 + 5); 
+
+					// min time
+                    let formattedGlobalMinTime = format_time(global_tmin / 1000);
+                    p.textAlign(p.LEFT);
+                    p.text(formattedGlobalMinTime, 130, BOOKMARK_ROW_HEIGHT / 2 + 5);
+
+					// max time
+                    let formattedGlobalMaxTime = format_time(global_tmax / 1000);
+                    p.textAlign(p.RIGHT);
+                    p.text(formattedGlobalMaxTime, 200 + TimeLine.width + 80, BOOKMARK_ROW_HEIGHT / 2 + 5);
+                }
+            }
+
 			// Time Endvalue labels
 			if(TIME_DATA=='lens'){
 				let current_lense_mode = document.getElementsByClassName("lense_mode")[0].innerHTML;
@@ -591,6 +633,37 @@ let timelinesketch = (p) => {
 		p.resizeElements(true, true);
 	};
 }
+
+let draw_temporal_aoi_bookmarks = (p_instance, canvas, rowHeight) => {	
+    // bookmark bar at the top of the timeline
+    canvas.fill(p_instance.color(0, 0, 20));
+    canvas.noStroke();
+    canvas.rect(0, 0, canvas.width, rowHeight);
+
+    // Display global min and max times on this bar
+    // console.log('Bookmark bar drawing. Global tmin:', global_tmin, 'Global tmax:', global_tmax);
+    // console.log('Is finite?', isFinite(global_tmin) && isFinite(global_tmax));
+
+    // if (isFinite(global_tmin) && isFinite(global_tmax)) {
+    //     console.log('Drawing text for bookmark bar.');
+    //     p_instance.fill(p_instance.color(100)); // Explicitly use white with p_instance.color and 100 HSB brightness
+    //     p_instance.textFont('Arial', 14);
+    //     p_instance.textAlign(p_instance.LEFT);
+
+    //     let formattedMinTime = format_time(global_tmin / 1000);
+    //     let formattedMaxTime = format_time(global_tmax / 1000);
+
+    //     console.log('Formatted Min Time:', formattedMinTime);
+    //     console.log('Formatted Max Time:', formattedMaxTime);
+    //     console.log('Text Min X:', 200 + 5, 'Y:', rowHeight / 2 + 5);
+    //     console.log('Text Max X:', 200 + canvas.width - 5, 'Y:', rowHeight / 2 + 5);
+
+
+    //     p_instance.text(formattedMinTime, 200 + 5, rowHeight / 2 + 5);
+    //     p_instance.textAlign(p_instance.RIGHT);
+    //     p_instance.text(formattedMaxTime, 200 + canvas.width - 5, rowHeight / 2 + 5);
+    // }
+};
 
 let draw_time_lens = (canvas) => {
 	canvas.fill(black(100)); canvas.noStroke();
