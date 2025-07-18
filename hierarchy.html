@@ -107,7 +107,6 @@
             function updateDisplay() {
                 let lensesToShow = allLensesData;
 
-                // focus filter if a node is selected
                 if (focusedNodeId) {
                     const parts = focusedNodeId.split('-');
                     const levelType = parts[0];
@@ -116,19 +115,17 @@
                     lensesToShow = allLensesData.filter(lens => childLenseIds.includes(lens.id));
                 }
 
-                // dropdown filters on the data
                 const selectedScreen = document.getElementById('screenFilter').value;
                 const selectedApp = document.getElementById('appFilter').value;
                 const selectedInterface = document.getElementById('interfaceFilter').value;
 
                 lensesToShow = lensesToShow.filter(lens => {
-                    const matchesScreen = (selectedScreen === 'all' || String(lens.screen_id) === selectedScreen);
-                    const matchesApp = (selectedApp === 'all' || String(lens.app_id) === selectedApp);
-                    const matchesInterface = (selectedInterface === 'all' || String(lens.interface_id) === selectedInterface);
+                    const matchesScreen = (selectedScreen === 'all' || String(lens.h1) === selectedScreen);
+                    const matchesApp = (selectedApp === 'all' || String(lens.h2) === selectedApp);
+                    const matchesInterface = (selectedInterface === 'all' || String(lens.h3) === selectedInterface);
                     return matchesScreen && matchesApp && matchesInterface;
                 });
                 
-                // visibility for the resulting AOIs on the main canvas
                 const idsToShow = lensesToShow.map(lens => lens.id);
                 const mainWindow = window.opener;
                 if (mainWindow && mainWindow.setVisibleLenses) {
@@ -142,21 +139,28 @@
                 const hierarchyDisplay = document.getElementById('hierarchyDisplay');
                 const hierarchy = {};
                 lensesToRender.forEach(lens => {
-                    const { screen_id, app_id, interface_id, name, id } = lens;
-                    if (!screen_id || !name) return;
+                    const screenId = lens.h1; // Using h1 for screen
+                    const appId = lens.h2; // Using h2 for app
+                    const interfaceId = lens.h3; // Using h3 for interface
+                    const lensName = lens.name; 
+                    const lensId = lens.id;
+
+                    if (!screenId || !lensName) return;
+
                     // ensure screen level exists
-                    if (!hierarchy[screen_id]) hierarchy[screen_id] = { _aois: [], applications: {} };
-                    // if it's an AOI for a screen itself
-                    if (!app_id && !interface_id) hierarchy[screen_id]._aois.push({ id, name });
+                    if (!hierarchy[screenId]) hierarchy[screenId] = { _aois: [], applications: {} };
+                    
+                    // if it's an AOI for a Screen itself
+                    if (!appId && !interfaceId) hierarchy[screenId]._aois.push({ id: lensId, name: lensName });
                     // if it has an app ID
-                    else if (app_id) {
-                        if (!hierarchy[screen_id].applications[app_id]) hierarchy[screen_id].applications[app_id] = { _aois: [], interfaces: {} };
+                    else if (appId) {
+                        if (!hierarchy[screenId].applications[appId]) hierarchy[screenId].applications[appId] = { _aois: [], interfaces: {} };
                         // if it's an AOI for an App itself
-                        if (!interface_id) hierarchy[screen_id].applications[app_id]._aois.push({ id, name });
+                        if (!interfaceId) hierarchy[screenId].applications[appId]._aois.push({ id: lensId, name: lensName });
                         // if it has an interface ID
                         else {
-                            if (!hierarchy[screen_id].applications[app_id].interfaces[interface_id]) hierarchy[screen_id].applications[app_id].interfaces[interface_id] = { _aois: [] };
-                            hierarchy[screen_id].applications[app_id].interfaces[interface_id]._aois.push({ id, name });
+                            if (!hierarchy[screenId].applications[appId].interfaces[interfaceId]) hierarchy[screenId].applications[appId].interfaces[interfaceId] = { _aois: [] };
+                            hierarchy[screenId].applications[appId].interfaces[interfaceId]._aois.push({ id: lensId, name: lensName });
                         }
                     }
                 });
@@ -215,9 +219,9 @@
                 const ids = new Set();
                 lenses.forEach(lens => {
                     let isMatch = false;
-                    if (filterType === 'screen' && String(lens.screen_id) === idsToMatch[0]) isMatch = true;
-                    else if (filterType === 'app' && String(lens.screen_id) === idsToMatch[0] && String(lens.app_id) === idsToMatch[1]) isMatch = true;
-                    else if (filterType === 'interface' && String(lens.screen_id) === idsToMatch[0] && String(lens.app_id) === idsToMatch[1] && String(lens.interface_id) === idsToMatch[2]) isMatch = true;
+                    if (filterType === 'screen' && String(lens.h1) === idsToMatch[0]) isMatch = true;
+                    else if (filterType === 'app' && String(lens.h1) === idsToMatch[0] && String(lens.h2) === idsToMatch[1]) isMatch = true;
+                    else if (filterType === 'interface' && String(lens.h1) === idsToMatch[0] && String(lens.h2) === idsToMatch[1] && String(lens.h3) === idsToMatch[2]) isMatch = true;
                     if (isMatch && lens.id !== undefined) ids.add(lens.id);
                 });
                 return Array.from(ids);
