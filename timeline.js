@@ -5,6 +5,16 @@ let TIMELINE_draggingY = false; // Is the object being dragged?
 let datname;
 let global_tmin = Infinity;
 let global_tmax = -Infinity;
+const BOOKMARK_ROW_HEIGHT = 20;
+const DATA_ROW_VERTICAL_OFFSET = BOOKMARK_ROW_HEIGHT + 5;
+
+// Add this global variable
+let mockBookmark = {
+    tmin: 100000, // Example start time in milliseconds (e.g., 0:01:40.000)
+    tmax: 120000, // Example end time in milliseconds (e.g., 0:02:00.000)
+    color: { h: 0, s: 100, b: 100 }, // Red in HSB (hue 0, saturation 100, brightness 100)
+    name: "Mock AOI 1"
+};
 
 let timelinesketch = (p) => {
 	//PFont  f; PFont  fb; // the font used for general text writing applications. defined in setup
@@ -17,9 +27,6 @@ let timelinesketch = (p) => {
 		"fontName": "Arial",
 		"fontSize": 18
 	}; 
-
-	const BOOKMARK_ROW_HEIGHT = 20;
-	const DATA_ROW_VERTICAL_OFFSET = BOOKMARK_ROW_HEIGHT + 5;
 
 	p.mouseIsOver_timeline = false; 
 	p.mouseIsPressed_timeline = false; 
@@ -46,9 +53,9 @@ let timelinesketch = (p) => {
 		
 		p.initConfig(p.windowWidth, p.windowHeight);
 		
-		let data_timeline_graphic_height = Math.floor(timeline_canvas_height - DATA_ROW_VERTICAL_OFFSET);
-		TimeLine = p.createGraphics(spatial_width-300, Math.floor(data_timeline_graphic_height), p.P2D);
-		
+		let data_rows_display_height = Math.floor(timeline_canvas_height - DATA_ROW_VERTICAL_OFFSET);
+		TimeLine = p.createGraphics(spatial_width - 300, data_rows_display_height, p.P2D);
+
 		p.colorMode(p.HSB, 100);
 		TIMELINE = p;
 		
@@ -170,20 +177,24 @@ let timelinesketch = (p) => {
 		// update dataset meta-information for the timeline
 		// update longest duration variable, used by relative time option
 		let longdur = 0;
+		let current_global_tmin = Infinity;
+    	let current_global_tmax = -Infinity;
+
 		for(let v=0; v<VALUED.length; v++){
 			let dat = DATASETS[VALUED[v]];
 			longdur = Math.max(longdur, dat.tmax - dat.tmin);
 
-			if (dat.included) { // Only consider included datasets
-				global_tmin = Math.min(global_tmin, dat.tmin);
-				global_tmax = Math.max(global_tmax, dat.tmax);
+			if (dat.included) { 
+            current_global_tmin = Math.min(current_global_tmin, dat.tmin);
+            current_global_tmax = Math.max(current_global_tmax, dat.tmax);
 			}
 		}
+		global_tmin = current_global_tmin; 
+    	global_tmax = current_global_tmax; 
 
 		longest_duration = longdur;
 		TIMELINE.longest_duration = longest_duration; //assigning the value to global variable of longest_duration so that it can be accessed from all files
 		
-
 		try{
 			p.background(black(100)); 
 			p.textFont(f); 
@@ -194,12 +205,6 @@ let timelinesketch = (p) => {
 				timeline_changed = false;
 				TimeLine.colorMode(p.HSB, 100);
 				TimeLine.background(black(100));
-
-			if (TIME_DATA == 'data' || TIME_DATA == 'all' || TIME_DATA == 'group') {
-				draw_temporal_aoi_bookmarks(p, TimeLine, BOOKMARK_ROW_HEIGHT)
-            }
-				TimeLine.push();
-				TimeLine.translate(0, DATA_ROW_VERTICAL_OFFSET);
 
 				if(TIME_DATA=='lens'){
 					draw_time_lens(TimeLine);
@@ -212,30 +217,35 @@ let timelinesketch = (p) => {
 				}else if(TIME_DATA=='saccadetype'){
 					draw_time_saccadetype(TimeLine);
 				}	
-				TimeLine.pop();
 			}
-			p.image(TimeLine, 200, 0);
+			if (TIME_DATA == 'data' || TIME_DATA == 'all' || TIME_DATA == 'group') {
+				p.fill(p.color(0, 0, 20));
+				p.noStroke();
+				p.rect(((p.width - TimeLine.width)/3)*2, 0, TimeLine.width, BOOKMARK_ROW_HEIGHT); 
+        	}
 
-            // draw Temp AOI and global times directly on the main canvas (p)
-            if (TIME_DATA == 'data' || TIME_DATA == 'all' || TIME_DATA == 'group') {
-                if (isFinite(global_tmin) && isFinite(global_tmax)) {
-                    p.fill(white(100));
-                    p.textFont('Arial', 16);
+			if (TIME_DATA == 'data' || TIME_DATA == 'all' || TIME_DATA == 'group') {
+            if (isFinite(global_tmin) && isFinite(global_tmax)) {
+                p.fill(white(100));
+                p.textFont('Arial', 16); 
+                p.textAlign(p.LEFT);
+                p.text("Temp AOI", 4, BOOKMARK_ROW_HEIGHT / 2 + p.textAscent()/2 - 2);
 
-                    p.textAlign(p.LEFT);
-                    p.text("Temp AOI", 4, BOOKMARK_ROW_HEIGHT / 2 + 5); 
+                // min time
+                let formattedGlobalMinTime = format_time(global_tmin / 1000);
+                p.textAlign(p.LEFT);
+                p.text(formattedGlobalMinTime, 115, BOOKMARK_ROW_HEIGHT / 2 + p.textAscent()/2 - 2);
 
-					// min time
-                    let formattedGlobalMinTime = format_time(global_tmin / 1000);
-                    p.textAlign(p.LEFT);
-                    p.text(formattedGlobalMinTime, 130, BOOKMARK_ROW_HEIGHT / 2 + 5);
+                // max time
+                let formattedGlobalMaxTime = format_time(global_tmax / 1000);
+                p.textAlign(p.RIGHT);
+                p.text(formattedGlobalMaxTime, 200 + TimeLine.width + 85, BOOKMARK_ROW_HEIGHT / 2 + p.textAscent()/2 - 2);
 
-					// max time
-                    let formattedGlobalMaxTime = format_time(global_tmax / 1000);
-                    p.textAlign(p.RIGHT);
-                    p.text(formattedGlobalMaxTime, 200 + TimeLine.width + 80, BOOKMARK_ROW_HEIGHT / 2 + 5);
-                }
+				draw_mock_bookmarks_on_global_bar(p, mockBookmark, global_tmin, global_tmax);
             }
+        }
+
+        p.image(TimeLine, 200, DATA_ROW_VERTICAL_OFFSET);
 
 			// Time Endvalue labels
 			if(TIME_DATA=='lens'){
@@ -379,31 +389,38 @@ let timelinesketch = (p) => {
 							}
 						}
 		
-						if(bFilteredIn) {
-							h = timeline_height/TIMELINE_CANVAS.num_of_rows*row;
-							toi = data.tois[ w ];
+						if (bFilteredIn) {
+							h = DATA_ROW_VERTICAL_OFFSET + (TimeLine.height / TIMELINE_CANVAS.num_of_rows) * row;
+
+							const vertical_shift_down_for_data_rows = 2;
+							h += vertical_shift_down_for_data_rows;
+
+							toi = data.tois[w];
 							p.strokeWeight(0);
-							p.textFont('Arial',16);
-							if(p.textAscent(s)<d){
-								p.text(s.substring(0,9), 4, h+p.textAscent()+(.1*d));
-								// p.text(twi_id < 0 ? "" : base_twis[twi_id].name.substring(0,9), 104, h+p.textAscent()+(.1*d));
-								if(!startTimeLabelDrawn && p.textAscent(s)<d){p.text( format_time(data.tois[w].tmin/1000), 104, h+p.textAscent()+(.1*d)); startTimeLabelDrawn = true; }
-								
-								if( VALUED.indexOf(selected_data) == k && TOGGLE_GREEN_BOX_HIGHLIGHTS){
-									//green box
-									p.strokeWeight(1); 
-									p.stroke( makeColor(80, SELECTED)); 
-									p.fill( makeColor(2, SELECTED));
-									p.rect( 2, h+2, 96, d-1);
-									p.stroke( white(100) ); 
-									p.fill( white(100) );
+							p.textFont('Arial', 16);
+
+							const horizontal_shift_right_for_data_labels = 30; 
+							const horizontal_shift_right_for_time_labels = 50;						
+
+							if (p.textAscent(s) < d) {
+								// sample name
+								p.text(s.substring(0, 9), 4 + horizontal_shift_right_for_data_labels, h + p.textAscent() + (.1 * d));
+
+								// start time
+								p.text(format_time(data.tois[w].tmin / 1000), 104 + horizontal_shift_right_for_time_labels, h + p.textAscent() + (.1 * d));
+
+								if (VALUED.indexOf(selected_data) == k && TOGGLE_GREEN_BOX_HIGHLIGHTS) {
+									p.rect(2 + horizontal_shift_right_for_data_labels, h + 2, 96, d - 1);
 								}
 							}
 							p.strokeWeight(0);
-							if(!startTimeLabelDrawn && p.textAscent(s)*2<d){p.text( format_time(data.tois[w].tmin/1000), 90-p.textWidth( format_time(data.tois[w].tmin/1000) ), h+d-(.1*d) ); startTimeLabelDrawn = true;}
-							if(p.textAscent(s)<d){p.text( format_time(data.tois[w].tmax/1000), p.width-90, h+d-(.1*d) );}
+
+							// end time
+							const right_time_adjustment_for_data_rows = 70; 
+							if (p.textAscent(s) < d) { p.text(format_time(data.tois[w].tmax / 1000), p.width - 90 + right_time_adjustment_for_data_rows, h + d - (.1 * d)); }
 							row++;
-						}	
+						}
+            
 					}
 				}				
 			}
@@ -634,35 +651,26 @@ let timelinesketch = (p) => {
 	};
 }
 
-let draw_temporal_aoi_bookmarks = (p_instance, canvas, rowHeight) => {	
-    // bookmark bar at the top of the timeline
-    canvas.fill(p_instance.color(0, 0, 20));
-    canvas.noStroke();
-    canvas.rect(0, 0, canvas.width, rowHeight);
+let draw_mock_bookmarks_on_global_bar = (p_instance, bookmark, global_tmin, global_tmax) => {
+	console.log('test 1');
+	
+    if (!bookmark || !isFinite(bookmark.tmin) || !isFinite(bookmark.tmax) || global_tmax <= global_tmin) {
+		return; 
+    }
+    let timelineDisplayWidth = TimeLine.width;
 
-    // Display global min and max times on this bar
-    // console.log('Bookmark bar drawing. Global tmin:', global_tmin, 'Global tmax:', global_tmax);
-    // console.log('Is finite?', isFinite(global_tmin) && isFinite(global_tmax));
+    // x-position for the start of the bookmark marker
+    let bookmarkX = p_instance.map(bookmark.tmin, global_tmin, global_tmax, 200, 200 + timelineDisplayWidth);
 
-    // if (isFinite(global_tmin) && isFinite(global_tmax)) {
-    //     console.log('Drawing text for bookmark bar.');
-    //     p_instance.fill(p_instance.color(100)); // Explicitly use white with p_instance.color and 100 HSB brightness
-    //     p_instance.textFont('Arial', 14);
-    //     p_instance.textAlign(p_instance.LEFT);
-
-    //     let formattedMinTime = format_time(global_tmin / 1000);
-    //     let formattedMaxTime = format_time(global_tmax / 1000);
-
-    //     console.log('Formatted Min Time:', formattedMinTime);
-    //     console.log('Formatted Max Time:', formattedMaxTime);
-    //     console.log('Text Min X:', 200 + 5, 'Y:', rowHeight / 2 + 5);
-    //     console.log('Text Max X:', 200 + canvas.width - 5, 'Y:', rowHeight / 2 + 5);
-
-
-    //     p_instance.text(formattedMinTime, 200 + 5, rowHeight / 2 + 5);
-    //     p_instance.textAlign(p_instance.RIGHT);
-    //     p_instance.text(formattedMaxTime, 200 + canvas.width - 5, rowHeight / 2 + 5);
-    // }
+	// size of bookmark
+    let markerSize = 10;
+    let markerY = BOOKMARK_ROW_HEIGHT / 2 - markerSize / 2; 
+    p_instance.noStroke();
+    p_instance.stroke(white(100)); 
+    p_instance.strokeWeight(1);
+    p_instance.line(bookmarkX + markerSize / 2, 0, bookmarkX + markerSize / 2, BOOKMARK_ROW_HEIGHT); 
+	p_instance.fill(p_instance.color(bookmark.color.h, bookmark.color.s, bookmark.color.b)); 
+	p_instance.rect(bookmarkX, markerY, markerSize, markerSize); 
 };
 
 let draw_time_lens = (canvas) => {
