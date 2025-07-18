@@ -3,6 +3,7 @@ let Minimap;
 let SpatialBackground, SpatialMidground, SpatialForeground;
 let SpatialCanvas;
 let highlighted_lenses = [];
+let visible_lenses = [];
 
 function highlightLensesById(arrayOfIds) {
     highlighted_lenses = []; // clear previous highlights
@@ -19,6 +20,20 @@ function highlightLensesById(arrayOfIds) {
         }
     }
     background_changed = true; // trigger a redraw
+}
+
+function setVisibleLenses(arrayOfIds) {
+    visible_lenses = [];
+    
+    if (arrayOfIds && arrayOfIds.length > 0) {
+        for (const id of arrayOfIds) {
+            const lensIndex = base_lenses.findIndex(lens => lens.id === id);
+            if (lensIndex !== -1) {
+                visible_lenses.push(lensIndex);
+            }
+        }
+    }
+    background_changed = true;
 }
 
 let spatialsketch = (p) => {
@@ -363,6 +378,10 @@ let spatialsketch = (p) => {
 		if( SHOW_LENS ){
 			for(let i=0; i<order_lenses.length; i++){
 				let lens_index = order_lenses[i];
+				if (visible_lenses.length > 0 && !visible_lenses.includes(lens_index)) {
+            		continue; 
+        		}
+
 				let l = base_lenses[lens_index];
 
 				let currentFill = l.col(20);

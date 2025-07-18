@@ -47,6 +47,7 @@ let previous_toi_name = "";
 let current_toi_id = 0;
 let tois_to_be_added = [];
 let maxEndTime = 0;
+let toisOfSelectedTwi = [];
 
 class Node {
     constructor(data) {
@@ -528,7 +529,7 @@ function select_twi(id){
 			list[i].classList.toggle('selected');
 		}
 	}
-	
+
 	selected_twi = id;
 	if(id < base_twis.length)
 		selected_twigroup = base_twis[id].group;
@@ -540,6 +541,7 @@ function select_twi(id){
 		if(DATASETS[data_id].included)
 			set_toi(data_id, id);
 	}
+	handleTWIChange();
 	background_changed |= SHOW_FIX||SHOW_TOPO;
 	if(SHOW_TOPO) update_topo = true;
 }
@@ -553,6 +555,20 @@ function set_toi(data_id, twi_id){
 
 	let data = DATASETS[data_id];
 	data.toi_id = twis.indexOf(twi_id);
+
+	if (toisOfSelectedTwi.length > 0 && !toisOfSelectedTwi.every(t => t.twi_id === twi_id)) {
+		toisOfSelectedTwi = [];
+	}
+
+	if (data.checked) {
+		for (let toi of data.tois) {
+			if (toi.twi_id == twi_id && toi) {
+				if (!toisOfSelectedTwi.some(t => t === toi)) {
+					toisOfSelectedTwi.push(toi);
+				}
+			}
+		}
+	}
 
 	let ele = document.getElementById(data_id+"_twi_"+twi_id);
 	
