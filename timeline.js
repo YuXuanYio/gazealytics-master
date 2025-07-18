@@ -7,12 +7,12 @@ let global_tmin = Infinity;
 let global_tmax = -Infinity;
 const BOOKMARK_ROW_HEIGHT = 20;
 const DATA_ROW_VERTICAL_OFFSET = BOOKMARK_ROW_HEIGHT + 5;
+let mockAOIIdForBookmark = 0;
 
-// Add this global variable
 let mockBookmark = {
-    tmin: 100000, // Example start time in milliseconds (e.g., 0:01:40.000)
-    tmax: 120000, // Example end time in milliseconds (e.g., 0:02:00.000)
-    color: { h: 0, s: 100, b: 100 }, // Red in HSB (hue 0, saturation 100, brightness 100)
+    tmin: 100000, 
+    tmax: 120000,
+	lensId: mockAOIIdForBookmark, 
     name: "Mock AOI 1"
 };
 
@@ -652,25 +652,32 @@ let timelinesketch = (p) => {
 }
 
 let draw_mock_bookmarks_on_global_bar = (p_instance, bookmark, global_tmin, global_tmax) => {
-	console.log('test 1');
-	
-    if (!bookmark || !isFinite(bookmark.tmin) || !isFinite(bookmark.tmax) || global_tmax <= global_tmin) {
-		return; 
-    }
-    let timelineDisplayWidth = TimeLine.width;
+	for(let i = 0; i< base_lenses.length; i++) {
+		if (!bookmark || !isFinite(bookmark.tmin) || !isFinite(bookmark.tmax) || global_tmax <= global_tmin) {
+			return; 
+		}
+		let timelineDisplayWidth = TimeLine.width;
+		let associatedLens = base_lenses[bookmark.lensId];
+		
+		if (!associatedLens) {
+			console.warn("Associated lens not found for bookmark ID:", bookmark.lensId);
+			return; 
+		}
+		let markerColor = associatedLens.col(100);
 
-    // x-position for the start of the bookmark marker
-    let bookmarkX = p_instance.map(bookmark.tmin, global_tmin, global_tmax, 200, 200 + timelineDisplayWidth);
+		// x-position for the start of the bookmark marker
+		let bookmarkX = p_instance.map(bookmark.tmin, global_tmin, global_tmax, 200, 200 + timelineDisplayWidth);
 
-	// size of bookmark
-    let markerSize = 10;
-    let markerY = BOOKMARK_ROW_HEIGHT / 2 - markerSize / 2; 
-    p_instance.noStroke();
-    p_instance.stroke(white(100)); 
-    p_instance.strokeWeight(1);
-    p_instance.line(bookmarkX + markerSize / 2, 0, bookmarkX + markerSize / 2, BOOKMARK_ROW_HEIGHT); 
-	p_instance.fill(p_instance.color(bookmark.color.h, bookmark.color.s, bookmark.color.b)); 
-	p_instance.rect(bookmarkX, markerY, markerSize, markerSize); 
+		// size of bookmark
+		let markerSize = 10;
+		let markerY = BOOKMARK_ROW_HEIGHT / 2 - markerSize / 2; 
+		p_instance.noStroke();
+		p_instance.stroke(white(100)); 
+		p_instance.strokeWeight(1);
+		p_instance.line(bookmarkX + markerSize / 2, 0, bookmarkX + markerSize / 2, BOOKMARK_ROW_HEIGHT); 
+		p_instance.fill(markerColor); 
+		p_instance.rect(bookmarkX, markerY, markerSize, markerSize); 
+	}
 };
 
 let draw_time_lens = (canvas) => {
