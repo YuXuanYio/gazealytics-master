@@ -209,17 +209,13 @@ class PolyLens{
 			this.h1 = h1; this.h2 = h2; this.h3 = h3;
 		}
 
-		edit_priority(priority, index = 0) {
-			console.log(this)	
-
+		edit_priority(priority, index = 0) {	
 			if (this.isTemporal) {
 				this.timeRanges[index].priority = priority;
 				handleAOITimeChange(document.getElementById('timeInput').value, true);
 			} else {
 				this.currentPriority = priority;
-			}
-
-			console.log(this)	
+			}	
 		}
 	
 		constructor(lid, x1, y1, groupid){
@@ -465,8 +461,6 @@ class EllipseLens{
 		}
 
 		edit_priority(priority, index = 0) {
-			console.log(this)
-
 			if (this.isTemporal) {
 				this.timeRanges[index].priority = priority;
 				handleAOITimeChange(document.getElementById('timeInput').value, true);
@@ -474,8 +468,6 @@ class EllipseLens{
 			} else {
 				this.currentPriority = priority;
 			}
-
-			console.log(this)
 		}
 
 		constructor(lid, x1, y1, groupid){
