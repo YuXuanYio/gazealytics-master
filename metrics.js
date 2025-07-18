@@ -260,8 +260,29 @@ function compute_toi_metrics(data_id, toi_id){
 		toi.lenscount[highest_priority_lens] += 1;
 		toi.lenstime[highest_priority_lens] += fixs[j].dt;
 
+		// compute_parent_fixations(lenses[highest_priority_lens], j);
+
 		// recusrively compute parent fixations
-		compute_parent_fixations(lenses[highest_priority_lens]);
+		let current_lens = lenses[highest_priority_lens];
+		while(current_lens != null) {
+			if (current_lens.parentLens != null) {
+				let parent_lens = current_lens.parentLens;
+
+				// find index of parent lens in lenses with the id of parent_lens
+				let parent_lens_index = -1;
+				for (let i = 0; i < lenses.length; i++) {
+					if (lenses[i].id === parent_lens.id) {
+						parent_lens_index = i;
+						break;
+					}
+				}
+				current_lens = current_lens.parentLens;
+				toi.lenscount[parent_lens_index] += 1;
+				toi.lenstime[parent_lens_index] += data.fixs[j].dt;
+			} else {
+				current_lens = null; // no more parent lenses
+			}
+		}
 
 		if(fixs[j].firstlens == undefined) {
 			//KT: handle exceptional case where fixs[j].firstlens is undefined
@@ -463,31 +484,24 @@ function compute_toi_metrics(data_id, toi_id){
 }
 
 // Recrusively addes fixations to the parent lens
-function compute_parent_fixations(lens) {
+function compute_parent_fixations(lens, j) {
 	
 	// This needs to be recursive because the parent lens might also have a parent lens
 	// and we want to count the time spent in the parent lens as well.
 	let parent_lens = lens.parentLens;
 
-	if (parent_lens === undefined || parent_lens.id === undefined) {
+	if (parent_lens == null) {
 		return;
 	}
 
-	// find index of parent lens in lenses with the id of parent_lens
-	let parent_lens_index = -1;
-	for (let i = 0; i < lenses.length; i++) {
-		if (lenses[i].id === parent_lens.id) {
-			parent_lens_index = i;
-			break;
-		}
-	}
 
-	console.log("Computing parent fixations for lens: " + lens.id + ", parent lens index: " + parent_lens_index);
+
+	// console.log("Computing parent fixations for lens: " + lens.id + ", parent lens index: " + parent_lens_index);
 
 	if (parent_lens_index !== -1) {
-		console.log("Adding fixation to parent lens: " + parent_lens_index);
+		// console.log("Adding fixation to parent lens: " + parent_lens_index);
 		toi.lenscount[parent_lens_index] += 1;
-		toi.lenstime[parent_lens_index] += fixs[j].dt;
+		toi.lenstime[parent_lens_index] += data.fixs[j].dt;
 
 		compute_parent_fixations(lenses[parent_lens_index]);
 	}

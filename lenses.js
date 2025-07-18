@@ -206,18 +206,20 @@ class PolyLens{
 		}
 
 		edit_hierarchy(h1, h2, h3){
-			this.h1 = h1; this.h2 = h2; this.h3 = h3;
+			this.h1 = h1 ? parseInt(h1) : -1; 
+			this.h2 = h2 ? parseInt(h2) : -1; 
+			this.h3 = h3 ? parseInt(h3) : -1;
 
 			// Set parent lens. If h3 is not -1, it means is an h3 level lens, its parent is h2.
-			if (h3 !== -1) {
+			if (this.h3 !== -1) {
 				// Find the lens with the matching h2
-				const parentLens = base_lenses.find(lens => lens.h2 === h2 && lens.h1 === h1 && lens.h3 === -1);
+				const parentLens = base_lenses.find(lens => lens.h2 === this.h2 && lens.h1 === this.h1 && lens.h3 === -1);
 				if (parentLens) {
 					this.parentLens = parentLens;
 				}
-			} else if (h3 === -1 && h2 !== -1) {
+			} else if (this.h3 === -1 && this.h2 !== -1) {
 				// Find the lens with the matching h1
-				const parentLens = base_lenses.find(lens => lens.h1 === h1 && lens.h2 === -1 && lens.h3 === -1);
+				const parentLens = base_lenses.find(lens => lens.h1 === this.h1 && lens.h2 === -1 && lens.h3 === -1);
 				if (parentLens) {
 					this.parentLens = parentLens;
 				}
@@ -475,18 +477,20 @@ class EllipseLens{
 		}
 
 		edit_hierarchy(h1, h2, h3){
-			this.h1 = h1; this.h2 = h2; this.h3 = h3;
+			this.h1 = h1 ? parseInt(h1) : -1; 
+			this.h2 = h2 ? parseInt(h2) : -1; 
+			this.h3 = h3 ? parseInt(h3) : -1;
 
 			// Set parent lens. If h3 is not -1, it means is an h3 level lens, its parent is h2.
-			if (h3 !== -1) {
+			if (this.h3 !== -1) {
 				// Find the lens with the matching h2
-				const parentLens = base_lenses.find(lens => lens.h2 === h2 && lens.h1 === h1 && lens.h3 === -1);
+				const parentLens = base_lenses.find(lens => lens.h2 === this.h2 && lens.h1 === this.h1 && lens.h3 === -1);
 				if (parentLens) {
 					this.parentLens = parentLens;
 				}
-			} else if (h3 === -1 && h2 !== -1) {
+			} else if (this.h3 === -1 && this.h2 !== -1) {
 				// Find the lens with the matching h1
-				const parentLens = base_lenses.find(lens => lens.h1 === h1 && lens.h2 === -1 && lens.h3 === -1);
+				const parentLens = base_lenses.find(lens => lens.h1 === this.h1 && lens.h2 === -1 && lens.h3 === -1);
 				if (parentLens) {
 					this.parentLens = parentLens;
 				}
