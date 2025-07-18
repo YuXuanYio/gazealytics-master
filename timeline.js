@@ -7,14 +7,10 @@ let global_tmin = Infinity;
 let global_tmax = -Infinity;
 const BOOKMARK_ROW_HEIGHT = 20;
 const DATA_ROW_VERTICAL_OFFSET = BOOKMARK_ROW_HEIGHT + 5;
-let mockAOIIdForBookmark = 0;
-
-let mockBookmark = {
-    tmin: 100000, 
-    tmax: 120000,
-	lensId: mockAOIIdForBookmark, 
-    name: "Mock AOI 1"
-};
+let hoveredBookmark = null;
+let _lastBookmarkRightEdgeX_forCalculation = 200; 
+const BOOKMARK_MARKER_SIZE = 10;
+const BOOKMARK_MIN_HORIZONTAL_GAP = 10; 
 
 let timelinesketch = (p) => {
 	//PFont  f; PFont  fb; // the font used for general text writing applications. defined in setup
@@ -157,6 +153,55 @@ let timelinesketch = (p) => {
 		}
 	};
 
+    p.mouseMoved = () => {
+		console.log('helloooo');
+        let newHoveredBookmark = null;
+
+        if (p.mouseY >= 0 && p.mouseY <= BOOKMARK_ROW_HEIGHT) {
+            resetBookmarkCalculationState();
+
+            for (let i = 0; i < base_lenses.length; i++) {
+                let currentLens = base_lenses[i];
+				console.log('test 2');
+                if (!currentLens || !currentLens.isTemporal || !Array.isArray(currentLens.timeRanges) || currentLens.timeRanges.length === 0) {
+                    continue;
+                }
+
+                currentLens.timeRanges.forEach(timeRange => {
+                    // call helper function to get drawing data
+                    let bookmarkData = getBookmarkDrawingData(p, currentLens, timeRange, global_tmin, global_tmax);
+					console.log('test 3');
+
+                    if (!bookmarkData) {
+                        return;
+                    }
+
+                    // check if the mouseX, mouseY is over this specific bookmark marker
+                    if (p.mouseX >= bookmarkData.x && p.mouseX <= bookmarkData.x + bookmarkData.size &&
+                        p.mouseY >= bookmarkData.y && p.mouseY <= bookmarkData.y + bookmarkData.size) {
+						
+                        newHoveredBookmark = {
+                            name: currentLens.name,
+                            startTime: timeRange.start,
+                            endTime: timeRange.end,
+                            x: bookmarkData.x,
+                            y: bookmarkData.y + bookmarkData.size 
+                        };
+						console.log('test 4');
+                        return; 
+                    }
+                });
+                if (newHoveredBookmark) {
+                    break; 
+                }
+            }
+        }
+
+        if (newHoveredBookmark !== hoveredBookmark) {
+            hoveredBookmark = newHoveredBookmark;
+            timeline_changed = true;
+        }
+    };
 
 	p.draw = () => {
 		// put drawing code here
@@ -241,7 +286,7 @@ let timelinesketch = (p) => {
                 p.textAlign(p.RIGHT);
                 p.text(formattedGlobalMaxTime, 200 + TimeLine.width + 85, BOOKMARK_ROW_HEIGHT / 2 + p.textAscent()/2 - 2);
 
-				draw_mock_bookmarks_on_global_bar(p, mockBookmark, global_tmin, global_tmax);
+				draw_mock_bookmarks_on_global_bar(p, global_tmin, global_tmax, base_lenses);
             }
         }
 
@@ -596,7 +641,35 @@ let timelinesketch = (p) => {
 				p.strokeWeight(0); 
 			}
 			if(SPATIAL.mouseIsOver_spatial){ p.do_spatial_overlay(); }
-		}catch (error) { console.error(error); timeline_changed = true; }
+
+			// to draw the tooltip on the temporal aoi bookmark bar
+            if (hoveredBookmark) {
+                p.noStroke();
+                p.fill(grey(80)); 
+                const tooltipPaddingY = 5; 
+                const tooltipHeight = 20; 
+                const textYOffset = 13; 
+
+                p.rect(
+                    hoveredBookmark.x,
+                    hoveredBookmark.y + tooltipPaddingY,
+                    p.textWidth(hoveredBookmark.name) + 10,
+                    tooltipHeight
+                );
+
+                p.fill(white(100)); 
+                p.textFont('Arial', 12); 
+                p.textAlign(p.LEFT);
+                p.text(
+                    hoveredBookmark.name,
+                    hoveredBookmark.x + 5,
+                    hoveredBookmark.y + tooltipPaddingY + textYOffset
+                );
+            }
+        } catch (error) {
+            console.error(error);
+            timeline_changed = true;
+        }
 	};
 
 	p.do_spatial_overlay = () => {
@@ -651,33 +724,88 @@ let timelinesketch = (p) => {
 	};
 }
 
-let draw_mock_bookmarks_on_global_bar = (p_instance, bookmark, global_tmin, global_tmax) => {
-	for(let i = 0; i< base_lenses.length; i++) {
-		if (!bookmark || !isFinite(bookmark.tmin) || !isFinite(bookmark.tmax) || global_tmax <= global_tmin) {
-			return; 
-		}
-		let timelineDisplayWidth = TimeLine.width;
-		let associatedLens = base_lenses[bookmark.lensId];
-		
-		if (!associatedLens) {
-			console.warn("Associated lens not found for bookmark ID:", bookmark.lensId);
-			return; 
-		}
-		let markerColor = associatedLens.col(100);
+// helper function to calculate drawing parameters for a single bookmark marker
+let getBookmarkDrawingData = (p_instance, currentLens, timeRange, global_tmin, global_tmax) => {
+    // validation for timeRange
+    if (!currentLens || !isFinite(timeRange.start) || !isFinite(timeRange.end) || global_tmax <= global_tmin) {
+        return null; 
+    }
 
-		// x-position for the start of the bookmark marker
-		let bookmarkX = p_instance.map(bookmark.tmin, global_tmin, global_tmax, 200, 200 + timelineDisplayWidth);
+    let timelineDisplayWidth = TimeLine.width;
+    let bookmarkTmin = timeRange.start;
 
-		// size of bookmark
-		let markerSize = 10;
-		let markerY = BOOKMARK_ROW_HEIGHT / 2 - markerSize / 2; 
-		p_instance.noStroke();
-		p_instance.stroke(white(100)); 
-		p_instance.strokeWeight(1);
-		p_instance.line(bookmarkX + markerSize / 2, 0, bookmarkX + markerSize / 2, BOOKMARK_ROW_HEIGHT); 
-		p_instance.fill(markerColor); 
-		p_instance.rect(bookmarkX, markerY, markerSize, markerSize); 
-	}
+    // calculate initial X-position based on time
+    let initialBookmarkX = p_instance.map(bookmarkTmin, global_tmin, global_tmax, 200, 200 + timelineDisplayWidth);
+
+    let bookmarkX = initialBookmarkX;
+
+    // horizontal pushing logic
+    if (bookmarkX < _lastBookmarkRightEdgeX_forCalculation + BOOKMARK_MIN_HORIZONTAL_GAP) {
+        bookmarkX = _lastBookmarkRightEdgeX_forCalculation + BOOKMARK_MIN_HORIZONTAL_GAP;
+    }
+
+    // update the shared state for the next calculation
+    _lastBookmarkRightEdgeX_forCalculation = bookmarkX + BOOKMARK_MARKER_SIZE;
+
+    // marker Y-position
+    let markerY = BOOKMARK_ROW_HEIGHT / 2 - BOOKMARK_MARKER_SIZE / 2;
+
+    return {
+        x: bookmarkX,
+        y: markerY,
+        size: BOOKMARK_MARKER_SIZE,
+        color: currentLens.col(100) 
+    };
+};
+
+let resetBookmarkCalculationState = () => {
+    _lastBookmarkRightEdgeX_forCalculation = 200;
+};
+
+let draw_mock_bookmarks_on_global_bar = (p_instance, global_tmin, global_tmax, allLenses) => {
+    if (!allLenses || allLenses.length === 0 || global_tmax <= global_tmin) {
+        return;
+    }
+
+    resetBookmarkCalculationState();
+
+    // loop through each lens in the base_lenses array
+    for (let i = 0; i < allLenses.length; i++) {
+        let currentLens = allLenses[i];
+
+        // check if this lens a temporal AOI
+        if (!currentLens || !currentLens.isTemporal || !Array.isArray(currentLens.timeRanges) || currentLens.timeRanges.length === 0) {
+            continue;
+        }
+
+        currentLens.timeRanges.forEach(timeRange => {
+            let bookmarkData = getBookmarkDrawingData(p_instance, currentLens, timeRange, global_tmin, global_tmax);
+
+            if (!bookmarkData) {
+                console.warn("Could not get drawing data for time range:", currentLens.name, timeRange);
+                return;
+            }
+
+            // vertical white line
+            p_instance.stroke(white(100));
+            p_instance.strokeWeight(1);
+            p_instance.line(bookmarkData.x + bookmarkData.size / 2, 0, bookmarkData.x + bookmarkData.size / 2, BOOKMARK_ROW_HEIGHT);
+
+            // bookmark rectangle
+            p_instance.noStroke();
+            p_instance.fill(bookmarkData.color);
+            p_instance.rect(bookmarkData.x, bookmarkData.y, bookmarkData.size, bookmarkData.size);
+
+            // highlight if selected
+            if (selected_lens === currentLens.id) {
+                p_instance.noFill();
+                p_instance.stroke(p_instance.color(60, 100, 100));
+                p_instance.strokeWeight(2);
+                p_instance.rect(bookmarkData.x - 1, bookmarkData.y - 1, bookmarkData.size + 2, bookmarkData.size + 2);
+                p_instance.strokeWeight(1);
+            }
+        });
+    }
 };
 
 let draw_time_lens = (canvas) => {
