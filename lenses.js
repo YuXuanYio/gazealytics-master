@@ -104,7 +104,11 @@ class PolyLens{
 			}
 			proc.fill(this.col(95));
 			proc.strokeWeight(0);
-			if(aspect && SHOW_LENSLABEL){proc.text(this.name+", Group "+this.group, disp_w + (this.centx-OFFSET_X) * ratio + gx, disp_h + (this.centy-OFFSET_Y) * ratio + gy);}
+			if(aspect && SHOW_LENSLABEL && SHOW_GROUPLABEL) {
+				proc.text(this.name+", Group "+this.group, disp_w + (this.centx-OFFSET_X) * ratio + gx, disp_h + (this.centy-OFFSET_Y) * ratio + gy);
+			} else if(aspect && SHOW_LENSLABEL) {
+				proc.text(this.name, disp_w + (this.centx-OFFSET_X) * ratio + gx, disp_h + (this.centy-OFFSET_Y) * ratio + gy);
+			}
 			proc.strokeWeight(1);
 			if(this.area == undefined && this.getArea == undefined)
 				this.area = calculatePolygonArea(this.x, this.y, this.x.length);//this.getArea();
@@ -352,7 +356,11 @@ class EllipseLens{
 			}
 			proc.fill(this.col(95));
 			proc.strokeWeight(0);
-			if(aspect && SHOW_LENSLABEL){proc.text(this.name+", Group "+this.group, (this.centx-OFFSET_X) * ratio + gx, (this.centy-OFFSET_Y) * ratio + gy)};
+			if(aspect && SHOW_LENSLABEL && SHOW_GROUPLABEL) {
+				proc.text(this.name+", Group "+this.group, (this.centx-OFFSET_X) * ratio + gx, (this.centy-OFFSET_Y) * ratio + gy)
+			} else if(aspect && SHOW_LENSLABEL) {
+				proc.text(this.name, (this.centx-OFFSET_X) * ratio + gx, (this.centy-OFFSET_Y) * ratio + gy);
+			}
 			proc.strokeWeight(1);
 			if(this.area == undefined && this.getArea == undefined){
 				let xpoints = [this.x1, this.x2, this.x2, this.x1];
@@ -583,7 +591,11 @@ class RectLens extends EllipseLens{
 			}
 			proc.fill(this.col(95));
 			proc.strokeWeight(0);
-			if(aspect && SHOW_LENSLABEL){proc.text(this.name+", Group "+this.group, (this.centx-OFFSET_X) * ratio + gx, (this.centy-OFFSET_Y) * ratio + gy)};
+			if(aspect && SHOW_LENSLABEL && SHOW_GROUPLABEL) {
+				proc.text(this.name+", Group "+this.group, (this.centx-OFFSET_X) * ratio + gx, (this.centy-OFFSET_Y) * ratio + gy)
+			} else if(aspect && SHOW_LENSLABEL) {
+				proc.text(this.name, (this.centx-OFFSET_X) * ratio + gx, (this.centy-OFFSET_Y) * ratio + gy);
+			}
 			proc.strokeWeight(1);
 			if(this.area == undefined && this.getArea == undefined){
 				let xpoints = [this.x1, this.x2, this.x2, this.x1];

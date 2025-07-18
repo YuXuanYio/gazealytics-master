@@ -39,6 +39,7 @@ LENSE_MODE = 0; // to filter fixation statistics (default-0: "Selected AOI Group
 let simulatedVideoTime = 0;
 var loaded = false; //for saved project image cropping
 SHOW_LENSLABEL = true;
+SHOW_GROUPLABEL = true;
 HAAR_VALUE = 0;
 SEQUENCE_SCORE_MISMATCH_PENALTY = 1;
 SEQUENCE_SCORE_GAP_PENALTY = 1;
@@ -937,6 +938,11 @@ function click_showlens(){
 function click_showlabel(){
 	document.getElementById('show_lenslabel').classList.toggle( 'toggle-on' );
 	SHOW_LENSLABEL = document.getElementById('show_lenslabel').classList.value.includes('toggle-on');
+	foreground_changed = true;
+}
+function click_showgrouplabel(){
+	document.getElementById('show_grouplabel').classList.toggle( 'toggle-on' );
+	SHOW_GROUPLABEL = document.getElementById('show_grouplabel').classList.value.includes('toggle-on');
 	foreground_changed = true;
 }
 function click_showtwis(){
