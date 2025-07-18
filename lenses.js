@@ -210,12 +210,16 @@ class PolyLens{
 		}
 
 		edit_priority(priority, index = 0) {
+			console.log(this)	
+
 			if (this.isTemporal) {
 				this.timeRanges[index].priority = priority;
 				handleAOITimeChange(document.getElementById('timeInput').value, true);
 			} else {
 				this.currentPriority = priority;
 			}
+
+			console.log(this)	
 		}
 	
 		constructor(lid, x1, y1, groupid){
@@ -461,6 +465,8 @@ class EllipseLens{
 		}
 
 		edit_priority(priority, index = 0) {
+			console.log(this)
+
 			if (this.isTemporal) {
 				this.timeRanges[index].priority = priority;
 				handleAOITimeChange(document.getElementById('timeInput').value, true);
@@ -468,6 +474,8 @@ class EllipseLens{
 			} else {
 				this.currentPriority = priority;
 			}
+
+			console.log(this)
 		}
 
 		constructor(lid, x1, y1, groupid){
@@ -702,11 +710,11 @@ function save_aoi(id){
 	if(targetLens) {
 		targetLens.edit_hierarchy(screenVal, appVal, interfaceVal);
 	} else {
-		console.log('Target lens not found');
+		// console.log('Target lens not found');
 	}
 
 	window.lenses = targetLens;
-	console.log('target lens:', targetLens)
+	// console.log('target lens:', targetLens)
 	alert('AOI saved successfully!');
 }
 function find_lens(X, Y){
@@ -861,7 +869,7 @@ function handleAOITimeChange(time, isString) {
 		
 		// Find the current time range for the lens, set its current priority to that time range's priority
 		const currentRange = lens.timeRanges.find(range => time >= range.start && time <= range.end);
-		if (currentRange) {
+		if (currentRange && lens.isTemporal) {
 			lens.currentPriority = currentRange.priority;
 		}
 
@@ -950,7 +958,7 @@ function handleAOIFilterChange(filterType) {
 		: '<i class="fas fa-eye-slash"></i>';
 		lensElem.checked = lens.included;
 	} else {
-		console.log(`Element lens_${i}_c not found`);
+		// console.log(`Element lens_${i}_c not found`);
 	}
 	});
 
@@ -965,7 +973,7 @@ function updateLensToggleVisual(id, included) {
 			: '<i class="fas fa-eye-slash"></i>';
 		lensElem.checked = included;
 	} else {
-		console.log(`Element lens_${id}_c not found`);
+		// console.log(`Element lens_${id}_c not found`);
 	}
 }
 
