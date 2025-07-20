@@ -1,5 +1,6 @@
 let MatrixBack;
 let draggableRectx = 0,draggableRecty = 0, draggableRectw = 0, draggableRecth = 0;
+let isUpdatingFromVideo = false;
 
 let draggingX = false, draggingY = false; // Is the object being dragged?
 
@@ -1122,6 +1123,15 @@ let matrixsketch = (p) => {
 		
 		currentVideoObj.position(video_x, video_y);
 		currentVideoObj.size(video_width, video_height);
+
+		// Updates the slider to match the video's current time 
+		currentVideoObj.elt.addEventListener('timeupdate', function() {
+			isUpdatingFromVideo = true;
+			let newTimeAnimate = currentVideoObj.time() / currentVideoObj.duration();
+			document.getElementById("time_animate_sl").noUiSlider.set(newTimeAnimate);
+			TIME_ANIMATE = newTimeAnimate;
+			isUpdatingFromVideo = false;
+		});
 
 		if(toi_start_timestamp_button == null) {
 			toi_start_timestamp_button = p.createButton('Set TWI Start Time');
