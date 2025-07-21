@@ -104,7 +104,11 @@ class PolyLens{
 			}
 			proc.fill(this.col(95));
 			proc.strokeWeight(0);
-			if(aspect && SHOW_LENSLABEL){proc.text(this.name+", Group "+this.group, disp_w + (this.centx-OFFSET_X) * ratio + gx, disp_h + (this.centy-OFFSET_Y) * ratio + gy);}
+			if(aspect && SHOW_LENSLABEL && SHOW_GROUPLABEL) {
+				proc.text(this.name+", Group "+this.group, disp_w + (this.centx-OFFSET_X) * ratio + gx, disp_h + (this.centy-OFFSET_Y) * ratio + gy);
+			} else if(aspect && SHOW_LENSLABEL) {
+				proc.text(this.name, disp_w + (this.centx-OFFSET_X) * ratio + gx, disp_h + (this.centy-OFFSET_Y) * ratio + gy);
+			}
 			proc.strokeWeight(1);
 			if(this.area == undefined && this.getArea == undefined)
 				this.area = calculatePolygonArea(this.x, this.y, this.x.length);//this.getArea();
@@ -372,7 +376,11 @@ class EllipseLens{
 			}
 			proc.fill(this.col(95));
 			proc.strokeWeight(0);
-			if(aspect && SHOW_LENSLABEL){proc.text(this.name+", Group "+this.group, (this.centx-OFFSET_X) * ratio + gx, (this.centy-OFFSET_Y) * ratio + gy)};
+			if(aspect && SHOW_LENSLABEL && SHOW_GROUPLABEL) {
+				proc.text(this.name+", Group "+this.group, (this.centx-OFFSET_X) * ratio + gx, (this.centy-OFFSET_Y) * ratio + gy)
+			} else if(aspect && SHOW_LENSLABEL) {
+				proc.text(this.name, (this.centx-OFFSET_X) * ratio + gx, (this.centy-OFFSET_Y) * ratio + gy);
+			}
 			proc.strokeWeight(1);
 			if(this.area == undefined && this.getArea == undefined){
 				let xpoints = [this.x1, this.x2, this.x2, this.x1];
@@ -622,7 +630,11 @@ class RectLens extends EllipseLens{
 			}
 			proc.fill(this.col(95));
 			proc.strokeWeight(0);
-			if(aspect && SHOW_LENSLABEL){proc.text(this.name+", Group "+this.group, (this.centx-OFFSET_X) * ratio + gx, (this.centy-OFFSET_Y) * ratio + gy)};
+			if(aspect && SHOW_LENSLABEL && SHOW_GROUPLABEL) {
+				proc.text(this.name+", Group "+this.group, (this.centx-OFFSET_X) * ratio + gx, (this.centy-OFFSET_Y) * ratio + gy)
+			} else if(aspect && SHOW_LENSLABEL) {
+				proc.text(this.name, (this.centx-OFFSET_X) * ratio + gx, (this.centy-OFFSET_Y) * ratio + gy);
+			}
 			proc.strokeWeight(1);
 			if(this.area == undefined && this.getArea == undefined){
 				let xpoints = [this.x1, this.x2, this.x2, this.x1];
@@ -649,6 +661,7 @@ lensbox = '<div class="dragger" draggable="true" ondragend="dragEnd()" ondragove
 + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button id="lens_#_temporal_btn" onclick="toggleTemporal(#);"><i class="fas fa-clock"></i></button><span class="tip">Make current lens temporal</span></div>'
 + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button id="lens_#_l" checked="true"><i class="fas fa-lock-open"></i></button><span class="tip">Lock the lens with current value</span></div>'
 + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button onclick="delete_lens(#);"><i class="far fa-trash-alt"></i></button><span class="tip">Delete the lens</span></div>'
+// + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button onclick="duplicate_lens(#);"><i class="far fa-copy"></i></button><span class="tip">Duplicate the lens</span></div>'
 + '</div>'
 +'<div style="display: flex; gap: 8px; align-items: center; margin: 3px">'
 + '<label>Screen ID<br><input class="num" type="number" id="lens_#_screen_id" name="#name" style="width:70px" step=1 min=1></label>'
@@ -715,7 +728,7 @@ function create_lens(mx, my){
 		}else{this.innerHTML='<i class="fas fa-lock-open"></i>';} 
 	}
 	document.getElementById('lens_'+v+'_lensegroup').value = groupid;
-	}
+}
 function lenses_update(){
 	midground_changed = true; timeline_changed = true; matrix_changed = true; SAC_FILTER_CHANGED = true;
 }
@@ -976,23 +989,23 @@ function toggleTemporal(id, state = null, accountForTime = true) {
 
 function handleAOIFilterChange(filterType) {
 	base_lenses.forEach((lens, i) => {
-	if (filterType === 'temporal') {
-		lens.included = lens.isTemporal;
-	} else if (filterType === 'non-temporal') {
-		lens.included = !lens.isTemporal;
-	} else {
-		lens.included = true;
-	}
+		if (filterType === 'temporal') {
+			lens.included = lens.isTemporal;
+		} else if (filterType === 'non-temporal') {
+			lens.included = !lens.isTemporal;
+		} else {
+			lens.included = true;
+		}
 
-	const lensElem = document.getElementById(`lens_${i}_c`);
-	if (lensElem) {
-		lensElem.innerHTML = lens.included
-		? '<i class="fas fa-eye"></i>'
-		: '<i class="fas fa-eye-slash"></i>';
-		lensElem.checked = lens.included;
-	} else {
-		// console.log(`Element lens_${i}_c not found`);
-	}
+		const lensElem = document.getElementById(`lens_${i}_c`);
+		if (lensElem) {
+			lensElem.innerHTML = lens.included
+			? '<i class="fas fa-eye"></i>'
+			: '<i class="fas fa-eye-slash"></i>';
+			lensElem.checked = lens.included;
+		} else {
+			// console.log(`Element lens_${i}_c not found`);
+		}
 	});
 
 	lenses_update();
@@ -1059,5 +1072,3 @@ function handleTWIChange() {
 
 	lenses_update();
 }
-
-

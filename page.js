@@ -39,6 +39,7 @@ LENSE_MODE = 0; // to filter fixation statistics (default-0: "Selected AOI Group
 let simulatedVideoTime = 0;
 var loaded = false; //for saved project image cropping
 SHOW_LENSLABEL = true;
+SHOW_GROUPLABEL = true;
 HAAR_VALUE = 0;
 SEQUENCE_SCORE_MISMATCH_PENALTY = 1;
 SEQUENCE_SCORE_GAP_PENALTY = 1;
@@ -423,7 +424,7 @@ function load_controls(){
 		FORE_SIZE = parseFloat(document.getElementById("fore_size_sl").noUiSlider.get());
 		foreground_changed = true; 
 	}
-	let currentScrubbedTime = maxEndTime * TIME_ANIMATE;
+	let currentScrubbedTime = selectedTwiMinTime + (selectedTwiMaxTime - selectedTwiMinTime) * TIME_ANIMATE;
 	if( !TIME_PLAY && TIME_ANIMATE != parseFloat(document.getElementById("time_animate_sl").noUiSlider.get())){
 		TIME_ANIMATE = parseFloat(document.getElementById("time_animate_sl").noUiSlider.get());
 		handleAOITimeChange(currentScrubbedTime, false);
@@ -923,6 +924,8 @@ function click_showlens(){
 				document.getElementById('lens_'+i+'_c').checked=true;
 			}			
 		}
+		selectedFilter = document.getElementById('aoiFilterSelect').value;
+		handleAOIFilterChange(selectedFilter);
 	}else{
 		document.getElementById('showlens').innerHTML = " <i class='fas fa-eye-slash'></i> ";
 		for(var i=0; i<base_lenses.length; i++){
@@ -937,6 +940,11 @@ function click_showlens(){
 function click_showlabel(){
 	document.getElementById('show_lenslabel').classList.toggle( 'toggle-on' );
 	SHOW_LENSLABEL = document.getElementById('show_lenslabel').classList.value.includes('toggle-on');
+	foreground_changed = true;
+}
+function click_showgrouplabel(){
+	document.getElementById('show_grouplabel').classList.toggle( 'toggle-on' );
+	SHOW_GROUPLABEL = document.getElementById('show_grouplabel').classList.value.includes('toggle-on');
 	foreground_changed = true;
 }
 function click_showtwis(){

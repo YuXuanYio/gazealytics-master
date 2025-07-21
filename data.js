@@ -48,6 +48,8 @@ let current_toi_id = 0;
 let tois_to_be_added = [];
 let maxEndTime = 0;
 let toisOfSelectedTwi = [];
+let selectedTwiMaxTime = 0;
+let selectedTwiMinTime = 1000000000000000;
 
 class Node {
     constructor(data) {
@@ -565,6 +567,8 @@ function set_toi(data_id, twi_id){
 			if (toi.twi_id == twi_id && toi) {
 				if (!toisOfSelectedTwi.some(t => t === toi)) {
 					toisOfSelectedTwi.push(toi);
+					selectedTwiMaxTime = Math.max(selectedTwiMaxTime, toi.tmax);
+					selectedTwiMinTime = Math.min(selectedTwiMinTime, toi.tmin);
 				}
 			}
 		}
