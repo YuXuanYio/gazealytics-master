@@ -862,16 +862,22 @@ let draw_time_data = (canvas) => {
 						if( l != undefined ){
 							for(let j = toi.j_min;j < toi.j_max && (data.fixs[j].t - toi.tmin)/toi_longest_duration < TIME_ANIMATE; j++){
 								if(l.inside(data.fixs[j].x, data.fixs[j].y) ){
-									let ts = 0;
-									if(data.fixs[j].t > toi.tmin)
-										ts = (canvas.width*(data.fixs[j].t - toi.tmin))/toi_longest_duration;
-									let td = (canvas.width*data.fixs[j].dt)/toi_longest_duration;
-									if(td > 1){
-										canvas.fill(white(100)); canvas.noStroke();
-										canvas.rect(ts, h2top, td, h2);
-									}else{
-										canvas.stroke(white(100)); canvas.noFill();
-										canvas.line(ts, h2top, ts, h2top+h2);
+									// Check if the fixation time is within any time range of the lens
+									let inTimeRange = lenses[fl].timeRanges.some(range =>
+										data.fixs[j].t >= range.start && data.fixs[j].t <= range.end
+									);
+									if(inTimeRange){
+										let ts = 0;
+										if(data.fixs[j].t > toi.tmin)
+											ts = (canvas.width*(data.fixs[j].t - toi.tmin))/toi_longest_duration;
+										let td = (canvas.width*data.fixs[j].dt)/toi_longest_duration;
+										if(td > 1){
+											canvas.fill(lenses[fl].col(60)); canvas.noStroke();
+											canvas.rect(ts, h2top, td, h2);
+										}else{
+											canvas.stroke(lenses[fl].col(60)); canvas.noFill();
+											canvas.line(ts, h2top, ts, h2top+h2);
+										}
 									}
 								}
 							}
@@ -1027,16 +1033,22 @@ let draw_time_all = (canvas) => {
 							if(data.fixs[j] != undefined && (data.fixs[j].t - toi.tmin)/toi_longest_duration < TIME_ANIMATE){
 								let fl = data.fixs[j].firstlens;
 								if(fl<lenses.length ){
-									let ts = 0;
-									if(data.fixs[j].t > toi.tmin)
-										ts = (canvas.width*(data.fixs[j].t - toi.tmin))/toi_longest_duration;
-									let td = (canvas.width*data.fixs[j].dt)/toi_longest_duration;
-									if(td > 1){
-										canvas.fill(lenses[fl].col(60)); canvas.noStroke();
-										canvas.rect(ts, h2top, td, h2);
-									}else{
-										canvas.stroke(lenses[fl].col(60)); canvas.noFill();
-										canvas.line(ts, h2top, ts, h2top+h2);
+									// Check if the fixation time is within any time range of the lens
+									let inTimeRange = lenses[fl].timeRanges.some(range =>
+										data.fixs[j].t >= range.start && data.fixs[j].t <= range.end
+									);
+									if(inTimeRange){
+										let ts = 0;
+										if(data.fixs[j].t > toi.tmin)
+											ts = (canvas.width*(data.fixs[j].t - toi.tmin))/toi_longest_duration;
+										let td = (canvas.width*data.fixs[j].dt)/toi_longest_duration;
+										if(td > 1){
+											canvas.fill(lenses[fl].col(60)); canvas.noStroke();
+											canvas.rect(ts, h2top, td, h2);
+										}else{
+											canvas.stroke(lenses[fl].col(60)); canvas.noFill();
+											canvas.line(ts, h2top, ts, h2top+h2);
+										}
 									}
 								}
 							}					
