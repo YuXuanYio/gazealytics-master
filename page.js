@@ -424,7 +424,7 @@ function load_controls(){
 		FORE_SIZE = parseFloat(document.getElementById("fore_size_sl").noUiSlider.get());
 		foreground_changed = true; 
 	}
-	let currentScrubbedTime = maxEndTime * TIME_ANIMATE;
+	let currentScrubbedTime = selectedTwiMinTime + (selectedTwiMaxTime - selectedTwiMinTime) * TIME_ANIMATE;
 	if( !TIME_PLAY && TIME_ANIMATE != parseFloat(document.getElementById("time_animate_sl").noUiSlider.get())){
 		TIME_ANIMATE = parseFloat(document.getElementById("time_animate_sl").noUiSlider.get());
 		handleAOITimeChange(currentScrubbedTime, false);
