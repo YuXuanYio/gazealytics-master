@@ -924,6 +924,8 @@ function click_showlens(){
 				document.getElementById('lens_'+i+'_c').checked=true;
 			}			
 		}
+		selectedFilter = document.getElementById('aoiFilterSelect').value;
+		handleAOIFilterChange(selectedFilter);
 	}else{
 		document.getElementById('showlens').innerHTML = " <i class='fas fa-eye-slash'></i> ";
 		for(var i=0; i<base_lenses.length; i++){
