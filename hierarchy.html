@@ -139,9 +139,9 @@
                 const hierarchyDisplay = document.getElementById('hierarchyDisplay');
                 const hierarchy = {};
                 lensesToRender.forEach(lens => {
-                    const screenId = lens.h1; // Using h1 for screen
-                    const appId = lens.h2; // Using h2 for app
-                    const interfaceId = lens.h3; // Using h3 for interface
+                    const screenId = lens.h1;
+                    const appId = lens.h2;
+                    const interfaceId = lens.h3;
                     const lensName = lens.name; 
                     const lensId = lens.id;
 
@@ -239,14 +239,82 @@
                     if (lens.h2) uniqueAppIds.add(lens.h2);
                     if (lens.h3) uniqueInterfaceIds.add(lens.h3);
                 });
-                // clear previous options
-                screenFilter.length = 1;
-                appFilter.length = 1;
-                interfaceFilter.length = 1;
-                Array.from(uniqueScreenIds).sort().forEach(id => { screenFilter.add(new Option(id, id)); });
-                Array.from(uniqueAppIds).sort().forEach(id => { appFilter.add(new Option(id, id)); });
-                Array.from(uniqueInterfaceIds).sort().forEach(id => { interfaceFilter.add(new Option(id, id)); });
+
+                Array.from(uniqueScreenIds).sort((a, b) => { return String(a).localeCompare(String(b), undefined, {numeric: true}); }).forEach(id => {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = id;
+                    screenFilter.appendChild(option);
+                });
+
+                Array.from(uniqueAppIds).sort((a, b) => { return String(a).localeCompare(String(b), undefined, {numeric: true}); }).forEach(id => {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = id;
+                    appFilter.appendChild(option);
+                });
+
+                Array.from(uniqueInterfaceIds).sort((a, b) => { return String(a).localeCompare(String(b), undefined, {numeric: true}); }).forEach(id => {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = id;
+                    interfaceFilter.appendChild(option);
+                });
             }
+
+            // apply filters and re-render the hierarchy
+            function applyFilters() {
+                const selectedScreen = document.getElementById('screenFilter').value;
+                const selectedApp = document.getElementById('appFilter').value;
+                const selectedInterface = document.getElementById('interfaceFilter').value;
+                let filteredLenses = allLensesData.filter(lens => {
+                    // AOI must have at least a screen_id to be considered valid for the hierarchy
+                    if (lens.h1 === undefined || lens.h1 === null) {
+                        return false;
+                    }
+
+                    // check if the lens matches the selected screen filter
+                    const matchesScreen = (selectedScreen === 'all' || String(lens.h1) === selectedScreen);
+                    if (!matchesScreen) {
+                        return false;
+                    }
+
+                    const matchesApp = (selectedApp === 'all' || (lens.h2 !== undefined && lens.h2 !== null && String(lens.h2) === selectedApp));
+                    if (!matchesApp) {
+                        return false;
+                    }
+
+                    const matchesInterface = (selectedInterface === 'all' || (lens.h3 !== undefined && lens.h3 !== null && String(lens.h3) === selectedInterface));
+                    if (!matchesInterface) {
+                        return false;
+                    }
+                    
+                    return true;
+                });
+
+                renderHierarchy(filteredLenses);
+            }
+
+            function getChildAoiIds(lenses, filterType, filterId) {
+                const ids = new Set();
+                lenses.forEach(lens => {
+                    let isMatch = false;
+                    if (filterType === 'screen' && String(lens.h1) === filterId) {
+                        isMatch = true;
+                    } else if (filterType === 'app' && String(lens.h2) === filterId) {
+                        isMatch = true;
+                    } else if (filterType === 'interface' && String(lens.h3) === filterId) {
+                        isMatch = true;
+                    } else if (filterType === 'aoi' && String(lens.id) === filterId) {
+                        isMatch = true;
+                    }
+                    
+                    if (isMatch && lens.id !== undefined) {
+                        ids.add(lens.id);
+                    }
+            });
+            return Array.from(ids);
+        }
 
             window.onload = function() {
                 const mainWindow = window.opener;
