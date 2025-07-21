@@ -9,6 +9,10 @@ function compute_data_firstlens(data_id){
 		for (v=0; v<lenses.length; v++) {
 
 			let valid_lens = lenses[v].inside(fixs[j].x, fixs[j].y) && lenses[v].included && lenses[v].checked;
+			let inTimeRange = lenses[v].timeRanges.some(range =>
+            	fixs[j].t >= range.start && fixs[j].t <= range.end
+        	);
+        	valid_lens = valid_lens && inTimeRange;
 
 			if (valid_lens && fixs[j].firstlens == lenses.length ) {
 				fixs[j].firstlens = v; // first lens == lenses.length means outside all lenses, used for indirect transitions between lens
@@ -265,8 +269,6 @@ function compute_toi_metrics(data_id, toi_id){
 		toi.lenscount[highest_priority_lens] += 1;
 		toi.lenstime[highest_priority_lens] += fixs[j].dt;
 
-		// compute_parent_fixations(lenses[highest_priority_lens], j);
-
 		// recusrively compute parent fixations
 		let current_lens = lenses[highest_priority_lens];
 		while(current_lens != null) {
@@ -485,30 +487,6 @@ function compute_toi_metrics(data_id, toi_id){
 				if( vx1 != vx2 || vy1 != vy2){ toi.grid_transitions[ vx1 * GRID_N + vy1 ][ vx2 * GRID_N + vy2 ] += fixs[j].dt; }
 			}
 		}
-	}
-}
-
-// Recrusively addes fixations to the parent lens
-function compute_parent_fixations(lens, j) {
-	
-	// This needs to be recursive because the parent lens might also have a parent lens
-	// and we want to count the time spent in the parent lens as well.
-	let parent_lens = lens.parentLens;
-
-	if (parent_lens == null) {
-		return;
-	}
-
-
-
-	// console.log("Computing parent fixations for lens: " + lens.id + ", parent lens index: " + parent_lens_index);
-
-	if (parent_lens_index !== -1) {
-		// console.log("Adding fixation to parent lens: " + parent_lens_index);
-		toi.lenscount[parent_lens_index] += 1;
-		toi.lenstime[parent_lens_index] += data.fixs[j].dt;
-
-		compute_parent_fixations(lenses[parent_lens_index]);
 	}
 }
 
