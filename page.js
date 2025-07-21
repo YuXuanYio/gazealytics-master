@@ -462,7 +462,6 @@ function load_controls(){
 			TIME_ANIMATE = Math.min( 1.0, TIME_ANIMATE + 0.01 );
 			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );		
 		}
-		currentScrubbedTime = maxEndTime * TIME_ANIMATE
 		handleAOITimeChange(currentScrubbedTime, false);
 		background_changed = true; timeline_changed = true;
 	}

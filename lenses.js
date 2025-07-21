@@ -899,6 +899,8 @@ function handleAOITimeChange(time, isString) {
 		time = parseTimeString(time);
 	}
 
+	let selectedFilter = document.getElementById('aoiFilterSelect').value;
+
 	for (let i = 0; i < base_lenses.length; i++) {
 		const lens = base_lenses[i];
 		if (!lens) {
@@ -909,8 +911,14 @@ function handleAOITimeChange(time, isString) {
 			lens.timeRanges = [{ start: lens.startTime ?? 0, end: lens.endTime ?? 0, priority: lens.priority ?? 1 }];
 		}
 
-		lens.included = (lens.timeRanges.some(range => time >= range.start && time <= range.end) && lens.isTemporal) || !lens.isTemporal;
-		
+		if (selectedFilter === 'temporal') {
+			lens.included = (lens.timeRanges.some(range => time >= range.start && time <= range.end) && lens.isTemporal);
+			lens.checked = lens.included;
+		} else if (selectedFilter === 'non-temporal') {
+			continue;
+		} else {
+			lens.included = (lens.timeRanges.some(range => time >= range.start && time <= range.end) && lens.isTemporal || (!lens.isTemporal && lens.checked));
+		}
 		// Find the current time range for the lens, set its current priority to that time range's priority
 		const currentRange = lens.timeRanges.find(range => time >= range.start && time <= range.end);
 		if (currentRange && lens.isTemporal) {
@@ -924,8 +932,6 @@ function handleAOITimeChange(time, isString) {
 				? '<i class="fas fa-eye"></i>'
 				: '<i class="fas fa-eye-slash"></i>';
 			lensElem.checked = lens.included;
-		} else {
-			// console.log(`Element lens_${i}_c not found`);
 		}
 	}
 
@@ -958,18 +964,13 @@ function removeTimeRow(lensId, index) {
 	}
 }
 
-function toggleTemporal(id, state = null, accountForTime = true) {
+function toggleTemporal(id, state = null) {
 	const lens = base_lenses[id];
 
 	if (typeof state === "boolean") {
 		lens.isTemporal = state;
 	} else {
 		lens.isTemporal = !lens.isTemporal;
-	}
-
-	const timeInput = document.getElementById(`timeInput`).value;
-	if (timeInput && accountForTime) {
-		handleAOITimeChange(timeInput, true);
 	}
 
 	const container = document.getElementById(`lens_${id}_values`);
@@ -1063,6 +1064,7 @@ function handleTWIChange() {
 			} else {
 				lens.included = false;
 			}
+			lens.checked = lens.included;
 
 			updateLensToggleVisual(i, lens.included);
 			if (lens.name == "aoi25") {console.log(`Lens ${lens.name} included: ${lens.included}, Static: ${isStatic}, Temporal: ${isPartial}`)};
