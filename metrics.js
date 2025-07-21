@@ -243,6 +243,11 @@ function compute_toi_metrics(data_id, toi_id){
 		for(var l=0; l<lenses.length; l++){
 			
 			let valid_lens = lenses[l].inside(fixs[j].x, fixs[j].y) && lenses[l].included && lenses[l].checked;
+			let inTimeRange = lenses[l].timeRanges.some(range =>
+            	fixs[j].t >= range.start && fixs[j].t <= range.end
+        	);
+        	valid_lens = valid_lens && inTimeRange;
+
 			if (valid_lens && highest_priority_lens == lenses.length ) {
 				highest_priority_lens = l
 			}

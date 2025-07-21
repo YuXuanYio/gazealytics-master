@@ -915,6 +915,8 @@ function handleAOITimeChange(time, isString) {
 			// console.log(`Element lens_${i}_c not found`);
 		}
 	}
+
+	matrix_changed = true
 }
 
 function addExtraTimeRow(lensId) {
