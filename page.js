@@ -51,6 +51,7 @@ EXPORT_METRIC_CANVAS = true;
 EXPORT_CROP_TIMELINE_CANVAS = true;
 TOGGLE_GREEN_BOX_HIGHLIGHTS = true;
 let matrix_changed_retry = 0;
+let videoStartTimeChanged = false;
 
 var TIMELINE_HIGHLIGHT = {
     tmin: null,
@@ -428,24 +429,26 @@ function load_controls(){
 	if( !TIME_PLAY && TIME_ANIMATE != parseFloat(document.getElementById("time_animate_sl").noUiSlider.get())){
 		TIME_ANIMATE = parseFloat(document.getElementById("time_animate_sl").noUiSlider.get());
 		handleAOITimeChange(currentScrubbedTime, false);
-		//update video with the time, only if the video is not playing
-		if(VIDEO_LINKING && selected_data != -1 && DATASETS[selected_data] != null && DATASETS[selected_data] != undefined && 
+		if (VIDEO_LINKING && selected_data != -1 && DATASETS[selected_data] != null && DATASETS[selected_data] != undefined && 
 			currentVideoObj != null && currentVideoObj != undefined && !TIME_PLAY) {
-							
-			//get time from dataset
-			let data = DATASETS[selected_data]; toi = data.tois[ data.toi_id ];
+
+			let data = DATASETS[selected_data];
+			toi = data.tois[data.toi_id];
 			let longest_duration = data.tmax - data.tmin;
 
-			if(lenses.length == 0){
-				for(let j = toi.j_min; j < toi.j_max && (data.fixs[j].t - data.tmin)/longest_duration < TIME_ANIMATE; j++){
-					if(data.fixs[j].t - data.tmin < 0)
+			if (lenses.length == 0) {
+				for (let j = toi.j_min; j < toi.j_max && (data.fixs[j].t - data.tmin)/longest_duration < TIME_ANIMATE; j++) {
+					if (data.fixs[j].t - data.tmin < 0)
 						ts = 0;
 					else
-						ts = (TimeLine.width*(data.fixs[j].t - data.tmin))/longest_duration;					
+						ts = (TimeLine.width * (data.fixs[j].t - data.tmin)) / longest_duration;
 				}
 			}
-			//set video time
-			VIDEOS[selected_data].videoobj.time(TIME_ANIMATE * VIDEOS[selected_data].videoobj.duration());
+
+			let start = selectedTwiMinTime / 1000;
+			let end = selectedTwiMaxTime / 1000;
+			let scrubbedTime = start + TIME_ANIMATE * (end - start);
+			currentVideoObj.time(scrubbedTime);
 		}
 		background_changed = true; timeline_changed = true;
 	}else if( TIME_PLAY && TIME_ANIMATE < 1.0 ){
@@ -453,13 +456,22 @@ function load_controls(){
 		// If video is playing, we need to update the time animate slider proportionally to the video time
 		if(VIDEO_LINKING && selected_data != -1 && VIDEOS[selected_data] != null && VIDEOS[selected_data] != undefined && 
 			currentVideoObj != null && currentVideoObj != undefined) {
+				if (!videoStartTimeChanged) {
+					currentVideoObj.time(selectedTwiMinTime/1000);
+					videoStartTimeChanged = true;
+				} else {
+					if (currentVideoObj.time() >= selectedTwiMaxTime/1000) {
+						currentVideoObj.pause();
+						videoStartTimeChanged = false;
+					}
+				}
 			
-			// TIME_ANIMATE = Math.min( 1.0, TIME_ANIMATE + 0.01/100 );
-			TIME_ANIMATE = currentVideoObj.time() / currentVideoObj.duration();
+			const t = currentVideoObj.time();
+			TIME_ANIMATE = (t - selectedTwiMinTime / 1000) / ((selectedTwiMaxTime - selectedTwiMinTime) / 1000);
 			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );
 		}
 		else {
-			TIME_ANIMATE = Math.min( 1.0, TIME_ANIMATE + 0.01 );
+			TIME_ANIMATE = Math.min( 1.0, TIME_ANIMATE + 0.002 );
 			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );		
 		}
 		handleAOITimeChange(currentScrubbedTime, false);
