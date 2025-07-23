@@ -661,7 +661,7 @@ lensbox = '<div class="dragger" draggable="true" ondragend="dragEnd()" ondragove
 + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button id="lens_#_temporal_btn" onclick="toggleTemporal(#);"><i class="fas fa-clock"></i></button><span class="tip">Make current lens temporal</span></div>'
 + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button id="lens_#_l" checked="true"><i class="fas fa-lock-open"></i></button><span class="tip">Lock the lens with current value</span></div>'
 + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button onclick="delete_lens(#);"><i class="far fa-trash-alt"></i></button><span class="tip">Delete the lens</span></div>'
-// + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button onclick="duplicate_lens(#);"><i class="far fa-copy"></i></button><span class="tip">Duplicate the lens</span></div>'
++ '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button onclick="duplicate_lens(#);"><i class="far fa-copy"></i></button><span class="tip">Duplicate the lens</span></div>'
 + '</div>'
 +'<div style="display: flex; gap: 8px; align-items: center; margin: 3px">'
 + '<label>Screen ID<br><input class="num" type="number" id="lens_#_screen_id" name="#name" style="width:70px" step=1 min=1></label>'
@@ -1073,4 +1073,112 @@ function handleTWIChange() {
 	}
 
 	lenses_update();
+}
+
+function duplicate_lens(id) {
+	const originalLens = base_lenses[id];
+	if (!originalLens) {
+		console.warn(`Lens with id ${id} not found`);
+		return;
+	}
+
+	// Clone the original lens
+	const newLens = Object.assign(Object.create(Object.getPrototypeOf(originalLens)), originalLens);
+	newLens.id = lid++;
+	newLens.name = originalLens.name + '_copy';
+	newLens.timeRanges = originalLens.timeRanges.map(range => ({ ...range }));
+	newLens.isTemporal = originalLens.isTemporal;
+	newLens.h1 = originalLens.h1;
+	newLens.h2 = originalLens.h2;
+	newLens.h3 = originalLens.h3;
+	newLens.parentLens = originalLens.parentLens;
+
+	const v = newLens.id;
+	newLens.group = originalLens.group;
+
+	base_lenses.push(newLens);
+	order_lenses.push(v);
+	lenses.push(newLens);
+
+	const q = lensbox.replace(/#/g, v);
+	const node = document.createElement("li");
+	node.innerHTML = q;
+	node.id = `lens_${v}`;
+	node.setAttribute('class', 'lens_item');
+	document.getElementById('lenslist').appendChild(node);
+
+	node.onclick = function(e) {
+		var ec = e.target.className;
+		var ecs = e.target.className.split(' ')[0];
+		var ecid = e.target.id.split('_')[2];
+		var v = parseInt(this.id.split('_')[1]);
+		if (ec != 'num' && ecs != 'fas' && ecid != 'name') {
+			if (selected_lens != v) {
+				select_lens(v);
+			} else {
+				select_lens(-1);
+			}
+		}
+		if ((ecid === 'name' || ec === 'fas fa-eye-slash') && selected_lens != v) {
+			select_lens(v);
+		}
+		if ((ec === 'fas fa-eye' || ecs === 'far') && selected_lens === v) {
+			select_lens(-1);
+		}
+	};
+
+	const eyeBtn = document.getElementById(`lens_${v}_c`);
+	if (eyeBtn) {
+		eyeBtn.checked = true;
+		eyeBtn.onclick = function() {
+			document.getElementById('sort_dropdown').value = 'No_sort';
+			load_controls();
+			matrix_changed = true;
+			timeline_changed = true;
+			this.checked = !this.checked;
+			this.innerHTML = this.checked
+				? '<i class="fas fa-eye"></i>'
+				: '<i class="fas fa-eye-slash"></i>';
+		};
+	}
+
+	const lockBtn = document.getElementById(`lens_${v}_l`);
+	if (lockBtn) {
+		lockBtn.checked = false;
+		lockBtn.onclick = function() {
+			this.checked = !this.checked;
+			this.innerHTML = this.checked
+				? '<i class="fas fa-lock"></i>'
+				: '<i class="fas fa-lock-open"></i>';
+		};
+	}
+
+	const temporalBtn = document.getElementById(`lens_${v}_temporal_btn`);
+	if (temporalBtn) {
+		temporalBtn.innerHTML = !newLens.isTemporal
+			? '<i class="fas fa-clock"></i>'
+			: `<span style="display: inline-flex; align-items: center;">
+				<i class="fas fa-clock"></i>
+				<i class="fas fa-times"></i></span>`;
+		temporalBtn.onclick = function() {
+			toggleTemporal(v);
+		};
+	}
+
+	const groupInput = document.getElementById(`lens_${v}_lensegroup`);
+	if (groupInput) {
+		groupInput.value = newLens.group;
+	}
+
+	const controlPanel = document.getElementById(`lens_${v}_values`);
+	if (controlPanel) {
+		controlPanel.innerHTML = newLens.make_controls();
+	}
+
+	const nameInput = document.getElementById(`lens_${v}_name`);
+	if (nameInput) {
+		nameInput.value = newLens.name;
+	}
+
+	update_lens_colors();
 }
