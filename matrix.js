@@ -564,12 +564,12 @@ let matrixsketch = (p) => {
 		}
 		else {
 			if(HIST_METRIC.indexOf("lensegroup") > -1){
-				for(let l2=0; l2<lenses.length; l2++){
-					if(lenses[l2].group == selected_lensegroup) {						
+				for(let l2=0; l2<metric_lenses.length; l2++){
+					if(metric_lenses[l2].group == selected_lensegroup) {						
 						let val_list = [];
 						if( HIST_METRIC == 'fix_lensegroup_dur'){	
 							let val_list = [];		
-							for(let i=toi.j_min; i<toi.j_max; i++){ if( lense!=-1 && lenses[l2].inside(fixs[i].x, fixs[i].y) ){ val_list.push( fixs[i].dt ); } }
+							for(let i=toi.j_min; i<toi.j_max; i++){ if( lense!=-1 && metric_lenses[l2].inside(fixs[i].x, fixs[i].y) ){ val_list.push( fixs[i].dt ); } }
 							min_val = 0; max_val = 1000;
 							for(let i=0; i<val_list.length; i++){ bins[ Math.min(bins.length-1, Math.floor( (val_list[i]-min_val)/(max_val-min_val)*BINS_N ) ) ] += 1; }
 						}else if( lense!=-1 && HIST_METRIC == 'visit_lensegroup_dur' && ORDERLENSEGROUPID.indexOf(selected_lensegroup) != -1 ){
@@ -996,13 +996,13 @@ let matrixsketch = (p) => {
 			for(let a=0; a<xnum; a++){
 				for(let b=0; b<ynum; b++){
 					xs = xmin + a*xh; ys = ymin + b*yh;
-					val = 100*Math.sqrt( matrix_values[a][b]/trans_max );
+					val = 100*Math.sqrt( matrix_values[b][a]/trans_max );
 					canvas.fill( makeColor( val, MATCOL[0] ) );
 					canvas.rect(xs, ys, xh, yh );
 					if( MATRIX_WRITE ){
 						if(val < 60){ canvas.fill(white(100)); }else{ canvas.fill(black(100)); }
 						canvas.strokeWeight(0);
-						canvas.text( num_format(matrix_values[a][b], 2), xs + xh/2, ys + yh/2);
+						canvas.text( num_format(matrix_values[b][a], 2), xs + xh/2, ys + yh/2);
 						canvas.strokeWeight(1);
 					}
 				}
@@ -1176,8 +1176,8 @@ let load_data = () => {
 	
 	if(MATRIX_VIEW_STATE == "lensegroup_lensegroup"){
 		//check if summary is ticked
-		if( DAT_MODE == 2 && VALUED.indexOf(selected_data) == -1 || lenses.length == 0 ){ return; } // metric is meaningless without these conditions
-		if( DAT_MODE == 1 && ORDERGROUPID.indexOf(selected_grp) == -1 || lenses.length == 0 ){ return; } // metric is meaningless without these conditions
+		if( DAT_MODE == 2 && VALUED.indexOf(selected_data) == -1 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
+		if( DAT_MODE == 1 && ORDERGROUPID.indexOf(selected_grp) == -1 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 
 		let metric_sum = [];
 		for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){ 
@@ -1336,7 +1336,7 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(a, b, -1));
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
 					metric_sum[b] += matrix_values[a][b];
 				}				
 			}
@@ -1351,7 +1351,7 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(a, b, -1));
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
 					metric_sum[b] += matrix_values[a][b];
 				}
 			}
@@ -1366,7 +1366,7 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(a, b, -1));
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
 					metric_sum[b] += matrix_values[a][b];
 				}
 			}
@@ -1383,7 +1383,7 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(a, b, lens));					
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), lens));					
 					metric_sum[b] += matrix_values[a][b];
 				}
 			}
@@ -1398,7 +1398,7 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(a, b, -1));
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
 				}
 			}
 			overlay_string = "Direct Transitions from %ROW to %COL: %VAL";
@@ -1406,7 +1406,7 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(a, b, -1));
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
 				}
 			}
 			overlay_string = "Indirect Transitions from %ROW to %COL: %VAL";
@@ -1414,7 +1414,7 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(a, b, -1));
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
 				}
 			}
 			overlay_string = "Glances from %ROW -> %COL -> %ROW: %VAL";
@@ -1424,7 +1424,7 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(a, b, lens));					
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), lens));					
 				}
 			}
 			overlay_string = "Transitions from %ROW -> "+base_lenses[selected_lens].name+" -> %COL: %VAL";
@@ -1433,7 +1433,7 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(a, b, -1));
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
 				}
 			}
 			overlay_string = "Mean Direct Transitions from %ROW to %COL: %VAL";
@@ -1441,7 +1441,7 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(a, b, -1));
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
 				}
 			}
 			overlay_string = "Mean Indirect Transitions from %ROW to %COL: %VAL";
@@ -1449,7 +1449,7 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(a, b, -1));
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
 				}
 			}
 			overlay_string = "Mean Glances from %ROW -> %COL -> %ROW: %VAL";
@@ -1459,13 +1459,13 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(a, b, lens));					
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), lens));					
 				}
 			}
 			overlay_string = "Mean Transitions from %ROW -> "+base_lenses[selected_lens].name+" -> %COL: %VAL";
 		}
 	}else if( MATRIX_VIEW_STATE == "lensegroup_dat" || MATRIX_VIEW_STATE == "dat_lensegroup" ){
-		if( VALUED.length == 0 || lenses.length == 0 ){ return; } // metric is meaningless without these conditions
+		if( VALUED.length == 0 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 		for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){ rownames.push("AOI G"+LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group); rowcolours.push(get_lensegroup_col(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group));}
 		for(let a=0; a<VALUED.length; a++){ colnames.push(DATASETS[VALUED[a]].name); colcolours.push(get_dat_col(VALUED[a]));}
 		colspecial = VALUED.indexOf(selected_data); rowspecial = ORDERLENSEGROUPID.indexOf(selected_lensegroup);
@@ -1475,7 +1475,7 @@ let load_data = () => {
 			for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++)
 				sum_of_aoi_area.push(0);
 
-			for(let c=0; c<lenses.length; c++) {
+			for(let c=0; c<metric_lenses.length; c++) {
 				let group_num = base_lenses[order_lenses[c]].group;
 				let group_index = ORDERLENSEGROUPID.indexOf(group_num);
 				if(group_index != -1 && group_index < sum_of_aoi_area.length)
@@ -1507,7 +1507,7 @@ let load_data = () => {
 				sum_of_aoi_area.push(0);
 
 			if(MATRIX_DATA_STATE.indexOf("density") > -1) {
-				for(let c=0; c<lenses.length; c++) {
+				for(let c=0; c<metric_lenses.length; c++) {
 					let group_num = base_lenses[order_lenses[c]].group;
 					let group_index = ORDERLENSEGROUPID.indexOf(group_num);
 					if(group_index != -1 && group_index < sum_of_aoi_area.length)
@@ -1551,7 +1551,7 @@ let load_data = () => {
 			overlay_string = "Mean visitation duration in %ROW: %VAL ms";
 		}
 	}else if( MATRIX_VIEW_STATE == "aoi_dat" || MATRIX_VIEW_STATE == "dat_aoi" ){
-		if( VALUED.length == 0 || lenses.length == 0 ){ return; } // metric is meaningless without these conditions
+		if( VALUED.length == 0 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 		for(let a=0; a<lenses.length; a++){ rownames.push(lenses[a].name); rowcolours.push(lenses[a].col(95));}
 		for(let a=0; a<VALUED.length; a++){ colnames.push(DATASETS[VALUED[a]].name); colcolours.push(get_dat_col(VALUED[a]));}
 		colspecial = VALUED.indexOf(selected_data); rowspecial = order_lenses.indexOf(selected_lens);
@@ -1559,7 +1559,7 @@ let load_data = () => {
 		if(MATRIX_DATA_STATE == "aoiarea") {					
 			for(let a=0; a<VALUED.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<lenses.length; b++){
+				for(let b=0; b<metric_lenses.length; b++){
 					matrix_values[a].push(base_lenses[order_lenses[b]].area);
 				}				
 			}
@@ -1570,7 +1570,7 @@ let load_data = () => {
 				let HAAR = {"hit": 0, "off": 0, "haar": 0};
 				aggregate_hit_any_aoi_rate_across_twi(DATASETS[VALUED[a]], HAAR);
 				let HAAR_VALUE = parseFloat((HAAR.hit == 0 ? 0 : (HAAR.hit/(HAAR.hit+HAAR.off)).toFixed(2)));
-				for(let b=0; b<lenses.length; b++){
+				for(let b=0; b<metric_lenses.length; b++){
 					matrix_values[a].push(100 * HAAR_VALUE);
 				}				
 			}
@@ -1578,7 +1578,7 @@ let load_data = () => {
 		else {
 			for(let a=0; a<VALUED.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<lenses.length; b++){
+				for(let b=0; b<metric_lenses.length; b++){
 					matrix_values[a].push( aggregate_aoi_metrics_across_twi(DATASETS[VALUED[a]], b, null) );
 				}
 			}
@@ -1612,8 +1612,8 @@ let load_data = () => {
 			overlay_string = "Mean visitation duration in %ROW: %VAL ms";
 		}
 	}else if( MATRIX_VIEW_STATE == "lensegroup_toi" || MATRIX_VIEW_STATE == "toi_lensegroup" ){
-		if((DAT_MODE == 2 && VALUED.indexOf(selected_data) == -1) || lenses.length == 0 ){ return; } // metric is meaningless without these conditions
-		if( DAT_MODE == 1 && ORDERGROUPID.indexOf(selected_grp) == -1 || lenses.length == 0 ){ return; } // metric is meaningless without these conditions
+		if((DAT_MODE == 2 && VALUED.indexOf(selected_data) == -1) || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
+		if( DAT_MODE == 1 && ORDERGROUPID.indexOf(selected_grp) == -1 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 
 		for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){ rownames.push("AOI G"+LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group); rowcolours.push(get_lensegroup_col(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group)); }
 		for(let a=0; a<order_twis.length; a++){ colnames.push(base_twis[order_twis[a]].name); colcolours.push(get_twi_col(order_twis[a]));}
@@ -1624,7 +1624,7 @@ let load_data = () => {
 			for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++)
 				sum_of_aoi_area.push(0);
 
-			for(let c=0; c<lenses.length; c++) {
+			for(let c=0; c<metric_lenses.length; c++) {
 				let group_num = base_lenses[order_lenses[c]].group;
 				let group_index = ORDERLENSEGROUPID.indexOf(group_num);
 				if(group_index != -1 && group_index < sum_of_aoi_area.length)
@@ -1657,7 +1657,7 @@ let load_data = () => {
 				sum_of_aoi_area.push(0);
 
 			if(MATRIX_DATA_STATE.indexOf("density") > -1) {
-				for(let c=0; c<lenses.length; c++) {
+				for(let c=0; c<metric_lenses.length; c++) {
 					let group_num = base_lenses[order_lenses[c]].group;
 					let group_index = ORDERLENSEGROUPID.indexOf(group_num);
 					if(group_index != -1 && group_index < sum_of_aoi_area.length)
@@ -1701,8 +1701,8 @@ let load_data = () => {
 			overlay_string = "Mean visitation duration in %ROW: %VAL ms";
 		}
 	}else if( MATRIX_VIEW_STATE == "lensegroup_twigroup" || MATRIX_VIEW_STATE == "twigroup_lensegroup" ){
-		if((DAT_MODE == 2 && VALUED.indexOf(selected_data) == -1) || lenses.length == 0 ){ return; } // metric is meaningless without these conditions
-		if( DAT_MODE == 1 && ORDERGROUPID.indexOf(selected_grp) == -1 || lenses.length == 0 ){ return; } // metric is meaningless without these conditions
+		if((DAT_MODE == 2 && VALUED.indexOf(selected_data) == -1) || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
+		if( DAT_MODE == 1 && ORDERGROUPID.indexOf(selected_grp) == -1 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 		if(ORDERTWIGROUPIDARRAYINDEX.indexOf(-1) != -1) return;
 
 		for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){ rownames.push("AOI G"+LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group); rowcolours.push(get_lensegroup_col(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group)); }
@@ -1715,7 +1715,7 @@ let load_data = () => {
 			for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++)
 				sum_of_aoi_area.push(0);
 
-			for(let c=0; c<lenses.length; c++) {
+			for(let c=0; c<metric_lenses.length; c++) {
 				let group_num = base_lenses[order_lenses[c]].group;
 				let group_index = ORDERLENSEGROUPID.indexOf(group_num);
 				if(group_index != -1 && group_index < sum_of_aoi_area.length)
@@ -1755,7 +1755,7 @@ let load_data = () => {
 				sum_of_aoi_area.push(0);
 
 			if(MATRIX_DATA_STATE.indexOf("density") > -1) {
-				for(let c=0; c<lenses.length; c++) {
+				for(let c=0; c<metric_lenses.length; c++) {
 					let group_num = base_lenses[order_lenses[c]].group;
 					let group_index = ORDERLENSEGROUPID.indexOf(group_num);
 					if(group_index != -1 && group_index < sum_of_aoi_area.length)
@@ -1817,8 +1817,8 @@ let load_data = () => {
 			overlay_string = "Mean visitation duration in %ROW: %VAL ms";
 		}
 	}else if( MATRIX_VIEW_STATE == "aoi_toi" || MATRIX_VIEW_STATE == "toi_aoi" ){
-		if((DAT_MODE == 2 && VALUED.indexOf(selected_data) == -1) || lenses.length == 0 ){ return; } // metric is meaningless without these conditions
-		if( DAT_MODE == 1 && ORDERGROUPID.indexOf(selected_grp) == -1 || lenses.length == 0 ){ return; } // metric is meaningless without these conditions
+		if((DAT_MODE == 2 && VALUED.indexOf(selected_data) == -1) || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
+		if( DAT_MODE == 1 && ORDERGROUPID.indexOf(selected_grp) == -1 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 
 		for(let a=0; a<lenses.length; a++){ rownames.push(lenses[a].name); rowcolours.push(lenses[a].col(95));}
 		for(let a=0; a<order_twis.length; a++){ colnames.push(base_twis[order_twis[a]].name); colcolours.push(get_twi_col(order_twis[a]));}
@@ -1904,7 +1904,7 @@ let load_data = () => {
 					}
 				}
 				HAAR_VALUE = (HAAR.hit == 0 ? 0 : (HAAR.hit/(HAAR.hit+HAAR.off)).toFixed(2));
-				for(let b=0; b<lenses.length; b++){
+				for(let b=0; b<metric_lenses.length; b++){
 					matrix_values[a].push(100 * HAAR_VALUE);
 				}				
 			}
@@ -1913,7 +1913,7 @@ let load_data = () => {
 			for(let a=0; a<ORDERTWIGROUPIDARRAYINDEX.length; a++){ 
 				matrix_values.push([]); matrix_colours.push([]);			
 	
-				for(let b=0; b<lenses.length; b++) {
+				for(let b=0; b<metric_lenses.length; b++) {
 					let total_sum = 0;
 					if(MATRIX_DATA_STATE == "aoiarea") {
 						total_sum = base_lenses[order_lenses[b]].area;
@@ -1969,7 +1969,7 @@ let load_data = () => {
 			overlay_string = "Mean visitation duration in %ROW: %VAL ms";
 		}
 	}else if( MATRIX_VIEW_STATE == "lensegroup_grp" || MATRIX_VIEW_STATE == "grp_lensegroup" ){
-		if( lenses.length == 0 ){ return; } // metric is meaningless without these conditions
+		if( metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 		for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){ rownames.push("AOI G"+LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group); rowcolours.push(get_lensegroup_col(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group));}
 		for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){ colnames.push("Sample G"+GROUPS[ORDERGROUPIDARRAYINDEX[a]].group+''); colcolours.push(get_grp_col(GROUPS[ORDERGROUPIDARRAYINDEX[a]].group));}
 		colspecial = ORDERGROUPID.indexOf(selected_grp); rowspecial = ORDERLENSEGROUPID.indexOf(selected_lensegroup);
@@ -1979,7 +1979,7 @@ let load_data = () => {
 			for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++)
 				sum_of_aoi_area.push(0);
 
-			for(let c=0; c<lenses.length; c++) {
+			for(let c=0; c<metric_lenses.length; c++) {
 				let group_num = base_lenses[order_lenses[c]].group;
 				let group_index = ORDERLENSEGROUPID.indexOf(group_num);
 				if(group_index != -1 && group_index < sum_of_aoi_area.length)
@@ -2011,7 +2011,7 @@ let load_data = () => {
 				sum_of_aoi_area.push(0);
 
 			if(MATRIX_DATA_STATE.indexOf("density") > -1) {
-				for(let c=0; c<lenses.length; c++) {
+				for(let c=0; c<metric_lenses.length; c++) {
 					let group_num = base_lenses[order_lenses[c]].group;
 					let group_index = ORDERLENSEGROUPID.indexOf(group_num);
 					if(group_index != -1 && group_index < sum_of_aoi_area.length)
@@ -2137,7 +2137,7 @@ let load_data = () => {
 		}
 		
 	}else if( MATRIX_VIEW_STATE == "aoi_grp" || MATRIX_VIEW_STATE == "grp_aoi" ){
-		if( lenses.length == 0 ){ return; } // metric is meaningless without these conditions
+		if( metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 		
 		for(let a=0; a<lenses.length; a++){ rownames.push(lenses[a].name); rowcolours.push(lenses[a].col(95));}
 		for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
@@ -2153,7 +2153,7 @@ let load_data = () => {
 		if(MATRIX_DATA_STATE == "aoiarea") {
 			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<lenses.length; b++){
+				for(let b=0; b<metric_lenses.length; b++){
 					matrix_values[a].push( base_lenses[order_lenses[b]].area );
 				}
 			}
@@ -2164,7 +2164,7 @@ let load_data = () => {
 				let HAAR = {"hit": 0, "off": 0, "haar": 0};
 				aggregate_hit_any_aoi_rate_across_twi(DATASETS[VALUED[a]], HAAR);
 				let HAAR_VALUE = (HAAR.hit == 0 ? 0 : (HAAR.hit/(HAAR.hit+HAAR.off)).toFixed(2));
-				for(let b=0; b<lenses.length; b++){
+				for(let b=0; b<metric_lenses.length; b++){
 					matrix_values[a].push(100 * HAAR_VALUE);
 				}	
 			}
@@ -2173,7 +2173,7 @@ let load_data = () => {
 		}else if(MATRIX_DATA_STATE == "densitytime") {
 			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<lenses.length; b++){
+				for(let b=0; b<metric_lenses.length; b++){
 					if(base_lenses[order_lenses[b]].area > 0)
 						matrix_values[a].push( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenstime[b] / base_lenses[order_lenses[b]].area);
 					else
@@ -2184,7 +2184,7 @@ let load_data = () => {
 		}else if(MATRIX_DATA_STATE == "densitycount") {
 			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<lenses.length; b++){
+				for(let b=0; b<metric_lenses.length; b++){
 					if(base_lenses[order_lenses[b]].area > 0)
 						matrix_values[a].push( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenscount[b] / base_lenses[order_lenses[b]].area);
 					else
@@ -2195,7 +2195,7 @@ let load_data = () => {
 		}else if( MATRIX_DATA_STATE == "time" ){
 			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<lenses.length; b++){
+				for(let b=0; b<metric_lenses.length; b++){
 					matrix_values[a].push( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenstime[b] );
 				}
 			}
@@ -2203,7 +2203,7 @@ let load_data = () => {
 		}else if( MATRIX_DATA_STATE == "percent" ){
 			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<lenses.length; b++){
+				for(let b=0; b<metric_lenses.length; b++){
 					if(GROUPS[ORDERGROUPIDARRAYINDEX[a]].totaltime > 0)
 						matrix_values[a].push( 100 * GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenstime[b] / GROUPS[ORDERGROUPIDARRAYINDEX[a]].totaltime );
 					else
@@ -2214,7 +2214,7 @@ let load_data = () => {
 		}else if( MATRIX_DATA_STATE == "count" ){
 			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<lenses.length; b++){
+				for(let b=0; b<metric_lenses.length; b++){
 					matrix_values[a].push( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenscount[b] );
 				}
 			}
@@ -2222,7 +2222,7 @@ let load_data = () => {
 		}else if( MATRIX_DATA_STATE == "ratio" ){
 			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<lenses.length; b++){
+				for(let b=0; b<metric_lenses.length; b++){
 					if ( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenscount[b] > 0 ){
 						matrix_values[a].push( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenstime[b] / GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenscount[b] );
 					}else{ matrix_values[a].push( 0 ); }
@@ -2236,7 +2236,7 @@ let load_data = () => {
 				if(GROUPS[ORDERGROUPIDARRAYINDEX[a]].totalcount > 0)
 					mean_fix_duration = GROUPS[ORDERGROUPIDARRAYINDEX[a]].totaltime / GROUPS[ORDERGROUPIDARRAYINDEX[a]].totalcount;
 
-				for(let b=0; b<lenses.length; b++){
+				for(let b=0; b<metric_lenses.length; b++){
 					matrix_values[a].push( mean_fix_duration );					
 				}
 			}
@@ -2248,7 +2248,7 @@ let load_data = () => {
 				if(GROUPS[ORDERGROUPIDARRAYINDEX[a]].number_saccades > 0)
 					mean_saccade_length = GROUPS[ORDERGROUPIDARRAYINDEX[a]].total_saccadelength / GROUPS[ORDERGROUPIDARRAYINDEX[a]].number_saccades;
 
-				for(let b=0; b<lenses.length; b++){
+				for(let b=0; b<metric_lenses.length; b++){
 					matrix_values[a].push( mean_saccade_length );					
 				}
 			}
@@ -2256,7 +2256,7 @@ let load_data = () => {
 		}else if( MATRIX_DATA_STATE == "median" ){
 			for(let a=0; a<GROUPS.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<lenses.length; b++){
+				for(let b=0; b<metric_lenses.length; b++){
 					if ( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenscount[b] > 0 && GROUPS[ORDERGROUPIDARRAYINDEX[a]].lensmedian != undefined){
 						matrix_values[a].push( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lensmedian[b] );
 					}else{ matrix_values[a].push( 0 ); }
@@ -2266,7 +2266,7 @@ let load_data = () => {
 		}else if( MATRIX_DATA_STATE == "visitcount" ){
 			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<lenses.length; b++){
+				for(let b=0; b<metric_lenses.length; b++){
 					matrix_values[a].push( GROUPS[ORDERGROUPIDARRAYINDEX[a]].visit_durations[b].length );
 				}
 			}
@@ -2274,7 +2274,7 @@ let load_data = () => {
 		}else if( MATRIX_DATA_STATE == "visitmean" ){
 			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<lenses.length; b++){
+				for(let b=0; b<metric_lenses.length; b++){
 					if(GROUPS[ORDERGROUPIDARRAYINDEX[a]].visit_durations[b].length > 0)
 						matrix_values[a].push( GROUPS[ORDERGROUPIDARRAYINDEX[a]].visit_totals[b]/GROUPS[ORDERGROUPIDARRAYINDEX[a]].visit_durations[b].length );
 					else

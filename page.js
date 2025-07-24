@@ -174,6 +174,7 @@ function load_controls(){
 		if(base_lenses[v].checked != document.getElementById('lens_'+v+'_c').checked) {
 			base_lenses[v].checked = document.getElementById('lens_'+v+'_c').checked;
 			update_metrics = true;
+			matrix_changed = true;
 		}
 		
 		base_lenses[v].locked = document.getElementById('lens_'+v+'_l').checked;
@@ -190,6 +191,7 @@ function load_controls(){
 		}
 
 		if(base_lenses[v].included){
+			// Always include all lenses in metric_lenses for computation regardless of visibility
 			metric_lenses.push(base_lenses[v]);
 			if (base_lenses[v].checked){
 				SHOW_LENS = true;
