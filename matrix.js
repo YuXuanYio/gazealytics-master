@@ -1193,7 +1193,7 @@ let load_data = () => {
 			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(a, b, -1));
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));
 					metric_sum[b] += matrix_values[a][b];
 				}
 			}
@@ -1208,7 +1208,7 @@ let load_data = () => {
 			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(a, b, -1));				
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));				
 					metric_sum[b] += matrix_values[a][b];
 				}
 			}
@@ -1223,7 +1223,7 @@ let load_data = () => {
 			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(a, b, -1));					
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));					
 					metric_sum[b] += matrix_values[a][b];
 				}
 			}
@@ -1240,7 +1240,7 @@ let load_data = () => {
 			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(a, b, lensegroup));					
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], lensegroup));					
 					metric_sum[b] += matrix_values[a][b];
 				}
 			}
@@ -1250,12 +1250,12 @@ let load_data = () => {
 					else matrix_values[a][b] = 0;
 				}
 			}	
-			overlay_string = "Prob. Transitions from %ROW -> "+base_lenses[selected_lensegroup].name+" -> %COL: %VAL";		
+			overlay_string = "Prob. Transitions from %ROW -> AOI G" + selected_lensegroup + " -> %COL: %VAL";		
 		}else if( MATRIX_DATA_STATE == "trans1" ){
 			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(a, b, -1));
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));
 				}
 			}
 			overlay_string = "Direct Transitions from %ROW to %COL: %VAL";
@@ -1263,7 +1263,7 @@ let load_data = () => {
 			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(a, b, -1));				
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));				
 				}
 			}
 			overlay_string = "Indirect Transitions from %ROW to %COL: %VAL";
@@ -1271,7 +1271,7 @@ let load_data = () => {
 			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(a, b, -1));					
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));					
 				}
 			}
 			overlay_string = "Glances from %ROW -> %COL -> %ROW: %VAL";
@@ -1281,16 +1281,16 @@ let load_data = () => {
 			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(a, b, lensegroup));					
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], lensegroup));					
 				}
 			}
-			overlay_string = "Transitions from %ROW -> "+base_lenses[selected_lensegroup].name+" -> %COL: %VAL";
+			overlay_string = "Transitions from %ROW -> AOI G" + selected_lensegroup + " -> %COL: %VAL";
 		}
 		else if( MATRIX_DATA_STATE == "mean_trans1" ){
 			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(a, b, -1));
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));
 				}
 			}
 			overlay_string = "Mean Direct Transitions from %ROW to %COL: %VAL";
@@ -1298,7 +1298,7 @@ let load_data = () => {
 			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(a, b, -1));				
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));				
 				}
 			}
 			overlay_string = "Mean Indirect Transitions from %ROW to %COL: %VAL";
@@ -1306,7 +1306,7 @@ let load_data = () => {
 			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(a, b, -1));					
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));					
 				}
 			}
 			overlay_string = "Mean Glances from %ROW -> %COL -> %ROW: %VAL";
@@ -1316,10 +1316,10 @@ let load_data = () => {
 			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(a, b, lensegroup));					
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], lensegroup));					
 				}
 			}
-			overlay_string = "Mean Transitions from %ROW -> "+base_lenses[selected_lensegroup].name+" -> %COL: %VAL";
+			overlay_string = "Mean Transitions from %ROW -> AOI G" + selected_lensegroup + " -> %COL: %VAL";
 		}
 	}
 	else if( MATRIX_VIEW_STATE == "aoi_aoi"){
@@ -1336,7 +1336,13 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
+					// Find the metric_lenses index for the visible lens
+					let metric_lens_a = -1, metric_lens_b = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[a].id) metric_lens_a = i;
+						if(metric_lenses[i].id === lenses[b].id) metric_lens_b = i;
+					}
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(metric_lens_a, metric_lens_b, -1));
 					metric_sum[b] += matrix_values[a][b];
 				}				
 			}
@@ -1351,7 +1357,13 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
+					// Find the metric_lenses index for the visible lens
+					let metric_lens_a = -1, metric_lens_b = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[a].id) metric_lens_a = i;
+						if(metric_lenses[i].id === lenses[b].id) metric_lens_b = i;
+					}
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(metric_lens_a, metric_lens_b, -1));
 					metric_sum[b] += matrix_values[a][b];
 				}
 			}
@@ -1366,7 +1378,13 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
+					// Find the metric_lenses index for the visible lens
+					let metric_lens_a = -1, metric_lens_b = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[a].id) metric_lens_a = i;
+						if(metric_lenses[i].id === lenses[b].id) metric_lens_b = i;
+					}
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(metric_lens_a, metric_lens_b, -1));
 					metric_sum[b] += matrix_values[a][b];
 				}
 			}
@@ -1379,11 +1397,23 @@ let load_data = () => {
 			overlay_string = "Prob. Glances from %ROW -> %COL -> %ROW: %VAL";
 		}else if( MATRIX_DATA_STATE == "probability_through" ){
 			if( order_lenses.indexOf(selected_lens) == -1 ){ return; }
-			lens = order_lenses.indexOf(selected_lens);
+			let selected_metric_lens = -1;
+			for(let i=0; i<metric_lenses.length; i++){
+				if(metric_lenses[i].id === selected_lens) {
+					selected_metric_lens = i;
+					break;
+				}
+			}
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), lens));					
+					// Find the metric_lenses index for the visible lens
+					let metric_lens_a = -1, metric_lens_b = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[a].id) metric_lens_a = i;
+						if(metric_lenses[i].id === lenses[b].id) metric_lens_b = i;
+					}
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(metric_lens_a, metric_lens_b, selected_metric_lens));					
 					metric_sum[b] += matrix_values[a][b];
 				}
 			}
@@ -1398,7 +1428,13 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
+					// Find the metric_lenses index for the visible lens
+					let metric_lens_a = -1, metric_lens_b = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[a].id) metric_lens_a = i;
+						if(metric_lenses[i].id === lenses[b].id) metric_lens_b = i;
+					}
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(metric_lens_a, metric_lens_b, -1));
 				}
 			}
 			overlay_string = "Direct Transitions from %ROW to %COL: %VAL";
@@ -1406,7 +1442,13 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
+					// Find the metric_lenses index for the visible lens
+					let metric_lens_a = -1, metric_lens_b = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[a].id) metric_lens_a = i;
+						if(metric_lenses[i].id === lenses[b].id) metric_lens_b = i;
+					}
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(metric_lens_a, metric_lens_b, -1));
 				}
 			}
 			overlay_string = "Indirect Transitions from %ROW to %COL: %VAL";
@@ -1414,17 +1456,35 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
+					// Find the metric_lenses index for the visible lens
+					let metric_lens_a = -1, metric_lens_b = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[a].id) metric_lens_a = i;
+						if(metric_lenses[i].id === lenses[b].id) metric_lens_b = i;
+					}
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(metric_lens_a, metric_lens_b, -1));
 				}
 			}
 			overlay_string = "Glances from %ROW -> %COL -> %ROW: %VAL";
 		}else if( MATRIX_DATA_STATE == "through" ){
 			if( order_lenses.indexOf(selected_lens) == -1 ){ return; }
-			lens = order_lenses.indexOf(selected_lens);
+			let selected_metric_lens = -1;
+			for(let i=0; i<metric_lenses.length; i++){
+				if(metric_lenses[i].id === selected_lens) {
+					selected_metric_lens = i;
+					break;
+				}
+			}
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), lens));					
+					// Find the metric_lenses index for the visible lens
+					let metric_lens_a = -1, metric_lens_b = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[a].id) metric_lens_a = i;
+						if(metric_lenses[i].id === lenses[b].id) metric_lens_b = i;
+					}
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(metric_lens_a, metric_lens_b, selected_metric_lens));					
 				}
 			}
 			overlay_string = "Transitions from %ROW -> "+base_lenses[selected_lens].name+" -> %COL: %VAL";
@@ -1433,7 +1493,13 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
+					// Find the metric_lenses index for the visible lens
+					let metric_lens_a = -1, metric_lens_b = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[a].id) metric_lens_a = i;
+						if(metric_lenses[i].id === lenses[b].id) metric_lens_b = i;
+					}
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(metric_lens_a, metric_lens_b, -1));
 				}
 			}
 			overlay_string = "Mean Direct Transitions from %ROW to %COL: %VAL";
@@ -1441,7 +1507,13 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
+					// Find the metric_lenses index for the visible lens
+					let metric_lens_a = -1, metric_lens_b = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[a].id) metric_lens_a = i;
+						if(metric_lenses[i].id === lenses[b].id) metric_lens_b = i;
+					}
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(metric_lens_a, metric_lens_b, -1));
 				}
 			}
 			overlay_string = "Mean Indirect Transitions from %ROW to %COL: %VAL";
@@ -1449,17 +1521,35 @@ let load_data = () => {
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), -1));
+					// Find the metric_lenses index for the visible lens
+					let metric_lens_a = -1, metric_lens_b = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[a].id) metric_lens_a = i;
+						if(metric_lenses[i].id === lenses[b].id) metric_lens_b = i;
+					}
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(metric_lens_a, metric_lens_b, -1));
 				}
 			}
 			overlay_string = "Mean Glances from %ROW -> %COL -> %ROW: %VAL";
 		}else if( MATRIX_DATA_STATE == "mean_through" ){
 			if( order_lenses.indexOf(selected_lens) == -1 ){ return; }
-			lens = order_lenses.indexOf(selected_lens);
+			let selected_metric_lens = -1;
+			for(let i=0; i<metric_lenses.length; i++){
+				if(metric_lenses[i].id === selected_lens) {
+					selected_metric_lens = i;
+					break;
+				}
+			}
 			for(let a=0; a<lenses.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(order_lenses.indexOf(lenses[a].id), order_lenses.indexOf(lenses[b].id), lens));					
+					// Find the metric_lenses index for the visible lens
+					let metric_lens_a = -1, metric_lens_b = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[a].id) metric_lens_a = i;
+						if(metric_lenses[i].id === lenses[b].id) metric_lens_b = i;
+					}
+					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(metric_lens_a, metric_lens_b, selected_metric_lens));					
 				}
 			}
 			overlay_string = "Mean Transitions from %ROW -> "+base_lenses[selected_lens].name+" -> %COL: %VAL";
@@ -1559,8 +1649,11 @@ let load_data = () => {
 		if(MATRIX_DATA_STATE == "aoiarea") {					
 			for(let a=0; a<VALUED.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<metric_lenses.length; b++){
-					matrix_values[a].push(base_lenses[order_lenses[b]].area);
+				for(let b=0; b<lenses.length; b++){
+					let metric_index = metric_lenses.indexOf(order_lenses[b]);
+					if(metric_index != -1) {
+						matrix_values[a].push(base_lenses[order_lenses[b]].area);
+					}
 				}				
 			}
 		}
@@ -1570,16 +1663,22 @@ let load_data = () => {
 				let HAAR = {"hit": 0, "off": 0, "haar": 0};
 				aggregate_hit_any_aoi_rate_across_twi(DATASETS[VALUED[a]], HAAR);
 				let HAAR_VALUE = parseFloat((HAAR.hit == 0 ? 0 : (HAAR.hit/(HAAR.hit+HAAR.off)).toFixed(2)));
-				for(let b=0; b<metric_lenses.length; b++){
-					matrix_values[a].push(100 * HAAR_VALUE);
+				for(let b=0; b<lenses.length; b++){
+					let metric_index = metric_lenses.indexOf(order_lenses[b]);
+					if(metric_index != -1) {
+						matrix_values[a].push(100 * HAAR_VALUE);
+					}
 				}				
 			}
 		}
 		else {
 			for(let a=0; a<VALUED.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<metric_lenses.length; b++){
-					matrix_values[a].push( aggregate_aoi_metrics_across_twi(DATASETS[VALUED[a]], b, null) );
+				for(let b=0; b<lenses.length; b++){
+					let metric_index = metric_lenses.indexOf(order_lenses[b]);
+					if(metric_index != -1) {
+						matrix_values[a].push( aggregate_aoi_metrics_across_twi(DATASETS[VALUED[a]], metric_index, null) );
+					}
 				}
 			}
 		}
@@ -1828,7 +1927,10 @@ let load_data = () => {
 			for(let a=0; a<order_twis.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(base_lenses[order_lenses[b]].area);
+					let metric_index = metric_lenses.indexOf(order_lenses[b]);
+					if(metric_index != -1) {
+						matrix_values[a].push(base_lenses[order_lenses[b]].area);
+					}
 				}				
 			}
 		}
@@ -1839,7 +1941,10 @@ let load_data = () => {
 				aggregate_hit_any_aoi_rate_across_dat(order_twis[a], HAAR);
 				let HAAR_VALUE = (HAAR.hit == 0 ? 0 : (HAAR.hit/(HAAR.hit+HAAR.off)).toFixed(2));
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push(100 * HAAR_VALUE);
+					let metric_index = metric_lenses.indexOf(order_lenses[b]);
+					if(metric_index != -1) {
+						matrix_values[a].push(100 * HAAR_VALUE);
+					}
 				}				
 			}
 		}
@@ -1848,7 +1953,10 @@ let load_data = () => {
 			for(let a=0; a<order_twis.length; a++){ 
 				matrix_values.push([]); matrix_colours.push([]);			
 				for(let b=0; b<lenses.length; b++){
-					matrix_values[a].push (aggregate_aoi_metrics_across_dat(order_twis[a], b, null));
+					let metric_index = metric_lenses.indexOf(order_lenses[b]);
+					if(metric_index != -1) {
+						matrix_values[a].push (aggregate_aoi_metrics_across_dat(order_twis[a], metric_index, null));
+					}
 				}		
 			}
 		}
@@ -1904,8 +2012,11 @@ let load_data = () => {
 					}
 				}
 				HAAR_VALUE = (HAAR.hit == 0 ? 0 : (HAAR.hit/(HAAR.hit+HAAR.off)).toFixed(2));
-				for(let b=0; b<metric_lenses.length; b++){
-					matrix_values[a].push(100 * HAAR_VALUE);
+				for(let b=0; b<lenses.length; b++){
+					let metric_index = metric_lenses.indexOf(order_lenses[b]);
+					if(metric_index != -1) {
+						matrix_values[a].push(100 * HAAR_VALUE);
+					}
 				}				
 			}
 		}
@@ -1913,7 +2024,10 @@ let load_data = () => {
 			for(let a=0; a<ORDERTWIGROUPIDARRAYINDEX.length; a++){ 
 				matrix_values.push([]); matrix_colours.push([]);			
 	
-				for(let b=0; b<metric_lenses.length; b++) {
+				for(let b=0; b<lenses.length; b++) {
+					let metric_index = metric_lenses.indexOf(order_lenses[b]);
+					if(metric_index == -1) continue;
+					
 					let total_sum = 0;
 					if(MATRIX_DATA_STATE == "aoiarea") {
 						total_sum = base_lenses[order_lenses[b]].area;
@@ -1925,7 +2039,7 @@ let load_data = () => {
 				
 							if(order_twis_group_index != -1 && TWIGROUPS[ORDERTWIGROUPIDARRAYINDEX[a]].group == base_twis[order_twis[c]].group &&
 									 base_twis[order_twis[c]].included && base_twis[order_twis[c]].checked) {
-								let tmp_value = aggregate_aoi_metrics_across_dat(order_twis[c], b, null);
+								let tmp_value = aggregate_aoi_metrics_across_dat(order_twis[c], metric_index, null);
 								if(tmp_value > 0) {
 									total_sum += tmp_value;
 									total_number_of_addup++;
@@ -2105,7 +2219,7 @@ let load_data = () => {
 				}		
 				overlay_string = "Mean saccade length: %VAL pixels";
 			}else if( MATRIX_DATA_STATE == "median" ){
-				for(let a=0; a<GROUPS.length; a++){
+				for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
 					matrix_values.push([]); matrix_colours.push([]);
 					for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
 						if ( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lensegroup_lenscount[b] > 0 ){
@@ -2254,7 +2368,7 @@ let load_data = () => {
 			}
 			overlay_string = "Mean saccade length: %VAL pixels";
 		}else if( MATRIX_DATA_STATE == "median" ){
-			for(let a=0; a<GROUPS.length; a++){
+			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<metric_lenses.length; b++){
 					if ( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenscount[b] > 0 && GROUPS[ORDERGROUPIDARRAYINDEX[a]].lensmedian != undefined){
