@@ -1032,22 +1032,33 @@ let draw_time_all = (canvas) => {
 						for(let j = toi.j_min; j < toi.j_max; j++){
 							if(data.fixs[j] != undefined && (data.fixs[j].t - toi.tmin)/toi_longest_duration < TIME_ANIMATE){
 								let fl = data.fixs[j].firstlens;
-								if(fl<lenses.length ){
-									// Check if the fixation time is within any time range of the lens
-									let inTimeRange = lenses[fl].timeRanges.some(range =>
-										data.fixs[j].t >= range.start && data.fixs[j].t <= range.end
-									);
-									if(inTimeRange){
-										let ts = 0;
-										if(data.fixs[j].t > toi.tmin)
-											ts = (canvas.width*(data.fixs[j].t - toi.tmin))/toi_longest_duration;
-										let td = (canvas.width*data.fixs[j].dt)/toi_longest_duration;
-										if(td > 1){
-											canvas.fill(lenses[fl].col(60)); canvas.noStroke();
-											canvas.rect(ts, h2top, td, h2);
-										}else{
-											canvas.stroke(lenses[fl].col(60)); canvas.noFill();
-											canvas.line(ts, h2top, ts, h2top+h2);
+								if(fl < metric_lenses.length ){
+									// Find the corresponding lens in the visible lenses array
+									let visible_lens = null;
+									for(let i = 0; i < lenses.length; i++) {
+										if(lenses[i].id === metric_lenses[fl].id) {
+											visible_lens = lenses[i];
+											break;
+										}
+									}
+									
+									if(visible_lens && visible_lens.checked) {
+										// Check if the fixation time is within any time range of the lens
+										let inTimeRange = visible_lens.timeRanges.some(range =>
+											data.fixs[j].t >= range.start && data.fixs[j].t <= range.end
+										);
+										if(inTimeRange){
+											let ts = 0;
+											if(data.fixs[j].t > toi.tmin)
+												ts = (canvas.width*(data.fixs[j].t - toi.tmin))/toi_longest_duration;
+											let td = (canvas.width*data.fixs[j].dt)/toi_longest_duration;
+											if(td > 1){
+												canvas.fill(visible_lens.col(60)); canvas.noStroke();
+												canvas.rect(ts, h2top, td, h2);
+											}else{
+												canvas.stroke(visible_lens.col(60)); canvas.noFill();
+												canvas.line(ts, h2top, ts, h2top+h2);
+											}
 										}
 									}
 								}
