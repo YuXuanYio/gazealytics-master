@@ -114,11 +114,11 @@ let matrixsketch = (p) => {
 				for(let i=0; i<rownames.length; i++){
 					sort_coef.push( rownames[i]  );
 				}
-			}else if(xclose && (MATRIX_VIEW_STATE=='dat_aoi' || MATRIX_VIEW_STATE=='grp_aoi' || MATRIX_VIEW_STATE=='grp_dat')){
+			}else if(xclose && (['dat_aoi', 'grp_aoi', 'grp_dat', 'toi_aoi', 'twigroup_aoi', 'toi_dat', 'twigroup_dat', 'grp_toi', 'grp_twigroup', 'dat_lensegroup', 'grp_lensegroup', 'toi_lensegroup', 'twigroup_lensegroup'].indexOf(MATRIX_VIEW_STATE) != -1)){
 				is_sort_initiated_column = true;
 				yval = Math.floor( (p.mouseY - ymin) / yh );
 				for(let i=0; i<rownames.length; i++){
-					sort_coef.push( matrix_values[yval][i] );
+					sort_coef.push( matrix_values[i][yval] );
 				}
 				sort_selected_name +=colnames[yval];
 			}else if(xclose && (MATRIX_VIEW_STATE=='aoi_dat' || MATRIX_VIEW_STATE=='aoi_grp' || MATRIX_VIEW_STATE=='dat_grp')){
@@ -128,10 +128,10 @@ let matrixsketch = (p) => {
 					sort_coef.push( matrix_values[i][yval] );
 				}
 				sort_selected_name +=rownames[yval];
-			}else if(yclose && (MATRIX_VIEW_STATE=='dat_aoi' || MATRIX_VIEW_STATE=='grp_aoi' || MATRIX_VIEW_STATE=='grp_dat')){
+			}else if(yclose && (['dat_aoi', 'grp_aoi', 'grp_dat', 'toi_aoi', 'twigroup_aoi', 'toi_dat', 'twigroup_dat', 'grp_toi', 'grp_twigroup', 'dat_lensegroup', 'grp_lensegroup', 'toi_lensegroup', 'twigroup_lensegroup'].indexOf(MATRIX_VIEW_STATE) != -1)){
 				is_sort_initiated_rows = true;
 				xval = Math.floor( (p.mouseX - xmin) / xh );
-				for(let i=0; i<colnames.length; i++){
+				for(let i=0; i<rownames.length; i++){
 					sort_coef.push( matrix_values[i][xval] );
 				}
 				sort_selected_name +=rownames[xval];
@@ -159,22 +159,24 @@ let matrixsketch = (p) => {
 			}
 			// apply the sorting coef on the appropriate list (lens or dataset, TOIs coming soon maybe?)
 			if(xclose){
-				if(MATRIX_VIEW_STATE.substring(4,7)=='aoi'){
+				if(MATRIX_VIEW_STATE.substring(4,7)=='aoi' || MATRIX_VIEW_STATE.substring(4,12)=='lensegroup'){
 					sort_lenses(sort_coef);
 				}else if(MATRIX_VIEW_STATE.substring(4,7)=='dat'){
 					sort_datasets(sort_coef);
 				}else if(MATRIX_VIEW_STATE.substring(4,7)=='grp'){
 					sort_groups(sort_coef);
 				}
+				// Note: toi and twigroup sorting functions may need to be implemented
 	
 			}else{
-				if(MATRIX_VIEW_STATE.indexOf('aoi')==0){
+				if(MATRIX_VIEW_STATE.indexOf('aoi')==0 || MATRIX_VIEW_STATE.indexOf('lensegroup')==0){
 					sort_lenses(sort_coef);
 				}else if(MATRIX_VIEW_STATE.indexOf('dat')==0){
 					sort_datasets(sort_coef);
 				}else if(MATRIX_VIEW_STATE.indexOf('grp')==0){
 					sort_groups(sort_coef);
 				}
+				// Note: toi and twigroup sorting functions may need to be implemented
 			}
 		});
 		
@@ -996,13 +998,13 @@ let matrixsketch = (p) => {
 			for(let a=0; a<xnum; a++){
 				for(let b=0; b<ynum; b++){
 					xs = xmin + a*xh; ys = ymin + b*yh;
-					val = 100*Math.sqrt( matrix_values[b][a]/trans_max );
+					val = 100*Math.sqrt( matrix_values[a][b]/trans_max );
 					canvas.fill( makeColor( val, MATCOL[0] ) );
 					canvas.rect(xs, ys, xh, yh );
 					if( MATRIX_WRITE ){
 						if(val < 60){ canvas.fill(white(100)); }else{ canvas.fill(black(100)); }
 						canvas.strokeWeight(0);
-						canvas.text( num_format(matrix_values[b][a], 2), xs + xh/2, ys + yh/2);
+						canvas.text( num_format(matrix_values[a][b], 2), xs + xh/2, ys + yh/2);
 						canvas.strokeWeight(1);
 					}
 				}
@@ -1671,48 +1673,98 @@ let load_data = () => {
 			overlay_string = "Mean visitation duration in %ROW: %VAL ms";
 		}
 	}else if( MATRIX_VIEW_STATE == "aoi_dat" || MATRIX_VIEW_STATE == "dat_aoi" ){
-		if( VALUED.length == 0 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
-		for(let a=0; a<lenses.length; a++){ rownames.push(lenses[a].name); rowcolours.push(lenses[a].col(95));}
-		for(let a=0; a<VALUED.length; a++){ colnames.push(DATASETS[VALUED[a]].name); colcolours.push(get_dat_col(VALUED[a]));}
-		colspecial = VALUED.indexOf(selected_data); rowspecial = order_lenses.indexOf(selected_lens);
-		// fixation time
+	if( VALUED.length == 0 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
+		
+		// Filter to visible datasets only
+		let visible_datasets = [];
+		for(let a=0; a<VALUED.length; a++){
+			if(DATASETS[VALUED[a]].included) {
+				visible_datasets.push(VALUED[a]);
+			}
+		}
+		
+		// If no visible datasets, return early
+		if (visible_datasets.length === 0) { return; }
+		
+		// Use visible lenses (lenses array) and visible datasets
+		for(let a=0; a<lenses.length; a++){ 
+			rownames.push(lenses[a].name); 
+			rowcolours.push(lenses[a].col(95));
+		}
+		for(let a=0; a<visible_datasets.length; a++){ 
+			colnames.push(DATASETS[visible_datasets[a]].name); 
+			colcolours.push(get_dat_col(visible_datasets[a]));
+		}
+		
+		colspecial = visible_datasets.indexOf(selected_data); 
+		rowspecial = order_lenses.indexOf(selected_lens);
+		
+		// Update matrix calculations to use visible arrays
 		if(MATRIX_DATA_STATE == "aoiarea") {					
-			for(let a=0; a<VALUED.length; a++){
+			for(let a=0; a<visible_datasets.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					let metric_index = metric_lenses.indexOf(order_lenses[b]);
+					// Find the metric_lenses index for the visible lens
+					let metric_index = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[b].id) {
+							metric_index = i;
+							break;
+						}
+					}
 					if(metric_index != -1) {
-						matrix_values[a].push(base_lenses[order_lenses[b]].area);
+						matrix_values[a].push(lenses[b].area);
+					} else {
+						matrix_values[a].push(0);
 					}
 				}				
 			}
 		}
 		else if(MATRIX_DATA_STATE == "haar") {					
-			for(let a=0; a<VALUED.length; a++){
+			for(let a=0; a<visible_datasets.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				let HAAR = {"hit": 0, "off": 0, "haar": 0};
-				aggregate_hit_any_aoi_rate_across_twi(DATASETS[VALUED[a]], HAAR);
+				aggregate_hit_any_aoi_rate_across_twi(DATASETS[visible_datasets[a]], HAAR);
 				let HAAR_VALUE = parseFloat((HAAR.hit == 0 ? 0 : (HAAR.hit/(HAAR.hit+HAAR.off)).toFixed(2)));
 				for(let b=0; b<lenses.length; b++){
-					let metric_index = metric_lenses.indexOf(order_lenses[b]);
+					// Find the metric_lenses index for the visible lens
+					let metric_index = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[b].id) {
+							metric_index = i;
+							break;
+						}
+					}
 					if(metric_index != -1) {
 						matrix_values[a].push(100 * HAAR_VALUE);
+					} else {
+						matrix_values[a].push(0);
 					}
 				}				
 			}
 		}
 		else {
-			for(let a=0; a<VALUED.length; a++){
+			for(let a=0; a<visible_datasets.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					let metric_index = metric_lenses.indexOf(order_lenses[b]);
+					// Find the metric_lenses index for the visible lens
+					let metric_index = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[b].id) {
+							metric_index = i;
+							break;
+						}
+					}
 					if(metric_index != -1) {
-						matrix_values[a].push( aggregate_aoi_metrics_across_twi(DATASETS[VALUED[a]], metric_index, null) );
+						matrix_values[a].push( aggregate_aoi_metrics_across_twi(DATASETS[visible_datasets[a]], metric_index, null) );
+					} else {
+						matrix_values[a].push(0);
 					}
 				}
 			}
 		}
 		
+		// Overlay strings remain the same
 		if(MATRIX_DATA_STATE == "aoiarea") {
 			overlay_string = "Area in AOI %ROW: %VAL";
 		}else if( MATRIX_DATA_STATE == "densitytime" ){
