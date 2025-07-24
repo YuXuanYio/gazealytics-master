@@ -949,6 +949,13 @@ function addExtraTimeRow(lensId) {
 	} else {
 		console.warn(`Container lens_${lensId}_values not found`);
 	}
+	const btn = document.getElementById(`lens_${lensId}_temporal_btn`);
+	const count = lens.timeRanges?.length || 0;
+	btn.innerHTML = `
+		<span style="display: inline-flex; align-items: center;">
+			<i class="fas fa-clock" style="color: green;"></i>
+			<span style="font-size: 0.9em;">${count}</span>
+		</span>`;
 }
 
 function removeTimeRow(lensId, index) {
@@ -962,6 +969,13 @@ function removeTimeRow(lensId, index) {
 	if (container) {
 		container.innerHTML = lens.make_controls();
 	}
+	const btn = document.getElementById(`lens_${lensId}_temporal_btn`);
+	const count = lens.timeRanges?.length || 0;
+	btn.innerHTML = `
+		<span style="display: inline-flex; align-items: center;">
+			<i class="fas fa-clock" style="color: green;"></i>
+			<span style="font-size: 0.9em;">${count}</span>
+		</span>`;
 }
 
 function toggleTemporal(id, state = null) {
@@ -980,11 +994,16 @@ function toggleTemporal(id, state = null) {
 
 	const btn = document.getElementById(`lens_${id}_temporal_btn`);
 	if (btn) {
-		btn.innerHTML = !lens.isTemporal
-			? '<i class="fas fa-clock"></i>'
-			: `<span style="display: inline-flex; align-items: center;">
-				<i class="fas fa-clock"></i>
-				<i class="fas fa-times"></i></span>`;
+		if (!lens.isTemporal) {
+			btn.innerHTML = '<i class="fas fa-clock"></i>';
+		} else {
+			const count = lens.timeRanges?.length || 0;
+			btn.innerHTML = `
+				<span style="display: inline-flex; align-items: center;">
+					<i class="fas fa-clock" style="color: green;"></i>
+					<span style="font-size: 0.9em;">${count}</span>
+				</span>`;
+		}
 	}
 }
 
@@ -1155,11 +1174,14 @@ function duplicate_lens(id) {
 
 	const temporalBtn = document.getElementById(`lens_${v}_temporal_btn`);
 	if (temporalBtn) {
+		const count = newLens.timeRanges?.length || 0;
 		temporalBtn.innerHTML = !newLens.isTemporal
 			? '<i class="fas fa-clock"></i>'
-			: `<span style="display: inline-flex; align-items: center;">
-				<i class="fas fa-clock"></i>
-				<i class="fas fa-times"></i></span>`;
+			: `<span style="display: inline-flex; align-items: center; gap: 4px;">
+					<i class="fas fa-clock" style="color: green;"></i>
+					<span style="font-size: 0.9em;">${count}</span>
+			</span>`;
+
 		temporalBtn.onclick = function() {
 			toggleTemporal(v);
 		};
@@ -1178,6 +1200,19 @@ function duplicate_lens(id) {
 	const nameInput = document.getElementById(`lens_${v}_name`);
 	if (nameInput) {
 		nameInput.value = newLens.name;
+	}
+
+	const h1Input = document.getElementById(`lens_${v}_screen_id`);
+	if (h1Input) {
+		h1Input.value = newLens.h1;
+	}
+	const h2Input = document.getElementById(`lens_${v}_app_id`);
+	if (h2Input) {
+		h2Input.value = newLens.h2;
+	}
+	const h3Input = document.getElementById(`lens_${v}_interface_id`);
+	if (h3Input) {
+		h3Input.value = newLens.h3;
 	}
 
 	update_lens_colors();
