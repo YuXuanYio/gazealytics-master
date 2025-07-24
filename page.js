@@ -151,6 +151,8 @@ SHOW_FORE = "spatial"; TIME_DATA = "all";
 DO_BUNDLE = true; MATRIX_MINIMAP = false;
 CONTROL_STATE = "aoi"; SHOW_LENS = true; SHOW_NOTES = true; TIME_STRAT = 'real';
 MATRIX_WRITE = false; prev_count=0;
+let base_lenses = [];
+var hierarchyInputsInitialized = false;
 
 function load_controls(){
 	//data binding of AOI, TWI, Sample with DOM
@@ -554,7 +556,24 @@ function load_controls(){
 		if(e instanceof SyntaxError)
 			console.log(e);
 	}
+	if (!hierarchyInputsInitialized && base_lenses.length > 0) {
+        for (let i = 0; i < base_lenses.length; i++) {
+            setHierarchyInputs(base_lenses[i]);
+        }
+        hierarchyInputsInitialized = true;
+    }
 }
+
+function setHierarchyInputs(lens) {
+    const id = lens.id;
+    const screenInput = document.getElementById(`lens_${id}_screen_id`);
+    const appInput = document.getElementById(`lens_${id}_app_id`);
+    const interfaceInput = document.getElementById(`lens_${id}_interface_id`);
+    if (screenInput) screenInput.value = (lens.h1 === -1 || lens.h1 == null) ? '' : lens.h1;
+    if (appInput) appInput.value = (lens.h2 === -1 || lens.h2 == null) ? '' : lens.h2;
+    if (interfaceInput) interfaceInput.value = (lens.h3 === -1 || lens.h3 == null) ? '' : lens.h3;
+}
+
 // for changes to cropping from fields not mouse click
 function crop_resize(){
 	if(WIDTH != parseFloat(document.getElementById('WIDTH').value)){
