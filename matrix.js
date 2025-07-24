@@ -121,7 +121,7 @@ let matrixsketch = (p) => {
 					sort_coef.push( matrix_values[i][yval] );
 				}
 				sort_selected_name +=colnames[yval];
-			}else if(xclose && (MATRIX_VIEW_STATE=='aoi_dat' || MATRIX_VIEW_STATE=='aoi_grp' || MATRIX_VIEW_STATE=='dat_grp')){
+			}else if(xclose && (MATRIX_VIEW_STATE=='aoi_dat' || MATRIX_VIEW_STATE=='aoi_grp' || MATRIX_VIEW_STATE=='dat_grp' || MATRIX_VIEW_STATE=='aoi_toi' || MATRIX_VIEW_STATE=='dat_toi' || MATRIX_VIEW_STATE=='aoi_twigroup' || MATRIX_VIEW_STATE=='dat_twigroup')){
 				is_sort_initiated_column = true;
 				yval = Math.floor( (p.mouseY - ymin) / yh );
 				for(let i=0; i<colnames.length; i++){
@@ -135,7 +135,7 @@ let matrixsketch = (p) => {
 					sort_coef.push( matrix_values[i][xval] );
 				}
 				sort_selected_name +=rownames[xval];
-			}else if(yclose && (MATRIX_VIEW_STATE=='aoi_dat' || MATRIX_VIEW_STATE=='aoi_grp' || MATRIX_VIEW_STATE=='dat_grp')){
+			}else if(yclose && (MATRIX_VIEW_STATE=='aoi_dat' || MATRIX_VIEW_STATE=='aoi_grp' || MATRIX_VIEW_STATE=='dat_grp' || MATRIX_VIEW_STATE=='aoi_toi' || MATRIX_VIEW_STATE=='dat_toi' || MATRIX_VIEW_STATE=='aoi_twigroup' || MATRIX_VIEW_STATE=='dat_twigroup')){
 				is_sort_initiated_rows = true;
 				xval = Math.floor( (p.mouseX - xmin) / xh );
 				for(let i=0; i<rownames.length; i++){
@@ -165,8 +165,11 @@ let matrixsketch = (p) => {
 					sort_datasets(sort_coef);
 				}else if(MATRIX_VIEW_STATE.substring(4,7)=='grp'){
 					sort_groups(sort_coef);
+				}else if(MATRIX_VIEW_STATE.substring(4,7)=='toi' || MATRIX_VIEW_STATE.substring(4,10)=='twigroup'){
+					// Note: TWI/TOI sorting functions would need to be implemented in page.js
+					// For now, these view states don't have specific sort functions
+					console.log("TWI/TOI sorting not yet implemented for:", MATRIX_VIEW_STATE);
 				}
-				// Note: toi and twigroup sorting functions may need to be implemented
 	
 			}else{
 				if(MATRIX_VIEW_STATE.indexOf('aoi')==0 || MATRIX_VIEW_STATE.indexOf('lensegroup')==0){
@@ -175,8 +178,11 @@ let matrixsketch = (p) => {
 					sort_datasets(sort_coef);
 				}else if(MATRIX_VIEW_STATE.indexOf('grp')==0){
 					sort_groups(sort_coef);
+				}else if(MATRIX_VIEW_STATE.indexOf('toi')==0 || MATRIX_VIEW_STATE.indexOf('twigroup')==0){
+					// Note: TWI/TOI sorting functions would need to be implemented in page.js
+					// For now, these view states don't have specific sort functions
+					console.log("TWI/TOI sorting not yet implemented for:", MATRIX_VIEW_STATE);
 				}
-				// Note: toi and twigroup sorting functions may need to be implemented
 			}
 		});
 		
@@ -2009,9 +2015,18 @@ let load_data = () => {
 			for(let a=0; a<order_twis.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
 				for(let b=0; b<lenses.length; b++){
-					let metric_index = metric_lenses.indexOf(order_lenses[b]);
+					// Find the metric_lenses index for the visible lens
+					let metric_index = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[b].id) {
+							metric_index = i;
+							break;
+						}
+					}
 					if(metric_index != -1) {
-						matrix_values[a].push(base_lenses[order_lenses[b]].area);
+						matrix_values[a].push(lenses[b].area);
+					} else {
+						matrix_values[a].push(0);
 					}
 				}				
 			}
@@ -2023,9 +2038,18 @@ let load_data = () => {
 				aggregate_hit_any_aoi_rate_across_dat(order_twis[a], HAAR);
 				let HAAR_VALUE = (HAAR.hit == 0 ? 0 : (HAAR.hit/(HAAR.hit+HAAR.off)).toFixed(2));
 				for(let b=0; b<lenses.length; b++){
-					let metric_index = metric_lenses.indexOf(order_lenses[b]);
+					// Find the metric_lenses index for the visible lens
+					let metric_index = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[b].id) {
+							metric_index = i;
+							break;
+						}
+					}
 					if(metric_index != -1) {
 						matrix_values[a].push(100 * HAAR_VALUE);
+					} else {
+						matrix_values[a].push(0);
 					}
 				}				
 			}
@@ -2035,9 +2059,18 @@ let load_data = () => {
 			for(let a=0; a<order_twis.length; a++){ 
 				matrix_values.push([]); matrix_colours.push([]);			
 				for(let b=0; b<lenses.length; b++){
-					let metric_index = metric_lenses.indexOf(order_lenses[b]);
+					// Find the metric_lenses index for the visible lens
+					let metric_index = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[b].id) {
+							metric_index = i;
+							break;
+						}
+					}
 					if(metric_index != -1) {
-						matrix_values[a].push (aggregate_aoi_metrics_across_dat(order_twis[a], metric_index, null));
+						matrix_values[a].push(aggregate_aoi_metrics_across_dat(order_twis[a], metric_index, null));
+					} else {
+						matrix_values[a].push(0);
 					}
 				}		
 			}
@@ -2095,9 +2128,18 @@ let load_data = () => {
 				}
 				HAAR_VALUE = (HAAR.hit == 0 ? 0 : (HAAR.hit/(HAAR.hit+HAAR.off)).toFixed(2));
 				for(let b=0; b<lenses.length; b++){
-					let metric_index = metric_lenses.indexOf(order_lenses[b]);
+					// Find the metric_lenses index for the visible lens
+					let metric_index = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[b].id) {
+							metric_index = i;
+							break;
+						}
+					}
 					if(metric_index != -1) {
 						matrix_values[a].push(100 * HAAR_VALUE);
+					} else {
+						matrix_values[a].push(0);
 					}
 				}				
 			}
@@ -2107,14 +2149,22 @@ let load_data = () => {
 				matrix_values.push([]); matrix_colours.push([]);			
 	
 				for(let b=0; b<lenses.length; b++) {
-					let metric_index = metric_lenses.indexOf(order_lenses[b]);
-					if(metric_index == -1) continue;
+					// Find the metric_lenses index for the visible lens
+					let metric_index = -1;
+					for(let i=0; i<metric_lenses.length; i++){
+						if(metric_lenses[i].id === lenses[b].id) {
+							metric_index = i;
+							break;
+						}
+					}
 					
 					let total_sum = 0;
 					if(MATRIX_DATA_STATE == "aoiarea") {
-						total_sum = base_lenses[order_lenses[b]].area;
+						if(metric_index != -1) {
+							total_sum = lenses[b].area;
+						}
 					}
-					else {
+					else if(metric_index != -1) {
 						let total_number_of_addup = 0;
 						for(let c=0; c<order_twis.length; c++)	{
 							let order_twis_group_index = ORDERTWIGROUPID.indexOf(base_twis[order_twis[c]].group);
