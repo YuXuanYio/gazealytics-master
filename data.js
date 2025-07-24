@@ -562,6 +562,9 @@ function set_toi(data_id, twi_id){
 		toisOfSelectedTwi = [];
 	}
 
+	selectedTwiMaxTime = 0;
+	selectedTwiMinTime = 1000000000000000;
+
 	if (data.checked) {
 		for (let toi of data.tois) {
 			if (toi.twi_id == twi_id && toi) {
