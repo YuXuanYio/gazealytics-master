@@ -754,7 +754,7 @@ function save_aoi(id){
 	if(targetLens) {
 		targetLens.edit_hierarchy(screenVal, appVal, interfaceVal);
 	} else {
-		// console.log('Target lens not found');
+		console.log('Target lens not found');
 	}
 
 	window.lenses = targetLens;
