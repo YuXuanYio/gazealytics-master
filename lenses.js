@@ -949,6 +949,13 @@ function addExtraTimeRow(lensId) {
 	} else {
 		console.warn(`Container lens_${lensId}_values not found`);
 	}
+	const btn = document.getElementById(`lens_${lensId}_temporal_btn`);
+	const count = lens.timeRanges?.length || 0;
+	btn.innerHTML = `
+		<span style="display: inline-flex; align-items: center;">
+			<i class="fas fa-clock" style="color: green;"></i>
+			<span style="font-size: 0.9em;">${count}</span>
+		</span>`;
 }
 
 function removeTimeRow(lensId, index) {
@@ -962,6 +969,13 @@ function removeTimeRow(lensId, index) {
 	if (container) {
 		container.innerHTML = lens.make_controls();
 	}
+	const btn = document.getElementById(`lens_${lensId}_temporal_btn`);
+	const count = lens.timeRanges?.length || 0;
+	btn.innerHTML = `
+		<span style="display: inline-flex; align-items: center;">
+			<i class="fas fa-clock" style="color: green;"></i>
+			<span style="font-size: 0.9em;">${count}</span>
+		</span>`;
 }
 
 function toggleTemporal(id, state = null) {
@@ -980,11 +994,16 @@ function toggleTemporal(id, state = null) {
 
 	const btn = document.getElementById(`lens_${id}_temporal_btn`);
 	if (btn) {
-		btn.innerHTML = !lens.isTemporal
-			? '<i class="fas fa-clock"></i>'
-			: `<span style="display: inline-flex; align-items: center;">
-				<i class="fas fa-clock"></i>
-				<i class="fas fa-times"></i></span>`;
+		if (!lens.isTemporal) {
+			btn.innerHTML = '<i class="fas fa-clock"></i>';
+		} else {
+			const count = lens.timeRanges?.length || 0;
+			btn.innerHTML = `
+				<span style="display: inline-flex; align-items: center;">
+					<i class="fas fa-clock" style="color: green;"></i>
+					<span style="font-size: 0.9em;">${count}</span>
+				</span>`;
+		}
 	}
 }
 
@@ -1082,23 +1101,46 @@ function duplicate_lens(id) {
 		return;
 	}
 
-	// Clone the original lens
-	const newLens = Object.assign(Object.create(Object.getPrototypeOf(originalLens)), originalLens);
-	newLens.id = lid++;
+	const type = originalLens.type 
+	let newLens;
+
+	const newId = lid++;
+	const groupId = originalLens.group;
+
+	// Instantiate the correct lens class
+	if (type === 'poly') {
+		newLens = new PolyLens(newId, originalLens.x[0], originalLens.y[0], groupId);
+		newLens.x = [...originalLens.x];
+		newLens.y = [...originalLens.y];
+	} else if (type === 'ellipse') {
+		newLens = new EllipseLens(newId, originalLens.x1, originalLens.y1, groupId);
+		newLens.x2 = originalLens.x2;
+		newLens.y2 = originalLens.y2;
+		newLens.fix_up();
+	} else if (type === 'rect') {
+		newLens = new RectLens(newId, originalLens.x1, originalLens.y1, groupId);
+		newLens.x2 = originalLens.x2;
+		newLens.y2 = originalLens.y2;
+		newLens.fix_up();
+	} else {
+		console.warn("Unknown lens type; cannot duplicate");
+		return;
+	}
+
 	newLens.name = originalLens.name + '_copy';
-	newLens.timeRanges = originalLens.timeRanges.map(range => ({ ...range }));
 	newLens.isTemporal = originalLens.isTemporal;
+	newLens.timeRanges = originalLens.timeRanges.map(r => ({ ...r }));
 	newLens.h1 = originalLens.h1;
 	newLens.h2 = originalLens.h2;
 	newLens.h3 = originalLens.h3;
 	newLens.parentLens = originalLens.parentLens;
+	newLens.currentPriority = originalLens.currentPriority;
 
 	const v = newLens.id;
-	newLens.group = originalLens.group;
-
 	base_lenses.push(newLens);
 	order_lenses.push(v);
 	lenses.push(newLens);
+
 
 	const q = lensbox.replace(/#/g, v);
 	const node = document.createElement("li");
@@ -1107,7 +1149,7 @@ function duplicate_lens(id) {
 	node.setAttribute('class', 'lens_item');
 	document.getElementById('lenslist').appendChild(node);
 
-	node.onclick = function(e) {
+	node.onclick = function (e) {
 		var ec = e.target.className;
 		var ecs = e.target.className.split(' ')[0];
 		var ecid = e.target.id.split('_')[2];
@@ -1130,7 +1172,7 @@ function duplicate_lens(id) {
 	const eyeBtn = document.getElementById(`lens_${v}_c`);
 	if (eyeBtn) {
 		eyeBtn.checked = true;
-		eyeBtn.onclick = function() {
+		eyeBtn.onclick = function () {
 			document.getElementById('sort_dropdown').value = 'No_sort';
 			load_controls();
 			matrix_changed = true;
@@ -1145,7 +1187,7 @@ function duplicate_lens(id) {
 	const lockBtn = document.getElementById(`lens_${v}_l`);
 	if (lockBtn) {
 		lockBtn.checked = false;
-		lockBtn.onclick = function() {
+		lockBtn.onclick = function () {
 			this.checked = !this.checked;
 			this.innerHTML = this.checked
 				? '<i class="fas fa-lock"></i>'
@@ -1155,12 +1197,15 @@ function duplicate_lens(id) {
 
 	const temporalBtn = document.getElementById(`lens_${v}_temporal_btn`);
 	if (temporalBtn) {
+		const count = newLens.timeRanges?.length || 0;
 		temporalBtn.innerHTML = !newLens.isTemporal
 			? '<i class="fas fa-clock"></i>'
-			: `<span style="display: inline-flex; align-items: center;">
-				<i class="fas fa-clock"></i>
-				<i class="fas fa-times"></i></span>`;
-		temporalBtn.onclick = function() {
+			: `<span style="display: inline-flex; align-items: center; gap: 4px;">
+					<i class="fas fa-clock" style="color: green;"></i>
+					<span style="font-size: 0.9em;">${count}</span>
+			</span>`;
+
+		temporalBtn.onclick = function () {
 			toggleTemporal(v);
 		};
 	}
@@ -1178,6 +1223,19 @@ function duplicate_lens(id) {
 	const nameInput = document.getElementById(`lens_${v}_name`);
 	if (nameInput) {
 		nameInput.value = newLens.name;
+	}
+
+	const h1Input = document.getElementById(`lens_${v}_screen_id`);
+	if (h1Input) {
+		h1Input.value = newLens.h1;
+	}
+	const h2Input = document.getElementById(`lens_${v}_app_id`);
+	if (h2Input) {
+		h2Input.value = newLens.h2;
+	}
+	const h3Input = document.getElementById(`lens_${v}_interface_id`);
+	if (h3Input) {
+		h3Input.value = newLens.h3;
 	}
 
 	update_lens_colors();
