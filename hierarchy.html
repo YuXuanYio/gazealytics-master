@@ -137,7 +137,7 @@
             let screenColorMap = {};
             let appColorMap = {};
             const colorPalette = [
-                '#FFCDD2' , '#CFD8DC', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#C5CAE9', '#BBDEFB', '#B3E5FC', '#B2EBF2',
+                '#FFCDD2' , '#CFD8DC', '#BBDEFB', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#C5CAE9', '#B3E5FC', '#B2EBF2',
                 '#B2DFDB', '#C8E6C9', '#DCEDC8', '#F0F4C3', '#FFF9C4', '#FFECB3', '#FFE0B2', '#FFCCBC',
                 '#D7CCC8', '#F5F5F5', '#FAFAFA', '#EEEEEE', '#E0E0E0', '#BDBDBD', '#9E9E9E',
             ];
@@ -169,15 +169,14 @@
             }
 
             function updateDisplay() {
-                let currentLensesToProcess = [...allLensesData];
-                
                 // dropdown filters
                 const selectedScreen = document.getElementById('screenFilter').value;
                 const selectedApp = document.getElementById('appFilter').value;
                 const selectedInterface = document.getElementById('interfaceFilter').value;
                 const colorByOption = document.querySelector('input[name="colorBy"]:checked').value;
 
-                const filteredLenses = currentLensesToProcess.filter(lens => {
+                // lenses to display in the hierarchy tree based on dropdown filters
+                const filteredLenses = allLensesData.filter(lens => {
                     if (!isValidHierarchyId(lens.h1)) return false;
                     
                     const matchesScreen = (selectedScreen === 'all' || String(lens.h1) === selectedScreen);
@@ -187,16 +186,20 @@
                     return matchesScreen && matchesApp && matchesInterface;
                 });
 
-                // determine which AOIs to show on canvas
+                // AOIs to show on canvas
                 let idsToShowOnCanvas;
                 if (focusedNodeId) {
+                    // show children AOIs
                     const parts = focusedNodeId.split('-');
                     const levelType = parts[0];
                     const idsToMatch = parts.slice(1);
                     idsToShowOnCanvas = getChildAoiIds(allLensesData, levelType, idsToMatch);
-                } else {
-                    // show all AOIs by default
+                } else if (selectedScreen === 'all' && selectedApp === 'all' && selectedInterface === 'all') {
+                    // show all original AOIs
                     idsToShowOnCanvas = allLensesData.map(lens => lens.id);
+                } else {
+                    // show only the filtered AOIs
+                    idsToShowOnCanvas = filteredLenses.map(lens => lens.id);
                 }
 
                 // send visibility and color update to main canvas
@@ -402,7 +405,7 @@
                 }
 
                 populateFilterDropdowns(allLensesData);
-                updateDisplay();
+                updateDisplay(); 
             }
 
             window.onload = function() {
@@ -429,8 +432,8 @@
                     document.getElementById('screenFilter').value = 'all';
                     document.getElementById('appFilter').value = 'all';
                     document.getElementById('interfaceFilter').value = 'all';
-                    document.getElementById('colorNone').checked = true;
-                    updateDisplay();
+                    document.getElementById('colorNone').checked = true; 
+                    updateDisplay(); 
                 });
             };
         </script>
