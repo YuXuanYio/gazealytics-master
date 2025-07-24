@@ -1175,154 +1175,184 @@ let load_data = () => {
 	if( ['dat_aoi', 'toi_aoi', 'grp_aoi', 'twigroup_aoi', 'toi_dat', 'twigroup_dat', 'grp_dat', 'grp_toi', 'grp_twigroup', 'dat_lensegroup', 'grp_lensegroup', 'toi_lensegroup', 'twigroup_lensegroup'].indexOf(MATRIX_VIEW_STATE) != -1 ){ flipped = true; }
 	
 	if(MATRIX_VIEW_STATE == "lensegroup_lensegroup"){
-		//check if summary is ticked
-		if( DAT_MODE == 2 && VALUED.indexOf(selected_data) == -1 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
-		if( DAT_MODE == 1 && ORDERGROUPID.indexOf(selected_grp) == -1 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
+    //check if summary is ticked
+    if( DAT_MODE == 2 && VALUED.indexOf(selected_data) == -1 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
+    if( DAT_MODE == 1 && ORDERGROUPID.indexOf(selected_grp) == -1 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 
-		let metric_sum = [];
-		for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){ 
-			rownames.push("AOI G"+LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group); 
-			colnames.push("AOI G"+LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group); 
-			rowcolours.push(get_lensegroup_col(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group));
-			colcolours.push(get_lensegroup_col(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group));
-			metric_sum.push(0);
-		}
-		colspecial = ORDERLENSEGROUPID.indexOf(selected_lensegroup); rowspecial = colspecial;
-		// transitions data function
-		if( MATRIX_DATA_STATE == "probability_trans1" ){
-			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));
-					metric_sum[b] += matrix_values[a][b];
-				}
-			}
-			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
-				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					if(metric_sum[b] > 0) matrix_values[a][b] = matrix_values[a][b] / metric_sum[b];
-					else matrix_values[a][b] = 0;
-				}
-			}	
-			overlay_string = "Prob. Direct Transitions from %ROW to %COL: %VAL";
-		}else if( MATRIX_DATA_STATE == "probability_trans2" ){
-			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));				
-					metric_sum[b] += matrix_values[a][b];
-				}
-			}
-			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
-				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					if(metric_sum[b] > 0) matrix_values[a][b] = matrix_values[a][b] / metric_sum[b];
-					else matrix_values[a][b] = 0;
-				}
-			}	
-			overlay_string = "Prob. Indirect Transitions from %ROW to %COL: %VAL";
-		}else if( MATRIX_DATA_STATE == "probability_glances" ){
-			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));					
-					metric_sum[b] += matrix_values[a][b];
-				}
-			}
-			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
-				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					if(metric_sum[b] > 0) matrix_values[a][b] = matrix_values[a][b] / metric_sum[b];
-					else matrix_values[a][b] = 0;
-				}
-			}	
-			overlay_string = "Prob. Glances from %ROW -> %COL -> %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "probability_through" ){
-			if( ORDERLENSEGROUPID.indexOf(selected_lensegroup) == -1 ){ return; }
-			let lensegroup = ORDERLENSEGROUPID.indexOf(selected_lensegroup);
-			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], lensegroup));					
-					metric_sum[b] += matrix_values[a][b];
-				}
-			}
-			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
-				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					if(metric_sum[b] > 0) matrix_values[a][b] = matrix_values[a][b] / metric_sum[b];
-					else matrix_values[a][b] = 0;
-				}
-			}	
-			overlay_string = "Prob. Transitions from %ROW -> AOI G" + selected_lensegroup + " -> %COL: %VAL";		
-		}else if( MATRIX_DATA_STATE == "trans1" ){
-			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));
-				}
-			}
-			overlay_string = "Direct Transitions from %ROW to %COL: %VAL";
-		}else if( MATRIX_DATA_STATE == "trans2" ){
-			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));				
-				}
-			}
-			overlay_string = "Indirect Transitions from %ROW to %COL: %VAL";
-		}else if( MATRIX_DATA_STATE == "glances" ){
-			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));					
-				}
-			}
-			overlay_string = "Glances from %ROW -> %COL -> %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "through" ){
-			if( ORDERLENSEGROUPID.indexOf(selected_lensegroup) == -1 ){ return; }
-			let lensegroup = ORDERLENSEGROUPID.indexOf(selected_lensegroup);
-			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], lensegroup));					
-				}
-			}
-			overlay_string = "Transitions from %ROW -> AOI G" + selected_lensegroup + " -> %COL: %VAL";
-		}
-		else if( MATRIX_DATA_STATE == "mean_trans1" ){
-			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));
-				}
-			}
-			overlay_string = "Mean Direct Transitions from %ROW to %COL: %VAL";
-		}else if( MATRIX_DATA_STATE == "mean_trans2" ){
-			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));				
-				}
-			}
-			overlay_string = "Mean Indirect Transitions from %ROW to %COL: %VAL";
-		}else if( MATRIX_DATA_STATE == "mean_glances" ){
-			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], -1));					
-				}
-			}
-			overlay_string = "Mean Glances from %ROW -> %COL -> %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "mean_through" ){
-			if( ORDERLENSEGROUPID.indexOf(selected_lensegroup) == -1 ){ return; }
-			let lensegroup = ORDERLENSEGROUPID.indexOf(selected_lensegroup);
-			for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++){
-					matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(ORDERLENSEGROUPIDARRAYINDEX[a], ORDERLENSEGROUPIDARRAYINDEX[b], lensegroup));					
-				}
-			}
-			overlay_string = "Mean Transitions from %ROW -> AOI G" + selected_lensegroup + " -> %COL: %VAL";
-		}
-	}
-	else if( MATRIX_VIEW_STATE == "aoi_aoi"){
+    // Build visible groups from UI-visible lenses (lenses array) - same logic as timeline
+    let visible_groups = [];
+    for (let i = 0; i < lenses.length; i++) {
+        let group_id = lenses[i].group;
+        if (visible_groups.indexOf(group_id) === -1) {
+            visible_groups.push(group_id);
+        }
+    }
+    
+    // If no visible groups, return early
+    if (visible_groups.length === 0) { return; }
+    
+    // Map visible groups to their indices in LENSEGROUPS for data access
+    let group_indices = [];
+    for (let i = 0; i < visible_groups.length; i++) {
+        let group_idx = ORDERLENSEGROUPID.indexOf(visible_groups[i]);
+        if (group_idx !== -1) {
+            group_indices.push(ORDERLENSEGROUPIDARRAYINDEX[group_idx]);
+        }
+    }
+
+    let metric_sum = [];
+    // Use visible_groups instead of ORDERLENSEGROUPIDARRAYINDEX
+    for(let a=0; a<visible_groups.length; a++){ 
+        rownames.push("AOI G"+visible_groups[a]); 
+        colnames.push("AOI G"+visible_groups[a]); 
+        rowcolours.push(get_lensegroup_col(visible_groups[a]));
+        colcolours.push(get_lensegroup_col(visible_groups[a]));
+        metric_sum.push(0);
+    }
+    colspecial = visible_groups.indexOf(selected_lensegroup); rowspecial = colspecial;
+    
+    // transitions data function
+    if( MATRIX_DATA_STATE == "probability_trans1" ){
+        for(let a=0; a<visible_groups.length; a++){
+            matrix_values.push([]); matrix_colours.push([]);
+            for(let b=0; b<visible_groups.length; b++){
+                // Use group_indices for data access
+                matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(group_indices[a], group_indices[b], -1));
+                metric_sum[b] += matrix_values[a][b];
+            }
+        }
+        for(let a=0; a<visible_groups.length; a++){
+            for(let b=0; b<visible_groups.length; b++){
+                if(metric_sum[b] > 0) matrix_values[a][b] = matrix_values[a][b] / metric_sum[b];
+                else matrix_values[a][b] = 0;
+            }
+        }	
+        overlay_string = "Prob. Direct Transitions from %ROW to %COL: %VAL";
+    }else if( MATRIX_DATA_STATE == "probability_trans2" ){
+        for(let a=0; a<visible_groups.length; a++){
+            matrix_values.push([]); matrix_colours.push([]);
+            for(let b=0; b<visible_groups.length; b++){
+                matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(group_indices[a], group_indices[b], -1));				
+                metric_sum[b] += matrix_values[a][b];
+            }
+        }
+        for(let a=0; a<visible_groups.length; a++){
+            for(let b=0; b<visible_groups.length; b++){
+                if(metric_sum[b] > 0) matrix_values[a][b] = matrix_values[a][b] / metric_sum[b];
+                else matrix_values[a][b] = 0;
+            }
+        }	
+        overlay_string = "Prob. Indirect Transitions from %ROW to %COL: %VAL";
+    }else if( MATRIX_DATA_STATE == "probability_glances" ){
+        for(let a=0; a<visible_groups.length; a++){
+            matrix_values.push([]); matrix_colours.push([]);
+            for(let b=0; b<visible_groups.length; b++){
+                matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(group_indices[a], group_indices[b], -1));					
+                metric_sum[b] += matrix_values[a][b];
+            }
+        }
+        for(let a=0; a<visible_groups.length; a++){
+            for(let b=0; b<visible_groups.length; b++){
+                if(metric_sum[b] > 0) matrix_values[a][b] = matrix_values[a][b] / metric_sum[b];
+                else matrix_values[a][b] = 0;
+            }
+        }	
+        overlay_string = "Prob. Glances from %ROW -> %COL -> %ROW: %VAL";
+    }else if( MATRIX_DATA_STATE == "probability_through" ){
+        // Check if selected_lensegroup exists in visible groups
+        if( visible_groups.indexOf(selected_lensegroup) == -1 ){ return; }
+        let lensegroup_idx = visible_groups.indexOf(selected_lensegroup);
+        let lensegroup = group_indices[lensegroup_idx];
+        
+        for(let a=0; a<visible_groups.length; a++){
+            matrix_values.push([]); matrix_colours.push([]);
+            for(let b=0; b<visible_groups.length; b++){
+                matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(group_indices[a], group_indices[b], lensegroup));					
+                metric_sum[b] += matrix_values[a][b];
+            }
+        }
+        for(let a=0; a<visible_groups.length; a++){
+            for(let b=0; b<visible_groups.length; b++){
+                if(metric_sum[b] > 0) matrix_values[a][b] = matrix_values[a][b] / metric_sum[b];
+                else matrix_values[a][b] = 0;
+            }
+        }	
+        overlay_string = "Prob. Transitions from %ROW -> AOI G" + selected_lensegroup + " -> %COL: %VAL";		
+    }else if( MATRIX_DATA_STATE == "trans1" ){
+        for(let a=0; a<visible_groups.length; a++){
+            matrix_values.push([]); matrix_colours.push([]);
+            for(let b=0; b<visible_groups.length; b++){
+                matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(group_indices[a], group_indices[b], -1));
+            }
+        }
+        overlay_string = "Direct Transitions from %ROW to %COL: %VAL";
+    }else if( MATRIX_DATA_STATE == "trans2" ){
+        for(let a=0; a<visible_groups.length; a++){
+            matrix_values.push([]); matrix_colours.push([]);
+            for(let b=0; b<visible_groups.length; b++){
+                matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(group_indices[a], group_indices[b], -1));				
+            }
+        }
+        overlay_string = "Indirect Transitions from %ROW to %COL: %VAL";
+    }else if( MATRIX_DATA_STATE == "glances" ){
+        for(let a=0; a<visible_groups.length; a++){
+            matrix_values.push([]); matrix_colours.push([]);
+            for(let b=0; b<visible_groups.length; b++){
+                matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(group_indices[a], group_indices[b], -1));					
+            }
+        }
+        overlay_string = "Glances from %ROW -> %COL -> %ROW: %VAL";
+    }else if( MATRIX_DATA_STATE == "through" ){
+        if( visible_groups.indexOf(selected_lensegroup) == -1 ){ return; }
+        let lensegroup_idx = visible_groups.indexOf(selected_lensegroup);
+        let lensegroup = group_indices[lensegroup_idx];
+        
+        for(let a=0; a<visible_groups.length; a++){
+            matrix_values.push([]); matrix_colours.push([]);
+            for(let b=0; b<visible_groups.length; b++){
+                matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi(group_indices[a], group_indices[b], lensegroup));					
+            }
+        }
+        overlay_string = "Transitions from %ROW -> AOI G" + selected_lensegroup + " -> %COL: %VAL";
+    }
+    else if( MATRIX_DATA_STATE == "mean_trans1" ){
+        for(let a=0; a<visible_groups.length; a++){
+            matrix_values.push([]); matrix_colours.push([]);
+            for(let b=0; b<visible_groups.length; b++){
+                matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(group_indices[a], group_indices[b], -1));
+            }
+        }
+        overlay_string = "Mean Direct Transitions from %ROW to %COL: %VAL";
+    }else if( MATRIX_DATA_STATE == "mean_trans2" ){
+        for(let a=0; a<visible_groups.length; a++){
+            matrix_values.push([]); matrix_colours.push([]);
+            for(let b=0; b<visible_groups.length; b++){
+                matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(group_indices[a], group_indices[b], -1));				
+            }
+        }
+        overlay_string = "Mean Indirect Transitions from %ROW to %COL: %VAL";
+    }else if( MATRIX_DATA_STATE == "mean_glances" ){
+        for(let a=0; a<visible_groups.length; a++){
+            matrix_values.push([]); matrix_colours.push([]);
+            for(let b=0; b<visible_groups.length; b++){
+                matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(group_indices[a], group_indices[b], -1));					
+            }
+        }
+        overlay_string = "Mean Glances from %ROW -> %COL -> %ROW: %VAL";
+    }else if( MATRIX_DATA_STATE == "mean_through" ){
+        if( visible_groups.indexOf(selected_lensegroup) == -1 ){ return; }
+        let lensegroup_idx = visible_groups.indexOf(selected_lensegroup);
+        let lensegroup = group_indices[lensegroup_idx];
+        
+        for(let a=0; a<visible_groups.length; a++){
+            matrix_values.push([]); matrix_colours.push([]);
+            for(let b=0; b<visible_groups.length; b++){
+                matrix_values[a].push(aggregate_aoi_metrics_across_dat_twi_mean_values(group_indices[a], group_indices[b], lensegroup));					
+            }
+        }
+        overlay_string = "Mean Transitions from %ROW -> AOI G" + selected_lensegroup + " -> %COL: %VAL";
+    }
+	}else if( MATRIX_VIEW_STATE == "aoi_aoi"){
 		//check if summary is ticked
 		if( DAT_MODE == 2 && VALUED.indexOf(selected_data) == -1 || lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 		if( DAT_MODE == 1 && ORDERGROUPID.indexOf(selected_grp) == -1 || lenses.length == 0 ){ return; } // metric is meaningless without these conditions
