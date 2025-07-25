@@ -1232,38 +1232,38 @@ let do_aoi_transition_overlay = (p, data, fixs, toi, isSpaceView, callback) => {
 
 				if( fixs[j].firstlens < lenses.length && 
 					before < ORDERLENSEGROUPIDARRAYINDEX.length && 
-					lenses[fixs[j].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[before]].group
+					metric_lenses[fixs[j].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[before]].group
 					){ // must start in before state
 						
 					q1 = j; // record last in before state
 					while( j<fixs.length - 1 && 
-						fixs[j+1].firstlens < lenses.length &&
-						(lenses[fixs[j+1].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[before]].group || 
-						fixs[j+1].firstlens == lenses.length) ) // advance through before||none, record last before	
+						fixs[j+1].firstlens < metric_lenses.length &&
+						(metric_lenses[fixs[j+1].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[before]].group || 
+						fixs[j+1].firstlens == metric_lenses.length) ) // advance through before||none, record last before	
 					{ 
 						j++; 
 						if(fixs[j].firstlens == before){ q1=j; } 
 					} 			
 					if( j<fixs.length - 1 && 
-						fixs[j+1].firstlens < lenses.length && 
-						lenses[fixs[j+1].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[middle]].group
+						fixs[j+1].firstlens < metric_lenses.length && 
+						metric_lenses[fixs[j+1].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[middle]].group
 						){ // next element must be from middle state
 						j++;
 						if(fixs[j+1] == undefined)
 							continue;
 						q2 = j; q3 = j; // record first and last in the middle state
 						while( j<fixs.length - 1 && 
-							fixs[j+1].firstlens < lenses.length && 
-							(lenses[fixs[j+1].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[middle]].group || fixs[j+1].firstlens == lenses.length) ){ 
+							fixs[j+1].firstlens < metric_lenses.length && 
+							(metric_lenses[fixs[j+1].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[middle]].group || fixs[j+1].firstlens == metric_lenses.length) ){ 
 							j++; 
 							if(fixs[j+1] == undefined)
 								continue;
-							if(lenses[fixs[j].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[middle]].group){ q3=j; } 
+							if(metric_lenses[fixs[j].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[middle]].group){ q3=j; } 
 						} // advance through middle||none, record last middle
 						if( j<fixs.length - 1 && 
 							fixs[j+1].t < toi.tmax && 
-							fixs[j+1].firstlens < lenses.length && 
-							lenses[fixs[j+1].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[after]].group
+							fixs[j+1].firstlens < metric_lenses.length && 
+							metric_lenses[fixs[j+1].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[after]].group
 						)
 						{ // then must go to final state;
 

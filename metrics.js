@@ -3,24 +3,24 @@
 function compute_data_firstlens(data_id){
     fixs = DATASETS[data_id].fixs;
 	for(j=0; j<fixs.length; j++){
-		fixs[j].firstlens = lenses.length; // default: not in any lens
+		fixs[j].firstlens = metric_lenses.length; // default: not in any lens
 		fixs[j].firstlensegroup = -1;
 
-		for (v=0; v<lenses.length; v++) {
+		for (v=0; v<metric_lenses.length; v++) {
 
-			let valid_lens = lenses[v].inside(fixs[j].x, fixs[j].y) && lenses[v].included && lenses[v].checked;
-			let inTimeRange = lenses[v].timeRanges.some(range =>
+			let valid_lens = metric_lenses[v].inside(fixs[j].x, fixs[j].y);
+			let inTimeRange = metric_lenses[v].timeRanges.some(range =>
             	fixs[j].t >= range.start && fixs[j].t <= range.end
         	);
         	valid_lens = valid_lens && inTimeRange;
 
-			if (valid_lens && fixs[j].firstlens == lenses.length ) {
-				fixs[j].firstlens = v; // first lens == lenses.length means outside all lenses, used for indirect transitions between lens
+			if (valid_lens && fixs[j].firstlens == metric_lenses.length ) {
+				fixs[j].firstlens = v; // first lens == metric_lenses.length means outside all metric_lenses, used for indirect transitions between lens
 			}
 
-			else if (valid_lens && lenses[v].currentPriority < lenses[fixs[j].firstlens].currentPriority) {
-				fixs[j].firstlens = v; // first lens == lenses.length means outside all lenses, used for indirect transitions between lens
-				fixs[j].firstlensegroup = lenses[v].group;
+			else if (valid_lens && metric_lenses[v].currentPriority < metric_lenses[fixs[j].firstlens].currentPriority) {
+				fixs[j].firstlens = v; // first lens == metric_lenses.length means outside all metric_lenses, used for indirect transitions between lens
+				fixs[j].firstlensegroup = metric_lenses[v].group;
 			}
 		}
     }
@@ -43,11 +43,11 @@ function compute_compare(data1, data2){
 				//care about duplicate fixations over the same AOIs.
 				let inputSequenceA = [], inputSequenceB = [];
 				for(let i = 0; i < data1.firstlens.length; i++) {
-					if(data1.firstlens[i] > -1 && data1.firstlens[i] < lenses.length && (inputSequenceA.length == 0 || inputSequenceA[inputSequenceA.length-1] != data1.firstlens[i]))
+					if(data1.firstlens[i] > -1 && data1.firstlens[i] < metric_lenses.length && (inputSequenceA.length == 0 || inputSequenceA[inputSequenceA.length-1] != data1.firstlens[i]))
 						inputSequenceA.push(data1.firstlens[i]);
 				} 
 				for(let i = 0; i < data2.firstlens.length; i++) {
-					if(data2.firstlens[i] > -1 && data2.firstlens[i] < lenses.length && (inputSequenceB.length == 0 || inputSequenceB[inputSequenceB.length-1] != data2.firstlens[i]))
+					if(data2.firstlens[i] > -1 && data2.firstlens[i] < metric_lenses.length && (inputSequenceB.length == 0 || inputSequenceB[inputSequenceB.length-1] != data2.firstlens[i]))
 						inputSequenceB.push(data2.firstlens[i]);
 				} 
 				result = compute_sequence_score(inputSequenceA, inputSequenceB, SEQUENCE_SCORE_MISMATCH_PENALTY, SEQUENCE_SCORE_GAP_PENALTY, SEQUENCE_SCORE_SKEW_PENALTY);
@@ -91,7 +91,7 @@ function compute_compare(data1, data2){
 			suma = data1.totaltime;
 			sumb = data2.totaltime;
 			if( suma*sumb == 0){ return 0; }
-			for(l=0; l < Math.min(tA.length, tB.length, lenses.length); l ++){ ta = tA[l]; tb = tB[l]; sump += Math.min(ta/suma, tb/sumb); }
+			for(l=0; l < Math.min(tA.length, tB.length, metric_lenses.length); l ++){ ta = tA[l]; tb = tB[l]; sump += Math.min(ta/suma, tb/sumb); }
 			result = sump;
 		}else if(metric == 'grid_density'){
 			tA = data1.grid_density;
@@ -204,7 +204,7 @@ function compute_toi_metrics(data_id, toi_id){
 	toi.total_saccadelength = 0;
 	toi.number_saccades = 0;
 
-	for(i=0; i<lenses.length; i++){
+	for(i=0; i<metric_lenses.length; i++){
 		toi.lenscount.push(0); toi.lenstime.push(0); toi.visit_durations.push([]); toi.visit_totals.push(0);		
 	}
 	for(i=0; i<ORDERLENSEGROUPIDARRAYINDEX.length; i++){
@@ -243,25 +243,25 @@ function compute_toi_metrics(data_id, toi_id){
 			toi.number_saccades++;
 		}		
 		
-		let highest_priority_lens = lenses.length; // default: not in any lens
-		for(var l=0; l<lenses.length; l++){
+		let highest_priority_lens = metric_lenses.length; // default: not in any lens
+		for(var l=0; l<metric_lenses.length; l++){
 			
-			let valid_lens = lenses[l].inside(fixs[j].x, fixs[j].y) && lenses[l].included && lenses[l].checked;
-			let inTimeRange = lenses[l].timeRanges.some(range =>
+			let valid_lens = metric_lenses[l].inside(fixs[j].x, fixs[j].y);
+			let inTimeRange = metric_lenses[l].timeRanges.some(range =>
             	fixs[j].t >= range.start && fixs[j].t <= range.end
         	);
         	valid_lens = valid_lens && inTimeRange;
 
-			if (valid_lens && highest_priority_lens == lenses.length ) {
+			if (valid_lens && highest_priority_lens == metric_lenses.length ) {
 				highest_priority_lens = l
 			}
 
-			else if (valid_lens && lenses[l].currentPriority < lenses[highest_priority_lens].currentPriority) {
+			else if (valid_lens && metric_lenses[l].currentPriority < metric_lenses[highest_priority_lens].currentPriority) {
 				highest_priority_lens = l;
 			}
 		}
 
-		if (highest_priority_lens == lenses.length) {
+		if (highest_priority_lens == metric_lenses.length) {
 			// not in any lens, so we skip the rest of the loop
 			continue;
 		}
@@ -270,15 +270,15 @@ function compute_toi_metrics(data_id, toi_id){
 		toi.lenstime[highest_priority_lens] += fixs[j].dt;
 
 		// recusrively compute parent fixations
-		let current_lens = lenses[highest_priority_lens];
+		let current_lens = metric_lenses[highest_priority_lens];
 		while(current_lens != null) {
 			if (current_lens.parentLens != null) {
 				let parent_lens = current_lens.parentLens;
 
-				// find index of parent lens in lenses with the id of parent_lens
+				// find index of parent lens in metric_lenses with the id of parent_lens
 				let parent_lens_index = -1;
-				for (let i = 0; i < lenses.length; i++) {
-					if (lenses[i].id === parent_lens.id) {
+				for (let i = 0; i < metric_lenses.length; i++) {
+					if (metric_lenses[i].id === parent_lens.id) {
 						parent_lens_index = i;
 						break;
 					}
@@ -295,10 +295,10 @@ function compute_toi_metrics(data_id, toi_id){
 			//KT: handle exceptional case where fixs[j].firstlens is undefined
 			console.log("fixs[j].firstlens is undefined for fixs[j] with t: "+fixs[j].t+", x: "+fixs[j].x+", y: "+fixs[j].y);
 			let v = 0;
-			while(v<lenses.length && !lenses[v].inside(fixs[j].x, fixs[j].y) ){ v++; }
+			while(v<metric_lenses.length && !metric_lenses[v].inside(fixs[j].x, fixs[j].y) ){ v++; }
 			fixs[j].firstlens = v;
-			if(v < lenses.length)
-				fixs[j].firstlensegroup = lenses[v].group;
+			if(v < metric_lenses.length)
+				fixs[j].firstlensegroup = metric_lenses[v].group;
 			else
 				fixs[j].firstlensegroup = -1;
 		}			
@@ -306,7 +306,7 @@ function compute_toi_metrics(data_id, toi_id){
 		toi.firstlensegroup.push(fixs[j].firstlensegroup);
 
 		for(let l=0; l<ORDERLENSEGROUPIDARRAYINDEX.length; l++) {
-			if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] != undefined && lenses[highest_priority_lens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]].group && lenses[highest_priority_lens].inside(fixs[j].x, fixs[j].y)){
+			if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] != undefined && metric_lenses[highest_priority_lens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]].group && metric_lenses[highest_priority_lens].inside(fixs[j].x, fixs[j].y)){
 				toi.lensegroup_lenscount[l] += 1;
 				toi.lensegroup_lenstime[l] += fixs[j].dt;
 			}
@@ -315,14 +315,14 @@ function compute_toi_metrics(data_id, toi_id){
 		
 	toi.j_max = j;
 	// visit durations
-	var visit_lens = lenses.length;
+	var visit_lens = metric_lenses.length;
 	var duration = 0;
 	for(j=toi.j_min; j<toi.j_max-1; j++){
-		var current_lens = lenses.length;
-		for(var l=0; l<lenses.length; l++){ if(lenses[l].inside(fixs[j].x, fixs[j].y)){ current_lens = l; } }
-		if( current_lens == visit_lens && visit_lens < lenses.length ){
+		var current_lens = metric_lenses.length;
+		for(var l=0; l<metric_lenses.length; l++){ if(metric_lenses[l].inside(fixs[j].x, fixs[j].y)){ current_lens = l; } }
+		if( current_lens == visit_lens && visit_lens < metric_lenses.length ){
 			duration += (fixs[j].t - fixs[j-1].t) + fixs[j].dt;
-		}else if( visit_lens < lenses.length ){
+		}else if( visit_lens < metric_lenses.length ){
 			toi.visit_durations[visit_lens].push(duration); toi.visit_totals[visit_lens] += duration;
 			visit_lens = current_lens;
 			duration = fixs[j].dt;
@@ -338,8 +338,8 @@ function compute_toi_metrics(data_id, toi_id){
 	for(j=toi.j_min; j<toi.j_max-1; j++){
 		let current_lens = ORDERLENSEGROUPIDARRAYINDEX.length;
 		for(let l=0; l<ORDERLENSEGROUPIDARRAYINDEX.length; l++){ 
-			for(let l2=0; l2<lenses.length; l2++){
-				if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] != undefined && lenses[l2].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]].group && lenses[l2].inside(fixs[j].x, fixs[j].y)){
+			for(let l2=0; l2<metric_lenses.length; l2++){
+				if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] != undefined && metric_lenses[l2].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]].group && metric_lenses[l2].inside(fixs[j].x, fixs[j].y)){
 					current_lens = l;
 				}
 			}
@@ -357,12 +357,12 @@ function compute_toi_metrics(data_id, toi_id){
 	}
 	//swap comparison order, needed for medians
 	toi.lensmedian = []; 
-	for(let l=0; l<lenses.length; l++){
+	for(let l=0; l<metric_lenses.length; l++){
 		let lenstimes = [];
 		j = 0;
 		while(j < fixs.length && fixs[j].t < tmin){ j++; }
 		for(j = toi.j_min; j<toi.j_max; j++){
-			if(lenses[l].inside(fixs[j].x, fixs[j].y)){
+			if(metric_lenses[l].inside(fixs[j].x, fixs[j].y)){
 				lenstimes.push(fixs[j].dt);
 			}
 		}
@@ -377,8 +377,8 @@ function compute_toi_metrics(data_id, toi_id){
 		j = 0;
 		while(j < fixs.length && fixs[j].t < tmin){ j++; }
 		for(j = toi.j_min; j<toi.j_max; j++){
-			for(let l2=0; l2<lenses.length; l2++){
-				if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] != undefined && lenses[l2].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]].group && lenses[l2].inside(fixs[j].x, fixs[j].y)){
+			for(let l2=0; l2<metric_lenses.length; l2++){
+				if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] != undefined && metric_lenses[l2].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]].group && metric_lenses[l2].inside(fixs[j].x, fixs[j].y)){
 					lenstimes.push(fixs[j].dt);
 				}
 			}
@@ -394,11 +394,11 @@ function compute_toi_metrics(data_id, toi_id){
 
 	// make transitions table
 	toi.direct_transitions = []; toi.indirect_transitions = []; toi.triples = [];
-	for(let a=0; a<=lenses.length; a++){
+	for(let a=0; a<=metric_lenses.length; a++){
 		toi.direct_transitions.push([]); toi.indirect_transitions.push([]); toi.triples.push([]);
-		for(let b=0; b<=lenses.length; b++){
+		for(let b=0; b<=metric_lenses.length; b++){
 			toi.direct_transitions[a].push(0); toi.indirect_transitions[a].push(0); toi.triples[a].push([]);
-			for(let c=0; c<=lenses.length; c++){
+			for(let c=0; c<=metric_lenses.length; c++){
 				toi.triples[a][b].push(0);
 			}
 		}
@@ -428,27 +428,27 @@ function compute_toi_metrics(data_id, toi_id){
 				toi.indirect_transitions[ jlens ][ jlens ] += 1;
 				toi.triples[jlens ][ jlens ][ jlens ] += 1;
 			}
-			if( jlens != lenses.length && (toi.reduced_firstlens_nonempty.length == 0 || jlens != toi.reduced_firstlens_nonempty[ toi.reduced_firstlens_nonempty.length - 1]) ){
+			if( jlens != metric_lenses.length && (toi.reduced_firstlens_nonempty.length == 0 || jlens != toi.reduced_firstlens_nonempty[ toi.reduced_firstlens_nonempty.length - 1]) ){
 				toi.reduced_firstlens_nonempty.push(jlens);
 			}
 			
 			//handle lense group
-			if( jlens < lenses.length && ORDERLENSEGROUPID.indexOf(lenses[jlens].group) != toi.lensegroup_reduced_firstlens[ toi.lensegroup_reduced_firstlens.length-1 ] ){
-				toi.lensegroup_reduced_firstlens.push(ORDERLENSEGROUPID.indexOf(lenses[jlens].group));
+			if( jlens < metric_lenses.length && ORDERLENSEGROUPID.indexOf(metric_lenses[jlens].group) != toi.lensegroup_reduced_firstlens[ toi.lensegroup_reduced_firstlens.length-1 ] ){
+				toi.lensegroup_reduced_firstlens.push(ORDERLENSEGROUPID.indexOf(metric_lenses[jlens].group));
 			}
-			else if (jlens < lenses.length && ORDERLENSEGROUPID.indexOf(lenses[jlens].group) == toi.lensegroup_reduced_firstlens[ toi.lensegroup_reduced_firstlens.length-1 ] ){
+			else if (jlens < metric_lenses.length && ORDERLENSEGROUPID.indexOf(metric_lenses[jlens].group) == toi.lensegroup_reduced_firstlens[ toi.lensegroup_reduced_firstlens.length-1 ] ){
 				//self-transition
-				toi.lensegroup_direct_transitions[ ORDERLENSEGROUPID.indexOf(lenses[jlens].group) ][ ORDERLENSEGROUPID.indexOf(lenses[jlens].group) ] += 1;
-				toi.lensegroup_indirect_transitions[ ORDERLENSEGROUPID.indexOf(lenses[jlens].group) ][ ORDERLENSEGROUPID.indexOf(lenses[jlens].group) ] += 1;
-				toi.lensegroup_triples[ORDERLENSEGROUPID.indexOf(lenses[jlens].group) ][ ORDERLENSEGROUPID.indexOf(lenses[jlens].group) ][ ORDERLENSEGROUPID.indexOf(lenses[jlens].group) ] += 1;
+				toi.lensegroup_direct_transitions[ ORDERLENSEGROUPID.indexOf(metric_lenses[jlens].group) ][ ORDERLENSEGROUPID.indexOf(metric_lenses[jlens].group) ] += 1;
+				toi.lensegroup_indirect_transitions[ ORDERLENSEGROUPID.indexOf(metric_lenses[jlens].group) ][ ORDERLENSEGROUPID.indexOf(metric_lenses[jlens].group) ] += 1;
+				toi.lensegroup_triples[ORDERLENSEGROUPID.indexOf(metric_lenses[jlens].group) ][ ORDERLENSEGROUPID.indexOf(metric_lenses[jlens].group) ][ ORDERLENSEGROUPID.indexOf(metric_lenses[jlens].group) ] += 1;
 			}
 			//KT: below follows the above logic from reduced_firstlens to include AOI transitions to a "non"-AOI, meaning the fixation does not fall into any AOI, verify if this is what we need.
-			else if(jlens == lenses.length && ORDERLENSEGROUPID.length != toi.lensegroup_reduced_firstlens[ toi.lensegroup_reduced_firstlens.length-1 ])
+			else if(jlens == metric_lenses.length && ORDERLENSEGROUPID.length != toi.lensegroup_reduced_firstlens[ toi.lensegroup_reduced_firstlens.length-1 ])
 				toi.lensegroup_reduced_firstlens.push(ORDERLENSEGROUPID.length);
 
-			if( jlens < lenses.length && lenses.length > 0 && (toi.lensegroup_reduced_firstlens_nonempty.length == 0 || 
-				ORDERLENSEGROUPID.indexOf(lenses[jlens].group) != toi.lensegroup_reduced_firstlens_nonempty[ toi.lensegroup_reduced_firstlens_nonempty.length - 1]) ){
-				toi.lensegroup_reduced_firstlens_nonempty.push(ORDERLENSEGROUPID.indexOf(lenses[jlens].group));
+			if( jlens < metric_lenses.length && metric_lenses.length > 0 && (toi.lensegroup_reduced_firstlens_nonempty.length == 0 || 
+				ORDERLENSEGROUPID.indexOf(metric_lenses[jlens].group) != toi.lensegroup_reduced_firstlens_nonempty[ toi.lensegroup_reduced_firstlens_nonempty.length - 1]) ){
+				toi.lensegroup_reduced_firstlens_nonempty.push(ORDERLENSEGROUPID.indexOf(metric_lenses[jlens].group));
 			}
 		}
 	}
@@ -700,7 +700,7 @@ function compute_all_metrics(){
 let aggregate_aoi_data_across_twi = (aoi_data, data) => {
 	let dat = null; 
 	if(TWI_MODE == 2 && selected_twi != -1 && data.tois[data.toi_id] != undefined && data.tois[data.toi_id].included) {
-		for(var l=0; l<lenses.length; l++){
+		for(var l=0; l<metric_lenses.length; l++){
 			let twi_id = data.tois[data.toi_id].twi_id;
 			if(twi_id < base_twis.length && base_twis[twi_id].included && base_twis[twi_id].checked) 
 				aoi_data.visit_durations[l] = aoi_data.visit_durations[l].concat( data.tois[ data.toi_id ].visit_durations[l] );
@@ -717,7 +717,7 @@ let aggregate_aoi_data_across_twi = (aoi_data, data) => {
 		if(twi_id < base_twis.length && base_twis[twi_id].included && base_twis[twi_id].checked) 			
 			aggregate_aoi_transition_metrics(aoi_data, data.tois[ data.toi_id ]);
 	}else if(TWI_MODE == 1 && selected_twigroup != -1){
-		for(var l=0; l<lenses.length; l++){
+		for(var l=0; l<metric_lenses.length; l++){
 			//sum up metrics aoi_data from individual toi
 			for(let c=0; c<data.tois.length; c++) {
 				let twi_id = data.tois[c].twi_id;
@@ -748,7 +748,7 @@ let aggregate_aoi_data_across_twi = (aoi_data, data) => {
 		}
 		
 	}else if(TWI_MODE == 0){
-		for(var l=0; l<lenses.length; l++){
+		for(var l=0; l<metric_lenses.length; l++){
 			//sum up metrics aoi_data from individual toi
 			for(let c=0; c<data.tois.length; c++) {
 				let twi_id = data.tois[c].twi_id;
@@ -788,15 +788,15 @@ let aggregate_aoi_transition_metrics = (aoi_data, toi) => {
 
 	//concatenate lenstimes list
 	// aoi measures
-	for(l1=0;l1<=lenses.length;l1++){
+	for(l1=0;l1<=metric_lenses.length;l1++){
 		aoi_data.lenscount[l1] += toi.lenscount[l1]; aoi_data.lenstime[l1] += toi.lenstime[l1];
-		for(l2=0;l2<=lenses.length;l2++){
+		for(l2=0;l2<=metric_lenses.length;l2++){
 			if(toi.direct_transitions == undefined) continue;
 
 			if(toi.direct_transitions[l1][l2] != undefined)
 				aoi_data.direct_transitions[l1][l2] += toi.direct_transitions[l1][l2];
 			aoi_data.indirect_transitions[l1][l2] += toi.indirect_transitions[l1][l2];
-			for(l3=0;l3<=lenses.length;l3++){
+			for(l3=0;l3<=metric_lenses.length;l3++){
 				if(toi.triples[l1][l2] == undefined) 
 					console.log("toi: "+base_twis[toi.twi_id].name+", toi.triples: "+toi.triples+", toi.triples["+l1+"]["+l2+"], aoi_data.triples[l1][l2]: "+aoi_data.triples[l1][l2]);
 				else
@@ -878,9 +878,9 @@ let aggregate_similarity_metrics = (twi_group_data, toidata, data_id, toi_id) =>
 	twi_group_data.totaltime += toidata.totaltime;
 	twi_group_data.firstlens = twi_group_data.firstlens.concat(toidata.firstlens);
 	twi_group_data.firstlensegroup = twi_group_data.firstlensegroup.concat(toidata.firstlensegroup);
-	for(l1=0;l1<=lenses.length;l1++){
+	for(l1=0;l1<=metric_lenses.length;l1++){
 		twi_group_data.lenstime[l1] += toidata.lenstime[l1];
-		for(l2=0;l2<=lenses.length;l2++){
+		for(l2=0;l2<=metric_lenses.length;l2++){
 			if(toidata.direct_transitions == undefined) continue;
 
 			twi_group_data.direct_transitions[l1][l2] += toidata.direct_transitions[l1][l2];						
@@ -931,12 +931,12 @@ let aoi_metrics_factory = () => {
 	data.direct_transitions = []; data.indirect_transitions = []; data.triples = [];
 	data.lensegroup_direct_transitions = []; data.lensegroup_indirect_transitions = []; data.lensegroup_triples = [];
 
-	for(l1=0;l1<=lenses.length;l1++){
+	for(l1=0;l1<=metric_lenses.length;l1++){
 		data.lenscount.push(0); data.lenstime.push(0); data.lensmedian.push(0); 
 		data.direct_transitions.push([]); data.indirect_transitions.push([]); data.triples.push([]);
-		for(l2=0;l2<=lenses.length;l2++){
+		for(l2=0;l2<=metric_lenses.length;l2++){
 			data.direct_transitions[l1].push(0); data.indirect_transitions[l1].push(0); data.triples[l1].push([]);
-			for(l3=0;l3<=lenses.length;l3++){
+			for(l3=0;l3<=metric_lenses.length;l3++){
 				data.triples[l1][l2].push(0);
 			}
 		}
@@ -953,7 +953,7 @@ let aoi_metrics_factory = () => {
 	}
 	// visit metrics
 	data.visit_durations = []; data.visit_totals = [];
-	for(var l=0; l<lenses.length; l++){ data.visit_durations.push([]); data.visit_totals.push(0); }
+	for(var l=0; l<metric_lenses.length; l++){ data.visit_durations.push([]); data.visit_totals.push(0); }
 	
 	data.lensegroup_visit_durations = []; data.lensegroup_visit_totals = [];
 	for(var l=0; l<LENSEGROUPS.length; l++){ data.lensegroup_visit_durations.push([]); data.lensegroup_visit_totals.push(0); }
@@ -992,10 +992,10 @@ let similarity_metrics_factory = (singletondata) => {
 
 	// aoi transitions (direct, indirect, triples)
 	singletondata.direct_transitions = []; 
-	for(l1=0;l1<=lenses.length;l1++){
+	for(l1=0;l1<=metric_lenses.length;l1++){
 		singletondata.lenstime.push(0);
 		singletondata.direct_transitions.push([]); 
-		for(l2=0;l2<=lenses.length;l2++){
+		for(l2=0;l2<=metric_lenses.length;l2++){
 			singletondata.direct_transitions[l1].push(0); 			
 		}
 	}
@@ -1040,10 +1040,10 @@ let reset_metrics_data = (data) => {
 
 	// aoi transitions (direct, indirect, triples)
 	data.direct_transitions.splice(0, data.direct_transitions.length); 
-	for(l1=0;l1<=lenses.length;l1++){
+	for(l1=0;l1<=metric_lenses.length;l1++){
 		data.lenstime.push(0);
 		data.direct_transitions.push([]); 
-		for(l2=0;l2<=lenses.length;l2++){
+		for(l2=0;l2<=metric_lenses.length;l2++){
 			data.direct_transitions[l1].push(0); 			
 		}
 	}
@@ -1134,8 +1134,8 @@ function compute_lensegroupings(){
 	//compute the set of groups
 	for(v=1; v<LENS_COLOURS.length+1; v++){
 		let is_used = false;
-		for(v2=0; v2<lenses.length; v2++){
-			if( lenses[v2].group == v ){is_used=true;}
+		for(v2=0; v2<metric_lenses.length; v2++){
+			if( metric_lenses[v2].group == v ){is_used=true;}
 		}
 
 		if(is_used){ // the value v represenets at least one active dataset
@@ -1189,12 +1189,12 @@ function compute_groupings(){
 			data.direct_transitions = []; data.indirect_transitions = []; data.triples = [];
 			data.lensegroup_direct_transitions = []; data.lensegroup_indirect_transitions = []; data.lensegroup_triples = [];
 
-			for(l1=0;l1<=lenses.length;l1++){
+			for(l1=0;l1<=metric_lenses.length;l1++){
 				data.lenscount.push(0); data.lenstime.push(0); data.lensmedian.push(0);
 				data.direct_transitions.push([]); data.indirect_transitions.push([]); data.triples.push([]);
-				for(l2=0;l2<=lenses.length;l2++){
+				for(l2=0;l2<=metric_lenses.length;l2++){
 					data.direct_transitions[l1].push(0); data.indirect_transitions[l1].push(0); data.triples[l1].push([]);
-					for(l3=0;l3<=lenses.length;l3++){
+					for(l3=0;l3<=metric_lenses.length;l3++){
 						data.triples[l1][l2].push(0);
 					}
 				}
@@ -1212,7 +1212,7 @@ function compute_groupings(){
 
 			// visit metrics
 			data.visit_durations = []; data.visit_totals = [];
-			for(var l=0; l<lenses.length; l++){ data.visit_durations.push([]); data.visit_totals.push(0); }
+			for(var l=0; l<metric_lenses.length; l++){ data.visit_durations.push([]); data.visit_totals.push(0); }
 
 			data.lensegroup_visit_durations = []; data.lensegroup_visit_totals = [];
 			for(var l=0; l<LENSEGROUPS.length; l++){ data.lensegroup_visit_durations.push([]); data.lensegroup_visit_totals.push(0); }
@@ -1237,7 +1237,7 @@ function compute_groupings(){
 			
 			for(v2=0; v2<VALUED.length; v2++){
 				if(DATASETS[VALUED[v2]] != undefined && DATASETS[VALUED[v2]].group == v && DATASETS[VALUED[v2]].included){
-					if(lenses.length > 0)
+					if(metric_lenses.length > 0)
 						aggregate_aoi_data_across_twi(data, DATASETS[VALUED[v2]]);
 				}
 			}

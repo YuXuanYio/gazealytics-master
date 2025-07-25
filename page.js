@@ -158,7 +158,7 @@ function load_controls(){
 	//data binding of AOI, TWI, Sample with DOM
 
 	// rebuild the lens list
-	order_lenses = []; lenses = []; LENSIDLIST = [];
+	order_lenses = []; lenses = []; LENSIDLIST = []; metric_lenses = [];
 	for(var i=0;i<document.getElementById('lenslist').children.length;i++){
 		v = parseInt( document.getElementById('lenslist').children[i].id.substring(5) );
 		LENSIDLIST[i] = v;
@@ -178,6 +178,7 @@ function load_controls(){
 		if(base_lenses[v].checked != document.getElementById('lens_'+v+'_c').checked) {
 			base_lenses[v].checked = document.getElementById('lens_'+v+'_c').checked;
 			update_metrics = true;
+			matrix_changed = true;
 		}
 		
 		base_lenses[v].locked = document.getElementById('lens_'+v+'_l').checked;
@@ -193,10 +194,14 @@ function load_controls(){
 			update_lens_colors();			
 		}
 
-		if(base_lenses[v].checked && base_lenses[v].included){
-			SHOW_LENS = true;
-			order_lenses.push( v );
-			lenses.push(base_lenses[ v ]);
+		if(base_lenses[v].included){
+			// Always include all lenses in metric_lenses for computation regardless of visibility
+			metric_lenses.push(base_lenses[v]);
+			if (base_lenses[v].checked){
+				SHOW_LENS = true;
+				order_lenses.push( v );
+				lenses.push(base_lenses[ v ]);
+			}
 		}
 	}
 	for(var i=0; i<base_lenses.length; i++){ base_lenses[i].included = ( document.getElementById('lens_'+i)!=undefined ); }
