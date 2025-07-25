@@ -502,7 +502,32 @@ let matrixsketch = (p) => {
 				}else if( mat_col_val == 'dat' ){
 					xdat = DAT_DATA_BY_TWI_MODE[xval];
 				}else if( mat_col_val == 'grp' ){
-					xdat = GROUPS[ xval ];
+					if(xval < ORDERGROUPIDARRAYINDEX.length) {
+						xdat = GROUPS[ORDERGROUPIDARRAYINDEX[xval]];
+					}
+				}else if( mat_col_val == 'lensegroup' ){
+					// For lensegroup views, xval is the index in visible_groups array
+					// We need to map this to the actual group for highlighting
+					if( MATRIX_VIEW_STATE == "dat_lensegroup" || MATRIX_VIEW_STATE == "lensegroup_dat" ||
+						MATRIX_VIEW_STATE == "toi_lensegroup" || MATRIX_VIEW_STATE == "lensegroup_toi" ||
+						MATRIX_VIEW_STATE == "twigroup_lensegroup" || MATRIX_VIEW_STATE == "lensegroup_twigroup" ||
+						MATRIX_VIEW_STATE == "lensegroup_lensegroup" ) {
+						// Get the visible groups array from the current view state
+						let visible_groups = [];
+						for (let i = 0; i < lenses.length; i++) {
+							let group_id = lenses[i].group;
+							if (visible_groups.indexOf(group_id) === -1) {
+								visible_groups.push(group_id);
+							}
+						}
+						if (xval < visible_groups.length) {
+							let group_id = visible_groups[xval];
+							let group_idx = ORDERLENSEGROUPID.indexOf(group_id);
+							if (group_idx !== -1) {
+								xdat = GROUPS[ORDERLENSEGROUPIDARRAYINDEX[group_idx]];
+							}
+						}
+					}
 				}
 
 				if( mat_col_val == 'twigroup' ){
@@ -512,7 +537,32 @@ let matrixsketch = (p) => {
 				}else if( mat_row_val == 'dat' ){
 					ydat = DAT_DATA_BY_TWI_MODE[yval];
 				}else if( mat_row_val == 'grp' ){
-					ydat = GROUPS[ yval ];
+					if(yval < ORDERGROUPIDARRAYINDEX.length) {
+						ydat = GROUPS[ORDERGROUPIDARRAYINDEX[yval]];
+					}
+				}else if( mat_row_val == 'lensegroup' ){
+					// For lensegroup views, yval is the index in visible_groups array
+					// We need to map this to the actual group for highlighting
+					if( MATRIX_VIEW_STATE == "lensegroup_dat" || MATRIX_VIEW_STATE == "dat_lensegroup" ||
+						MATRIX_VIEW_STATE == "lensegroup_toi" || MATRIX_VIEW_STATE == "toi_lensegroup" ||
+						MATRIX_VIEW_STATE == "lensegroup_twigroup" || MATRIX_VIEW_STATE == "twigroup_lensegroup" ||
+						MATRIX_VIEW_STATE == "lensegroup_lensegroup" ) {
+						// Get the visible groups array from the current view state
+						let visible_groups = [];
+						for (let i = 0; i < lenses.length; i++) {
+							let group_id = lenses[i].group;
+							if (visible_groups.indexOf(group_id) === -1) {
+								visible_groups.push(group_id);
+							}
+						}
+						if (yval < visible_groups.length) {
+							let group_id = visible_groups[yval];
+							let group_idx = ORDERLENSEGROUPID.indexOf(group_id);
+							if (group_idx !== -1) {
+								ydat = GROUPS[ORDERLENSEGROUPIDARRAYINDEX[group_idx]];
+							}
+						}
+					}
 				}
 				if(mat_col_val == 'toi' && mat_row_val == 'toi' && (xdat == null || ydat == null))
 					p.text("No TWI data", p.width/2, p.height-5);

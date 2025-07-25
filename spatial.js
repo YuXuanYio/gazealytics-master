@@ -1193,13 +1193,22 @@ let do_aoi_transition_overlay = (p, data, fixs, toi, isSpaceView, callback) => {
 		if(fixs[j+1] == undefined)
 			continue;
 		if( MATRIX_VIEW_STATE == 'lensegroup_lensegroup'){ // first case, lensegroup_lensegroup data
+			// Build visible groups array to map xval/yval correctly
+			let visible_groups = [];
+			for (let i = 0; i < lenses.length; i++) {
+				let group_id = lenses[i].group;
+				if (visible_groups.indexOf(group_id) === -1) {
+					visible_groups.push(group_id);
+				}
+			}
+			
 			if( MATRIX_DATA_STATE.indexOf('trans1') > -1) {
 				if( fixs[j].firstlens < lenses.length && 
 					fixs[j+1].firstlens < lenses.length && 
-					xval < ORDERLENSEGROUPID.length && 
-					yval < ORDERLENSEGROUPID.length &&
-					lenses[fixs[j].firstlens].group == ORDERLENSEGROUPID[yval] && 
-					lenses[fixs[j+1].firstlens].group == ORDERLENSEGROUPID[xval] ){
+					xval < visible_groups.length && 
+					yval < visible_groups.length &&
+					lenses[fixs[j].firstlens].group == visible_groups[yval] && 
+					lenses[fixs[j+1].firstlens].group == visible_groups[xval] ){
 					if(isSpaceView)
 						p.line( fixs[j].x * pos_ratio + ground_x, fixs[j].y * pos_ratio + ground_y, fixs[j+1].x * pos_ratio + ground_x, fixs[j+1].y * pos_ratio + ground_y );
 					else
@@ -1208,16 +1217,16 @@ let do_aoi_transition_overlay = (p, data, fixs, toi, isSpaceView, callback) => {
 			}else if( MATRIX_DATA_STATE.indexOf('trans2') > -1) {
 				let q = j;
 				if( fixs[j].firstlens < lenses.length && 
-					yval < ORDERLENSEGROUPID.length && 
-					lenses[fixs[j].firstlens].group == ORDERLENSEGROUPID[yval]){									
+					yval < visible_groups.length && 
+					lenses[fixs[j].firstlens].group == visible_groups[yval]){									
 					while( j<fixs.length - 1 && fixs[j+1].firstlens == lenses.length ){ j++; }	
 					if(fixs[j+1] == undefined)
 						continue;
 					if( 						
 						fixs[j+1].firstlens < lenses.length && 
-						xval < ORDERLENSEGROUPID.length && 
+						xval < visible_groups.length && 
 						j<fixs.length - 1 && 
-						lenses[fixs[j+1].firstlens].group == ORDERLENSEGROUPID[xval]){
+						lenses[fixs[j+1].firstlens].group == visible_groups[xval]){
 						if(isSpaceView)
 							p.line( fixs[q].x * pos_ratio + ground_x, fixs[q].y * pos_ratio + ground_y, fixs[j+1].x * pos_ratio + ground_x, fixs[j+1].y * pos_ratio + ground_y );
 						else
@@ -1225,45 +1234,55 @@ let do_aoi_transition_overlay = (p, data, fixs, toi, isSpaceView, callback) => {
 					}
 				}
 			}else if( MATRIX_DATA_STATE.indexOf('glances') > -1 || MATRIX_DATA_STATE.indexOf('through') > -1){ // finding patterns from the filtered triples
-				if( ORDERLENSEGROUPID.indexOf(selected_lensegroup) == -1 ){ return; }
+				if( visible_groups.indexOf(selected_lensegroup) == -1 ){ return; }
 				before = 0; middle = 0; after = 0;
-				if( MATRIX_DATA_STATE == 'glances' ){ before = yval; middle = xval; after = yval; }
-				else if( MATRIX_DATA_STATE == 'through' ){ before = yval; middle = ORDERLENSEGROUPID.indexOf(selected_lensegroup); after = xval; }
+				if( MATRIX_DATA_STATE == 'glances' ){ 
+					before = visible_groups.indexOf(visible_groups[yval]); 
+					middle = visible_groups.indexOf(visible_groups[xval]); 
+					after = visible_groups.indexOf(visible_groups[yval]); 
+				}
+				else if( MATRIX_DATA_STATE == 'through' ){ 
+					before = visible_groups.indexOf(visible_groups[yval]); 
+					middle = visible_groups.indexOf(selected_lensegroup); 
+					after = visible_groups.indexOf(visible_groups[xval]); 
+				}
 
 				if( fixs[j].firstlens < lenses.length && 
-					before < ORDERLENSEGROUPIDARRAYINDEX.length && 
-					metric_lenses[fixs[j].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[before]].group
+					before >= 0 && before < visible_groups.length &&
+					lenses[fixs[j].firstlens].group == visible_groups[before]
 					){ // must start in before state
 						
 					q1 = j; // record last in before state
 					while( j<fixs.length - 1 && 
-						fixs[j+1].firstlens < metric_lenses.length &&
-						(metric_lenses[fixs[j+1].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[before]].group || 
-						fixs[j+1].firstlens == metric_lenses.length) ) // advance through before||none, record last before	
+						fixs[j+1].firstlens < lenses.length &&
+						(lenses[fixs[j+1].firstlens].group == visible_groups[before] || 
+						fixs[j+1].firstlens == lenses.length) ) // advance through before||none, record last before	
 					{ 
 						j++; 
-						if(fixs[j].firstlens == before){ q1=j; } 
+						if(fixs[j].firstlens < lenses.length && lenses[fixs[j].firstlens].group == visible_groups[before]){ q1=j; } 
 					} 			
 					if( j<fixs.length - 1 && 
-						fixs[j+1].firstlens < metric_lenses.length && 
-						metric_lenses[fixs[j+1].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[middle]].group
+						fixs[j+1].firstlens < lenses.length && 
+						middle >= 0 && middle < visible_groups.length &&
+						lenses[fixs[j+1].firstlens].group == visible_groups[middle]
 						){ // next element must be from middle state
 						j++;
 						if(fixs[j+1] == undefined)
 							continue;
 						q2 = j; q3 = j; // record first and last in the middle state
 						while( j<fixs.length - 1 && 
-							fixs[j+1].firstlens < metric_lenses.length && 
-							(metric_lenses[fixs[j+1].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[middle]].group || fixs[j+1].firstlens == metric_lenses.length) ){ 
+							fixs[j+1].firstlens < lenses.length && 
+							(lenses[fixs[j+1].firstlens].group == visible_groups[middle] || fixs[j+1].firstlens == lenses.length) ){ 
 							j++; 
 							if(fixs[j+1] == undefined)
 								continue;
-							if(metric_lenses[fixs[j].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[middle]].group){ q3=j; } 
+							if(fixs[j].firstlens < lenses.length && lenses[fixs[j].firstlens].group == visible_groups[middle]){ q3=j; } 
 						} // advance through middle||none, record last middle
 						if( j<fixs.length - 1 && 
 							fixs[j+1].t < toi.tmax && 
-							fixs[j+1].firstlens < metric_lenses.length && 
-							metric_lenses[fixs[j+1].firstlens].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[after]].group
+							fixs[j+1].firstlens < lenses.length && 
+							after >= 0 && after < visible_groups.length &&
+							lenses[fixs[j+1].firstlens].group == visible_groups[after]
 						)
 						{ // then must go to final state;
 
@@ -1443,8 +1462,10 @@ let do_aoi_fixation_overlay = (p, data, fixs, toi, lens, isSpaceView, callback) 
 			for(j = 0; j<fixs.length - 1; j++){
 				if(MATRIX_VIEW_STATE.indexOf('lensegroup')!= -1) {
 					for(let j2 = 0; j2 < lenses.length; j2++) {
-						if( fixs[j].t > tmin && fixs[j].t < tmax && lens > -1 && lens < ORDERLENSEGROUPID.length &&
-							lenses[j2].group == ORDERLENSEGROUPID[lens] && lenses[j2].inside(fixs[j].x, fixs[j].y) ){
+						// lens is now the index in ORDERLENSEGROUPID, so get the actual group ID
+						let group_id = (lens >= 0 && lens < ORDERLENSEGROUPID.length) ? ORDERLENSEGROUPID[lens] : -1;
+						if( fixs[j].t > tmin && fixs[j].t < tmax && group_id != -1 &&
+							lenses[j2].group == group_id && lenses[j2].inside(fixs[j].x, fixs[j].y) ){
 							s = Math.exp(FIX_SIZE) * Math.sqrt(fixs[j].dt);
 							// p.fill( white(90) );
 							p.ellipse(fixs[j].x * pos_ratio + ground_x, fixs[j].y * pos_ratio + ground_y, s, s);
@@ -1469,8 +1490,10 @@ let do_aoi_fixation_overlay = (p, data, fixs, toi, lens, isSpaceView, callback) 
 				}
 				if(MATRIX_VIEW_STATE.indexOf('lensegroup')!= -1) {					
 					for(let j2 = 0; j2 < lenses.length; j2++) {
-						if( ts > 0 && ts+td < spatial_width-300 && lens > -1 && lens < ORDERLENSEGROUPID.length &&
-							lenses[j2].group == ORDERLENSEGROUPID[lens] && lenses[j2].inside(fixs[j].x, fixs[j].y) ){
+						// lens is now the index in ORDERLENSEGROUPID, so get the actual group ID
+						let group_id = (lens >= 0 && lens < ORDERLENSEGROUPID.length) ? ORDERLENSEGROUPID[lens] : -1;
+						if( ts > 0 && ts+td < spatial_width-300 && group_id != -1 &&
+							lenses[j2].group == group_id && lenses[j2].inside(fixs[j].x, fixs[j].y) ){
 							if(td > 1){
 								p.noStroke(); p.rect( 200 + ts, timeline_highlight_position, td, 10 );
 							}else{
@@ -1627,16 +1650,32 @@ let do_matrix_overlay = (p) => {
 		}else if( MATRIX_VIEW_STATE == 'lensegroup_dat' || MATRIX_VIEW_STATE == 'dat_lensegroup'){ 
 			let data = null;
 			let aoi = -1;
+			
+			// Build visible groups array first (used by both cases)
+			let visible_groups = [];
+			for (let i = 0; i < lenses.length; i++) {
+				let group_id = lenses[i].group;
+				if (visible_groups.indexOf(group_id) === -1) {
+					visible_groups.push(group_id);
+				}
+			}
+			
 			if( mat_col_val == 'dat' ){
+				// lensegroup_dat: NOT flipped
+				// xval = dataset index, yval = lensegroup index  
 				if(xval == -1 || xval >= VALUED.length) return;
-				if(yval == -1 || yval >= ORDERLENSEGROUPID.length) return;
+				if(yval == -1 || yval >= visible_groups.length) return;
 				data = DATASETS[ VALUED[xval] ];
-				aoi = yval;
+				let group_id = visible_groups[yval];
+				aoi = ORDERLENSEGROUPID.indexOf(group_id);
 			}else if( mat_row_val == 'dat' ){
-				if(xval == -1 || xval >= ORDERLENSEGROUPID.length) return;
+				// dat_lensegroup: IS flipped (flipped = true)
+				// Due to flipping: xval = lensegroup, yval = dataset
+				if(xval == -1 || xval >= visible_groups.length) return;
 				if(yval == -1 || yval >= VALUED.length) return;
 				data = DATASETS[ VALUED[yval] ];
-				aoi = xval;
+				let group_id = visible_groups[xval];
+				aoi = ORDERLENSEGROUPID.indexOf(group_id);
 			}
 			aggregate_fixation_data_across_twi(p, data, aoi, true, null);
 		}else if( MATRIX_VIEW_STATE == 'aoi_dat' || MATRIX_VIEW_STATE == 'dat_aoi'){ 
@@ -1734,17 +1773,37 @@ let do_matrix_overlay = (p) => {
 			let data = null;
 			let grp = -1;
 			let aoi = -1;
+			
+			// Build visible groups array to map lensegroup coordinates correctly
+			let visible_groups = [];
+			for (let i = 0; i < lenses.length; i++) {
+				let group_id = lenses[i].group;
+				if (visible_groups.indexOf(group_id) === -1) {
+					visible_groups.push(group_id);
+				}
+			}
+			
 			if( mat_col_val == 'grp' ){
+				// lensegroup_grp: NOT flipped
+				// xval = sample group index, yval = lensegroup index (into visible_groups)
 				grp = xval;
-				aoi = yval;
+				if(yval < visible_groups.length) {
+					let group_id = visible_groups[yval];
+					aoi = ORDERLENSEGROUPID.indexOf(group_id);
+				}
 			}else if( mat_row_val == 'grp' ){
+				// grp_lensegroup: IS flipped  
+				// xval = lensegroup index (into visible_groups), yval = sample group index
 				grp = yval;
-				aoi = xval;
+				if(xval < visible_groups.length) {
+					let group_id = visible_groups[xval];
+					aoi = ORDERLENSEGROUPID.indexOf(group_id);
+				}
 			}			
-			if(grp != -1 && aoi != -1 && grp < ORDERGROUPIDARRAYINDEX.length && aoi < ORDERLENSEGROUPID.length){
+			if(grp != -1 && aoi != -1 && grp < ORDERGROUPIDARRAYINDEX.length){
 				for(let i = 0; i < VALUED.length; i++) {
 					if(DATASETS[ VALUED[i] ].group == GROUPS[ORDERGROUPIDARRAYINDEX[grp]].group) {
-						// draw the fixations in intersection of toi and aoi, for the dataset:						
+						// draw the fixations in intersection of sample group and lensegroup, for the dataset:						
 						data = DATASETS[ VALUED[i] ];
 						aggregate_fixation_data_across_twi(p, data, aoi, true, null);
 					}
@@ -1772,6 +1831,108 @@ let do_matrix_overlay = (p) => {
 						aggregate_fixation_data_across_twi(p, data, aoi, true, null);
 					}
 				}				
+			}
+		}
+		else if( MATRIX_VIEW_STATE == 'grp_dat' || MATRIX_VIEW_STATE == 'dat_grp'){ // grp-dat or dat-grp state
+			let data = null;
+			let grp = -1;
+			if( mat_col_val == 'grp' ){
+				grp = xval;
+				if(yval < VALUED.length) {
+					data = DATASETS[ VALUED[yval] ];
+				}
+			}else if( mat_row_val == 'grp' ){
+				grp = yval;
+				if(xval < VALUED.length) {
+					data = DATASETS[ VALUED[xval] ];
+				}
+			}
+			
+			if(grp != -1 && data != null && grp < ORDERGROUPIDARRAYINDEX.length &&
+			   DATASETS[ VALUED.indexOf(data.id) ] != undefined && 
+			   DATASETS[ VALUED.indexOf(data.id) ].group == GROUPS[ORDERGROUPIDARRAYINDEX[grp]].group) {
+				// Only highlight if the dataset belongs to the selected group
+				p.stroke(cy(100, data.group)); p.strokeWeight(2);
+				aggregate_fixation_data_across_dat_twi(p, true, data);
+			}
+		}
+		else if( MATRIX_VIEW_STATE == 'grp_toi' || MATRIX_VIEW_STATE == 'toi_grp'){ // grp-toi or toi-grp state
+			let twi_id = -1;
+			let grp = -1;
+			if( mat_col_val == 'grp' ){
+				grp = xval;
+				if(yval < order_twis.length) {
+					twi_id = order_twis[yval];
+				}
+			}else if( mat_row_val == 'grp' ){
+				grp = yval;
+				if(xval < order_twis.length) {
+					twi_id = order_twis[xval];
+				}
+			}
+			
+			if(grp != -1 && twi_id != -1 && grp < ORDERGROUPIDARRAYINDEX.length) {
+				for(let i = 0; i < VALUED.length; i++) {
+					if(DATASETS[ VALUED[i] ].group == GROUPS[ORDERGROUPIDARRAYINDEX[grp]].group) {
+						let data = DATASETS[ VALUED[i] ];
+						for(let c=0; c<data.tois.length; c++) {
+							let data_twi_id = data.tois[c].twi_id;
+							if(data.tois[c].included && data_twi_id == twi_id && 
+							   data_twi_id < base_twis.length && base_twis[data_twi_id].included && base_twis[data_twi_id].checked) {
+								aggregate_fixation_data_across_dat(p, twi_id, -1, true, data);
+							}
+						}
+					}
+				}				
+			}
+		}
+		else if( MATRIX_VIEW_STATE == 'grp_twigroup' || MATRIX_VIEW_STATE == 'twigroup_grp'){ // grp-twigroup or twigroup-grp state
+			let twigroup_id = -1;
+			let grp = -1;
+			if( mat_col_val == 'grp' ){
+				grp = xval;
+				if(yval < ORDERTWIGROUPID.length) {
+					twigroup_id = ORDERTWIGROUPID[yval];
+				}
+			}else if( mat_row_val == 'grp' ){
+				grp = yval;
+				if(xval < ORDERTWIGROUPID.length) {
+					twigroup_id = ORDERTWIGROUPID[xval];
+				}
+			}
+			
+			if(grp != -1 && twigroup_id != -1 && grp < ORDERGROUPIDARRAYINDEX.length) {
+				for(let i = 0; i < VALUED.length; i++) {
+					if(DATASETS[ VALUED[i] ].group == GROUPS[ORDERGROUPIDARRAYINDEX[grp]].group) {
+						let data = DATASETS[ VALUED[i] ];
+						for(let c=0; c<order_twis.length; c++) {
+							let twi_id = order_twis[c];
+							if(base_twis[twi_id].group == twigroup_id && 
+							   base_twis[twi_id].included && base_twis[twi_id].checked) {
+								aggregate_fixation_data_across_dat(p, twi_id, -1, true, data);
+							}
+						}
+					}
+				}				
+			}
+		}
+		else if( MATRIX_VIEW_STATE == 'grp_grp'){ // grp-grp state
+			let grp1 = -1, grp2 = -1;
+			if( mat_col_val == 'grp' && mat_row_val == 'grp' ){
+				grp1 = yval; // row group
+				grp2 = xval; // col group
+			}
+			
+			if(grp1 != -1 && grp2 != -1 && grp1 < ORDERGROUPIDARRAYINDEX.length && grp2 < ORDERGROUPIDARRAYINDEX.length) {
+				// For grp_grp, we can highlight datasets from both groups or show some comparison
+				// Let's highlight the intersection (datasets that belong to the column group when hovering)
+				for(let i = 0; i < VALUED.length; i++) {
+					if(DATASETS[ VALUED[i] ].group == GROUPS[ORDERGROUPIDARRAYINDEX[grp2]].group) {
+						let data = DATASETS[ VALUED[i] ];
+						p.stroke(cy(100, data.group)); p.strokeWeight(2);
+						aggregate_fixation_data_across_dat_twi(p, true, data);
+					}
+				}
 			}
 		}
 		if(MATRIX_DATA_STATE.indexOf('aoi') == 0){ // some aoi metric is being used, so lets draw the grid overview
