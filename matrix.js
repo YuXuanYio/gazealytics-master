@@ -505,29 +505,6 @@ let matrixsketch = (p) => {
 					if(xval < ORDERGROUPIDARRAYINDEX.length) {
 						xdat = GROUPS[ORDERGROUPIDARRAYINDEX[xval]];
 					}
-				}else if( mat_col_val == 'lensegroup' ){
-					// For lensegroup views, xval is the index in visible_groups array
-					// We need to map this to the actual group for highlighting
-					if( MATRIX_VIEW_STATE == "dat_lensegroup" || MATRIX_VIEW_STATE == "lensegroup_dat" ||
-						MATRIX_VIEW_STATE == "toi_lensegroup" || MATRIX_VIEW_STATE == "lensegroup_toi" ||
-						MATRIX_VIEW_STATE == "twigroup_lensegroup" || MATRIX_VIEW_STATE == "lensegroup_twigroup" ||
-						MATRIX_VIEW_STATE == "lensegroup_lensegroup" ) {
-						// Get the visible groups array from the current view state
-						let visible_groups = [];
-						for (let i = 0; i < lenses.length; i++) {
-							let group_id = lenses[i].group;
-							if (visible_groups.indexOf(group_id) === -1) {
-								visible_groups.push(group_id);
-							}
-						}
-						if (xval < visible_groups.length) {
-							let group_id = visible_groups[xval];
-							let group_idx = ORDERLENSEGROUPID.indexOf(group_id);
-							if (group_idx !== -1) {
-								xdat = GROUPS[ORDERLENSEGROUPIDARRAYINDEX[group_idx]];
-							}
-						}
-					}
 				}
 
 				if( mat_col_val == 'twigroup' ){
@@ -539,29 +516,6 @@ let matrixsketch = (p) => {
 				}else if( mat_row_val == 'grp' ){
 					if(yval < ORDERGROUPIDARRAYINDEX.length) {
 						ydat = GROUPS[ORDERGROUPIDARRAYINDEX[yval]];
-					}
-				}else if( mat_row_val == 'lensegroup' ){
-					// For lensegroup views, yval is the index in visible_groups array
-					// We need to map this to the actual group for highlighting
-					if( MATRIX_VIEW_STATE == "lensegroup_dat" || MATRIX_VIEW_STATE == "dat_lensegroup" ||
-						MATRIX_VIEW_STATE == "lensegroup_toi" || MATRIX_VIEW_STATE == "toi_lensegroup" ||
-						MATRIX_VIEW_STATE == "lensegroup_twigroup" || MATRIX_VIEW_STATE == "twigroup_lensegroup" ||
-						MATRIX_VIEW_STATE == "lensegroup_lensegroup" ) {
-						// Get the visible groups array from the current view state
-						let visible_groups = [];
-						for (let i = 0; i < lenses.length; i++) {
-							let group_id = lenses[i].group;
-							if (visible_groups.indexOf(group_id) === -1) {
-								visible_groups.push(group_id);
-							}
-						}
-						if (yval < visible_groups.length) {
-							let group_id = visible_groups[yval];
-							let group_idx = ORDERLENSEGROUPID.indexOf(group_id);
-							if (group_idx !== -1) {
-								ydat = GROUPS[ORDERLENSEGROUPIDARRAYINDEX[group_idx]];
-							}
-						}
 					}
 				}
 				if(mat_col_val == 'toi' && mat_row_val == 'toi' && (xdat == null || ydat == null))
@@ -2022,7 +1976,7 @@ let load_data = () => {
 			colcolours.push(get_twigroup_col(TWIGROUPS[ORDERTWIGROUPIDARRAYINDEX[a]].group)); }
 		colspecial = ORDERTWIGROUPID.indexOf(selected_twigroup);  rowspecial = visible_groups.indexOf(selected_lensegroup);
 
-		if(MATRIX_DATA_STATE == "aoiarea") {					
+		if(MATRIX_DATA_STATE == "aoiarea") {
 			let sum_of_aoi_area = [];
 			for(let b=0; b<visible_groups.length; b++)
 				sum_of_aoi_area.push(0);
@@ -2036,7 +1990,7 @@ let load_data = () => {
 
 			for(let a=0; a<ORDERTWIGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<visible_groups.length; b++){
+			for(let b=0; b<visible_groups.length; b++){
 					matrix_values[a].push(sum_of_aoi_area[b]);
 				}				
 			}
@@ -2045,17 +1999,17 @@ let load_data = () => {
 		else if(MATRIX_DATA_STATE == "haar") {
 			for(let a=0; a<ORDERTWIGROUPIDARRAYINDEX.length; a++){ 
 				matrix_values.push([]); matrix_colours.push([]);
-				let HAAR = {"hit": 0, "off": 0, "haar": 0};
-				let HAAR_VALUE = 0;
-				for(let c=0; c<order_twis.length; c++)	{
-					let order_twis_group_index = ORDERTWIGROUPID.indexOf(base_twis[order_twis[c]].group);
-		
-					if(TWIGROUPS[ORDERTWIGROUPIDARRAYINDEX[a]].group == base_twis[order_twis[c]].group &&
-							order_twis_group_index != -1 && base_twis[order_twis[c]].included && base_twis[order_twis[c]].checked) {
-						aggregate_hit_any_aoi_rate_across_dat(order_twis[c], HAAR);						
-					}
-				}				
-				HAAR_VALUE = (HAAR.hit == 0 ? 0 : (HAAR.hit/(HAAR.hit+HAAR.off)).toFixed(2));
+					let HAAR = {"hit": 0, "off": 0, "haar": 0};
+					let HAAR_VALUE = 0;
+					for(let c=0; c<order_twis.length; c++)	{
+						let order_twis_group_index = ORDERTWIGROUPID.indexOf(base_twis[order_twis[c]].group);
+			
+						if(TWIGROUPS[ORDERTWIGROUPIDARRAYINDEX[a]].group == base_twis[order_twis[c]].group &&
+								order_twis_group_index != -1 && base_twis[order_twis[c]].included && base_twis[order_twis[c]].checked) {
+							aggregate_hit_any_aoi_rate_across_dat(order_twis[c], HAAR);						
+						}
+					}				
+					HAAR_VALUE = (HAAR.hit == 0 ? 0 : (HAAR.hit/(HAAR.hit+HAAR.off)).toFixed(2));
 				for(let b=0; b<visible_groups.length; b++){
 					matrix_values[a].push(100 * HAAR_VALUE);
 				}				
@@ -2073,11 +2027,11 @@ let load_data = () => {
 					if(group_index != -1 && group_index < sum_of_aoi_area.length)
 						sum_of_aoi_area[group_index] += base_lenses[order_lenses[c]].area;
 				}
-			}					
+			}
 
 			for(let a=0; a<ORDERTWIGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<visible_groups.length; b++){
+			for(let b=0; b<visible_groups.length; b++){ 
 					let data_index = ORDERLENSEGROUPID.indexOf(visible_groups[b]);
 					matrix_values[a].push(aggregate_aoi_metrics_across_twigroup(DATASETS[VALUED[a]], ORDERTWIGROUPIDARRAYINDEX[a], data_index, sum_of_aoi_area));
 				}
