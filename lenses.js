@@ -1240,3 +1240,58 @@ function duplicate_lens(id) {
 
 	update_lens_colors();
 }
+
+// highlight functions
+function highlightLensInList(lensId, highlight = true) {
+    const lensElement = document.getElementById(`lens_${lensId}`);
+    if (lensElement) {
+        lensElement.classList.toggle('highlighted', highlight);
+    }
+}
+
+function clearAllLensHighlights() {
+    document.querySelectorAll('.lens_item').forEach(item => {
+        item.classList.remove('highlighted');
+    });
+}
+
+function highlightFilteredLenses() {
+    clearAllLensHighlights();
+    
+    // current filter state from hierarchy popup if available
+    const hierarchyPopup = window.open('', 'AOIHierarchyPopup');
+    if (hierarchyPopup) {
+        const selectedScreen = hierarchyPopup.document.getElementById('screenFilter').value;
+        const selectedApp = hierarchyPopup.document.getElementById('appFilter').value;
+        const selectedInterface = hierarchyPopup.document.getElementById('interfaceFilter').value;
+        
+        base_lenses.forEach(lens => {
+            const matchesScreen = selectedScreen === 'all' || String(lens.h1) === selectedScreen;
+            const matchesApp = selectedApp === 'all' || (isValidHierarchyId(lens.h2) && String(lens.h2) === selectedApp);
+            const matchesInterface = selectedInterface === 'all' || (isValidHierarchyId(lens.h3) && String(lens.h3) === selectedInterface);
+            
+            if (matchesScreen && matchesApp && matchesInterface) {
+                highlightLensInList(lens.id);
+            }
+        });
+    }
+}
+
+// call this filters change in the hierarchy
+window.updateLensHighlightsFromFilters = function() {
+    highlightFilteredLenses();
+};
+
+window.highlightLensesByHierarchy = function(h1, h2, h3) {
+    clearAllLensHighlights();
+    
+    base_lenses.forEach(lens => {
+        const matchesScreen = h1 === undefined || lens.h1 == h1;
+        const matchesApp = h2 === undefined || lens.h2 == h2;
+        const matchesInterface = h3 === undefined || lens.h3 == h3;
+        
+        if (matchesScreen && matchesApp && matchesInterface) {
+            highlightLensInList(lens.id);
+        }
+    });
+};
