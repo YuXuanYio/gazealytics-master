@@ -657,7 +657,7 @@ lensbox = '<div class="dragger" draggable="true" ondragend="dragEnd()" ondragove
 + '<div style="display: flex; align-items: center;">'
 + '<input type="text" id="lens_#_name" name="#name" style="width:70px" value="aoi#">'
 + '<button id="lens_#_c" checked="true" onclick="not_all_eye(\'showlens\');"><i class="fas fa-eye"></i></button>'
-+ '<input class="num" type="number" id="lens_#_lensegroup" style="width:50px" value="1" step="1" min="1" max="20">'
++ '<input class="num" type="number" id="lens_#_lensegroup" style="width:50px" value="1" step="1" min="1" max="30">'
 + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button id="lens_#_temporal_btn" onclick="toggleTemporal(#);"><i class="fas fa-clock"></i></button><span class="tip">Make current lens temporal</span></div>'
 + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button id="lens_#_l" checked="true"><i class="fas fa-lock-open"></i></button><span class="tip">Lock the lens with current value</span></div>'
 + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button onclick="delete_lens(#);"><i class="far fa-trash-alt"></i></button><span class="tip">Delete the lens</span></div>'

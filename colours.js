@@ -6,8 +6,7 @@ SACC_TYPES = ["#99f3ff","#1ae4ff","#fbfd7c"]; // short, basic, glance
 DIRECTIONS = ["#dd4646","#dbd643","#a3dd36","#3dd664","#41d8d8","#4368d6","#8a3dd6","#d83bb1"];
 TWIS_COLOURS = ["#dd4646","#dbd643","#a3dd36","#3dd664","#41d8d8","#4368d6","#8a3dd6","#d83bb1","#f3d1aa","#ffffff",
 "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd"];
-LENS_COLOURS = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a",
-"#7f7f7f", "#bcbd22", "#17becf","#98e2bb","#f3d1aa","#fdaaf3","#fbffc2","#ecacac","#a1b7f7","#dbd643"];
+LENS_COLOURS = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#7f7f7f", "#bcbd22", "#17becf", "#98e2bb", "#f3d1aa", "#fdaaf3", "#fbffc2", "#ecacac", "#a1b7f7", "#dbd643", "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd"];
 ORDERED = ["#e9741c","#ffff7c","#74f05c"]; // before, middle, after
 MATCOL = ["#FFFFFF","#cb181d","#2171b5"];
 WHITE = '#FFFFFF'; GREY = '#888888'; DARK="#BBBBBB"; BLACK = '#000000';
