@@ -1943,10 +1943,16 @@ let load_data = () => {
 			overlay_string = "Mean visitation duration in %ROW: %VAL ms";
 		}
 	}else if( MATRIX_VIEW_STATE == "lensegroup_twigroup" || MATRIX_VIEW_STATE == "twigroup_lensegroup" ){
-		if((DAT_MODE == 2 && VALUED.indexOf(selected_data) == -1) || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
-		if( DAT_MODE == 1 && ORDERGROUPID.indexOf(selected_grp) == -1 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
-		if(ORDERTWIGROUPIDARRAYINDEX.indexOf(-1) != -1) return;
-		
+		if((DAT_MODE == 2 && VALUED.indexOf(selected_data) == -1) || metric_lenses.length == 0 ){ 
+			return; 
+		}
+		if( DAT_MODE == 1 && ORDERGROUPID.indexOf(selected_grp) == -1 || metric_lenses.length == 0 ){ 
+			return; 
+		}
+		if(ORDERTWIGROUPIDARRAYINDEX.indexOf(-1) != -1) {
+			return;
+		}
+				
 		// Build visible groups from UI-visible lenses (lenses array) - same logic as lensegroup_lensegroup
 		let visible_groups = [];
 		for (let i = 0; i < lenses.length; i++) {
@@ -1955,9 +1961,11 @@ let load_data = () => {
 				visible_groups.push(group_id);
 			}
 		}
-		
+				
 		// If no visible groups, return early
-		if (visible_groups.length === 0) { return; }
+		if (visible_groups.length === 0) { 
+			return; 
+		}
 		
 		// Map visible groups to their indices in LENSEGROUPS for data access
 		let group_indices = [];
@@ -1990,7 +1998,7 @@ let load_data = () => {
 
 			for(let a=0; a<ORDERTWIGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-			for(let b=0; b<visible_groups.length; b++){
+				for(let b=0; b<visible_groups.length; b++){
 					matrix_values[a].push(sum_of_aoi_area[b]);
 				}				
 			}
@@ -1999,17 +2007,17 @@ let load_data = () => {
 		else if(MATRIX_DATA_STATE == "haar") {
 			for(let a=0; a<ORDERTWIGROUPIDARRAYINDEX.length; a++){ 
 				matrix_values.push([]); matrix_colours.push([]);
-					let HAAR = {"hit": 0, "off": 0, "haar": 0};
-					let HAAR_VALUE = 0;
-					for(let c=0; c<order_twis.length; c++)	{
-						let order_twis_group_index = ORDERTWIGROUPID.indexOf(base_twis[order_twis[c]].group);
-			
-						if(TWIGROUPS[ORDERTWIGROUPIDARRAYINDEX[a]].group == base_twis[order_twis[c]].group &&
-								order_twis_group_index != -1 && base_twis[order_twis[c]].included && base_twis[order_twis[c]].checked) {
-							aggregate_hit_any_aoi_rate_across_dat(order_twis[c], HAAR);						
-						}
-					}				
-					HAAR_VALUE = (HAAR.hit == 0 ? 0 : (HAAR.hit/(HAAR.hit+HAAR.off)).toFixed(2));
+				let HAAR = {"hit": 0, "off": 0, "haar": 0};
+				let HAAR_VALUE = 0;
+				for(let c=0; c<order_twis.length; c++)	{
+					let order_twis_group_index = ORDERTWIGROUPID.indexOf(base_twis[order_twis[c]].group);
+		
+					if(TWIGROUPS[ORDERTWIGROUPIDARRAYINDEX[a]].group == base_twis[order_twis[c]].group &&
+							order_twis_group_index != -1 && base_twis[order_twis[c]].included && base_twis[order_twis[c]].checked) {
+						aggregate_hit_any_aoi_rate_across_dat(order_twis[c], HAAR);						
+					}
+				}				
+				HAAR_VALUE = (HAAR.hit == 0 ? 0 : (HAAR.hit/(HAAR.hit+HAAR.off)).toFixed(2));
 				for(let b=0; b<visible_groups.length; b++){
 					matrix_values[a].push(100 * HAAR_VALUE);
 				}				
@@ -2031,9 +2039,33 @@ let load_data = () => {
 
 			for(let a=0; a<ORDERTWIGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
-			for(let b=0; b<visible_groups.length; b++){ 
+				for(let b=0; b<visible_groups.length; b++){
 					let data_index = ORDERLENSEGROUPID.indexOf(visible_groups[b]);
-					matrix_values[a].push(aggregate_aoi_metrics_across_twigroup(DATASETS[VALUED[a]], ORDERTWIGROUPIDARRAYINDEX[a], data_index, sum_of_aoi_area));
+					let total_metric = 0;
+					let count = 0;
+					
+					// Iterate through all datasets and aggregate metrics for this twigroup
+					for(let d=0; d<VALUED.length; d++){
+						if(DATASETS[VALUED[d]] && DATASETS[VALUED[d]].tois) {
+							for(let t=0; t<DATASETS[VALUED[d]].tois.length; t++) {
+								let toi = DATASETS[VALUED[d]].tois[t];
+								let twi_id = toi.twi_id;
+								if(toi.included && twi_id < base_twis.length && 
+								   base_twis[twi_id].group == TWIGROUPS[ORDERTWIGROUPIDARRAYINDEX[a]].group &&
+								   base_twis[twi_id].included && base_twis[twi_id].checked) {
+									let metric_value = get_aoi_fixation_metric_by_name(toi, data_index, sum_of_aoi_area);
+									if(metric_value > 0 && MATRIX_DATA_STATE != "percent") {
+										total_metric += metric_value;
+										count++;
+									} else if(MATRIX_DATA_STATE == "percent"){
+										total_metric += metric_value;
+										count++;
+									}
+								}
+							}
+						}
+					}
+					matrix_values[a].push(count > 0 ? total_metric : 0);
 				}
 			}
 		}
