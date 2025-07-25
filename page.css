@@ -310,27 +310,3 @@ table, th, td {
 .matsel_shown {
 	display: inline;
 }
-
-.lens_item {
-    padding: 3px;
-    transition: background-color 0.2s;
-    cursor: pointer;
-    margin: 2px 0;
-    border-radius: 3px;
-}
-
-.lens_item:hover {
-    background-color: #e7e2e2;
-}
-
-.lens_item.highlighted {
-    background-color: #e7e2e2 !important;
-    border-left: 3px solid #ffd600 !important;
-    padding-left: 5px !important;
-}
-
-.highlighted {
-    background-color: #e7e2e2;
-    border-left: 3px solid #ffd600;
-    padding-left: 5px;
-}
