@@ -137,11 +137,12 @@
         let screenColorMap = {};
         let appColorMap = {};
         let idsToShowOnCanvas = [];
-        const colorPalette = [
-            '#FFCDD2', '#C5CAE9', '#DCEDC8', '#CFD8DC', '#BBDEFB', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#B3E5FC', '#B2EBF2',
-            '#B2DFDB', '#C8E6C9', '#F0F4C3', '#FFF9C4', '#FFECB3', '#FFE0B2', '#FFCCBC', '#D7CCC8', '#F5F5F5', '#FAFAFA', 
-            '#EEEEEE', '#E0E0E0', '#BDBDBD', '#9E9E9E',
-        ];
+        // check if LENS_COLOURS is defined in the parent window
+        const colorPalette = (window.opener && window.opener.LENS_COLOURS) ? window.opener.LENS_COLOURS.slice() : [
+        '#FFCDD2', '#C5CAE9', '#DCEDC8', '#CFD8DC', '#BBDEFB', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#B3E5FC', '#B2EBF2',
+        '#B2DFDB', '#C8E6C9', '#F0F4C3', '#FFF9C4', '#FFECB3', '#FFE0B2', '#FFCCBC', '#D7CCC8', '#F5F5F5', '#FAFAFA', 
+        '#EEEEEE', '#E0E0E0', '#BDBDBD', '#9E9E9E',
+    ];
 
         function isValidHierarchyId(id) {
             return id !== undefined && id !== null && String(id) !== '-1';

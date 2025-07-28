@@ -37,8 +37,10 @@ function setVisibleLenses(arrayOfIds, colorMap = null) {
 
 	if (colorMap) {
         lensColorMap = colorMap;
+		console.log('if colorMap', lensColorMap);
     } else {
         lensColorMap = {};
+		console.log('else colorMap', lensColorMap);
     }
 
     background_changed = true;
