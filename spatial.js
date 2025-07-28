@@ -4,6 +4,7 @@ let SpatialBackground, SpatialMidground, SpatialForeground;
 let SpatialCanvas;
 let highlighted_lenses = [];
 let visible_lenses = [];
+let lensColorMap = {};
 
 function highlightLensesById(arrayOfIds) {
     highlighted_lenses = []; // clear previous highlights
@@ -22,7 +23,7 @@ function highlightLensesById(arrayOfIds) {
     background_changed = true; // trigger a redraw
 }
 
-function setVisibleLenses(arrayOfIds) {
+function setVisibleLenses(arrayOfIds, colorMap = null) {
     visible_lenses = [];
     
     if (arrayOfIds && arrayOfIds.length > 0) {
@@ -33,6 +34,13 @@ function setVisibleLenses(arrayOfIds) {
             }
         }
     }
+
+	if (colorMap) {
+        lensColorMap = colorMap;
+    } else {
+        lensColorMap = {};
+    }
+
     background_changed = true;
 }
 
@@ -388,6 +396,12 @@ let spatialsketch = (p) => {
 				let currentStroke = l.col(60);
 				let currentWeight = 2;
 
+				// check if this lens has a color mapping
+				if (lensColorMap[l.id]) {
+					currentFill = lensColorMap[l.id];
+					currentStroke = darkenColor(lensColorMap[l.id], 20);
+					currentWeight = 3;
+				}
 				// highlighting logic
 				if (highlighted_lenses.includes(lens_index)) {
 					currentFill = l.col(40);
@@ -1817,3 +1831,17 @@ let do_matrix_overlay = (p) => {
 		aggregate_histogram_across_dat_twi(p, data, true, null);
 	}
 };
+
+function darkenColor(colorHex, percent) {
+    let r = parseInt(colorHex.substring(1, 3), 16);
+    let g = parseInt(colorHex.substring(3, 5), 16);
+    let b = parseInt(colorHex.substring(5, 7), 16);
+
+    r = Math.floor(r * (100 - percent) / 100);
+    g = Math.floor(g * (100 - percent) / 100);
+    b = Math.floor(b * (100 - percent) / 100);
+
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
+
