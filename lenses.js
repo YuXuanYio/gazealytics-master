@@ -662,6 +662,8 @@ lensbox = '<div class="dragger" draggable="true" ondragend="dragEnd()" ondragove
 + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button id="lens_#_l" checked="true"><i class="fas fa-lock-open"></i></button><span class="tip">Lock the lens with current value</span></div>'
 + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button onclick="delete_lens(#);"><i class="far fa-trash-alt"></i></button><span class="tip">Delete the lens</span></div>'
 + '<div class="tool inner_button" style="display: inline-flex; align-items: center;"><button onclick="duplicate_lens(#);"><i class="far fa-copy"></i></button><span class="tip">Duplicate the lens</span></div>'
+// +'<input type="color" id="aoic_#" class="colorer" style="min-width: 20px; min-height: 21.5px; width: 20px; height: 21.5px;" oninput="LENS_COLOURS[#]=this.value; update_colour_vals();">'
++ `<input type="color" id="aoic_#" class="colorer" style="min-width: 20px; min-height: 21.5px; width: 20px; height: 21.5px;" oninput="LENS_COLOURS[#]=this.value; update_colour_vals(); const other = document.querySelectorAll('[id^=aoic_' + # + ']'); other.forEach(el => { if (el !== this) el.value = this.value; });">`
 + '</div>'
 +'<div style="display: flex; gap: 8px; align-items: center; margin: 3px">'
 + '<label>Screen ID<br><input class="num" type="number" id="lens_#_screen_id" name="#name" style="width:70px" step=1 min=1></label>'
