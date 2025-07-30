@@ -402,7 +402,7 @@ let spatialsketch = (p) => {
 				if (lensColorMap[l.id]) {
 					currentFill = lensColorMap[l.id];
 					currentStroke = darkenColor(lensColorMap[l.id], 20);
-					currentWeight = 3;
+					currentWeight = 7;
 				}
 				// highlighting logic
 				if (highlighted_lenses.includes(lens_index)) {
@@ -414,7 +414,7 @@ let spatialsketch = (p) => {
 					currentWeight = 5;
 				}
 
-				p.fill(currentFill);
+				p.noFill();
 				p.stroke(currentStroke);
 				p.strokeWeight(currentWeight);
 
