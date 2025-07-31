@@ -694,6 +694,7 @@ function create_lens(mx, my){
 	//node.setAttribute('onclick', "if(selected_lens!="+v+"){select_lens("+v+");}else{select_lens(-1);}");
 	node.setAttribute('class', 'lens_item');
 	document.getElementById('lenslist').appendChild(node);
+	generateAOIColorControls();
 	update_lens_colors();
 	node.onclick = function(e){
 		var ec = e.target.className;
@@ -914,12 +915,11 @@ function handleAOITimeChange(time, isString) {
 		}
 
 		if (selectedFilter === 'temporal') {
-			lens.included = (lens.timeRanges.some(range => time >= range.start && time <= range.end) && lens.isTemporal);
-			lens.checked = lens.included;
+			lens.checked = (lens.timeRanges.some(range => time >= range.start && time <= range.end) && lens.isTemporal);
 		} else if (selectedFilter === 'non-temporal') {
 			continue;
 		} else {
-			lens.included = (lens.timeRanges.some(range => time >= range.start && time <= range.end) && lens.isTemporal || (!lens.isTemporal && lens.checked));
+			lens.checked = (lens.timeRanges.some(range => time >= range.start && time <= range.end) && lens.isTemporal || (!lens.isTemporal && lens.checked));
 		}
 		// Find the current time range for the lens, set its current priority to that time range's priority
 		const currentRange = lens.timeRanges.find(range => time >= range.start && time <= range.end);
@@ -930,10 +930,9 @@ function handleAOITimeChange(time, isString) {
 
 		const lensElem = document.getElementById(`lens_${i}_c`);
 		if (lensElem) {
-			lensElem.innerHTML = lens.included
+			lensElem.innerHTML = lens.checked
 				? '<i class="fas fa-eye"></i>'
 				: '<i class="fas fa-eye-slash"></i>';
-			lensElem.checked = lens.included;
 		}
 	}
 
@@ -1012,19 +1011,19 @@ function toggleTemporal(id, state = null) {
 function handleAOIFilterChange(filterType) {
 	base_lenses.forEach((lens, i) => {
 		if (filterType === 'temporal') {
-			lens.included = lens.isTemporal;
+			lens.checked = lens.isTemporal;
 		} else if (filterType === 'non-temporal') {
-			lens.included = !lens.isTemporal;
+			lens.checked = !lens.isTemporal;
 		} else {
-			lens.included = true;
+			lens.checked = true;
 		}
 
 		const lensElem = document.getElementById(`lens_${i}_c`);
 		if (lensElem) {
-			lensElem.innerHTML = lens.included
+			lensElem.innerHTML = lens.checked
 			? '<i class="fas fa-eye"></i>'
 			: '<i class="fas fa-eye-slash"></i>';
-			lensElem.checked = lens.included;
+			lensElem.checked = lens.checked;
 		} else {
 			// console.log(`Element lens_${i}_c not found`);
 		}
@@ -1033,13 +1032,13 @@ function handleAOIFilterChange(filterType) {
 	lenses_update();
 }
 
-function updateLensToggleVisual(id, included) {
+function updateLensToggleVisual(id, checked) {
 	const lensElem = document.getElementById(`lens_${id}_c`);
 	if (lensElem) {
-		lensElem.innerHTML = included
+		lensElem.innerHTML = checked
 			? '<i class="fas fa-eye"></i>'
 			: '<i class="fas fa-eye-slash"></i>';
-		lensElem.checked = included;
+		lensElem.checked = checked;
 	} else {
 		// console.log(`Element lens_${id}_c not found`);
 	}
@@ -1077,17 +1076,16 @@ function handleTWIChange() {
 			}
 
 			if (isStatic) {
-				lens.included = true;
-				toggleTemporal(i, false, false);
+				lens.checked = true;
+				toggleTemporal(i, false);
 			} else if (isPartial) {
-				lens.included = true;
-				toggleTemporal(i, true, false);
+				lens.checked = true;
+				toggleTemporal(i, true);
 			} else {
-				lens.included = false;
+				lens.checked = false;
 			}
-			lens.checked = lens.included;
 
-			updateLensToggleVisual(i, lens.included);
+			updateLensToggleVisual(i, lens.checked);
 			if (lens.name == "aoi25") {console.log(`Lens ${lens.name} included: ${lens.included}, Static: ${isStatic}, Temporal: ${isPartial}`)};
 				
 		}
@@ -1240,5 +1238,6 @@ function duplicate_lens(id) {
 		h3Input.value = newLens.h3;
 	}
 
+	generateAOIColorControls();
 	update_lens_colors();
 }

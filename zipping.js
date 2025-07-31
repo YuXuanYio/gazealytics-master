@@ -125,7 +125,6 @@ function save_zip(){
 			zip.file(filename, file);
 		}
 	}
-	
 	//zip.generateAsync({type:"base64"}).then(function (base64) { download_zip(zip_name(), base64); console.log('zipping complete'); });
 	zip.generateAsync({type:"blob"}).then(function (data) { console.log("zip downloading"); saveAs(data, zip_name()); console.log('zipping complete'); document.getElementById("project_txt").innerHTML = '';	document.getElementById("save_button").disabled = false;});
 }
@@ -252,13 +251,13 @@ function load_zip(){
 								if(base_lenses[v].h3 != undefined && base_lenses[v].h3 != null){
 									item.value = base_lenses[v].h3;
 								}
-								item = document.getElementById('lens_'+v+'_temporal_btn');
-								item.checked = base_lenses[v].isTemporal;
-								if(item.checked){
-									item.innerHTML='<span style="display: inline-flex; align-items: center;"><i class="fas fa-clock"></i><i class="fas fa-times"></i></span>';
-								}else{
-									item.innerHTML='<i class="fas fa-clock"></i>';
-								}
+								// item = document.getElementById('lens_'+v+'_temporal_btn');
+								// item.checked = base_lenses[v].isTemporal;
+								// if(item.checked){
+								// 	item.innerHTML='<span style="display: inline-flex; align-items: center;"><i class="fas fa-clock"></i><i class="fas fa-times"></i></span>';
+								// }else{
+								// 	item.innerHTML='<i class="fas fa-clock"></i>';
+								// }
 
 							}
 						}

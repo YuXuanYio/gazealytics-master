@@ -272,10 +272,36 @@ function contrast_bw(colour){
 }
 
 function generateAOIColorControls() {
+	// Potentially changeable to if order_lenses.length != base_lenses.length then do following, if not then use order_lenses to get indexes
 	const container = document.getElementById('aoi_color_controls');
 	container.innerHTML = "<p>AOI Colours:</p>";
+	const startingIndex = order_lenses[0];
+
+	const inputFirst = document.createElement("input");
+	inputFirst.type = "color";
+	inputFirst.id = `aoic_${startingIndex}`;
+	inputFirst.className = "colorer";
+	inputFirst.value = LENS_COLOURS[startingIndex] || "#ffffff";
+
+	console.log("Input color for startingIndex", startingIndex, ":", inputFirst.value);
+
+	inputFirst.oninput = function () {
+		LENS_COLOURS[startingIndex] = this.value;
+		update_colour_vals();
+
+		// Update duplicate color inputs if needed (use exact match!)
+		const el = document.getElementById(`aoic_${startingIndex}`);
+		if (el && el !== this) el.value = this.value;
+	};
+
+	container.appendChild(inputFirst);
+
+	const el = document.getElementById(`aoic_${startingIndex}`);
+	if (el && el !== inputFirst) el.value = inputFirst.value;
 
 	for (let i = 0; i < base_lenses.length; i++) {
+		if (i === startingIndex) continue;
+
 		const input = document.createElement("input");
 		input.type = "color";
 		input.id = `aoic_${i}`;
@@ -286,14 +312,13 @@ function generateAOIColorControls() {
 			LENS_COLOURS[i] = this.value;
 			update_colour_vals();
 
-			document.querySelectorAll(`[id^=aoic_${i}]`).forEach(el => {
-				if (el !== this) el.value = this.value;
-			});
+			const el = document.getElementById(`aoic_${i}`);
+			if (el && el !== this) el.value = this.value;
 		};
 
 		container.appendChild(input);
 
-		document.querySelectorAll(`[id^=aoic_${i}]`).forEach(el => {
+		document.querySelectorAll(`#aoic_${i}`).forEach(el => {
 			if (el !== input) el.value = input.value;
 		});
 	}
