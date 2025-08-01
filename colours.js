@@ -98,10 +98,18 @@ function update_group_colors(){
 function update_lens_colors(){
 	for(var i=0;i<document.getElementById('lenslist').children.length;i++){
 		val = parseInt(document.getElementById('lenslist').children[i].id.split('_')[1]);		
-			if(TIME_DATA=='all') 
+			if(TIME_DATA=='all') {				
 				document.getElementById(val+"_dragger").style.backgroundColor = 'rgba('+rgbColor(LENS_COLOURS[val%LENS_COLOURS.length])+', .75)';
-			else 
+				generateAOIColorControls();
+			} 
+			else{
 				document.getElementById(val+"_dragger").style.backgroundColor = 'rgba('+rgbColor(LENS_COLOURS[(base_lenses[val].group - 1)%LENS_COLOURS.length])+', .75)';
+				document.getElementById('aoi_color_controls').style.display = "none";
+				document.querySelectorAll('[id^="aoic_"]').forEach(el => {
+					el.style.display = "none";
+				});
+				generateGroupAOIColorControls();
+			}
 		timeline_changed = true;
 		matrix_changed = true;
 	}
@@ -274,6 +282,10 @@ function contrast_bw(colour){
 function generateAOIColorControls() {
 	// Potentially changeable to if order_lenses.length != base_lenses.length then do following, if not then use order_lenses to get indexes
 	const container = document.getElementById('aoi_color_controls');
+	container.style.display = "block";
+	document.querySelectorAll('[id^="aoic_"]').forEach(el => {
+		el.style.display = "block";
+	});
 	container.innerHTML = "<p>AOI Colours:</p>";
 	const startingIndex = order_lenses[0];
 
@@ -321,5 +333,28 @@ function generateAOIColorControls() {
 		document.querySelectorAll(`#aoic_${i}`).forEach(el => {
 			if (el !== input) el.value = input.value;
 		});
+	}
+}
+
+function generateGroupAOIColorControls() {
+	const container = document.getElementById('aoi_color_group_controls');
+	container.style.display = "block";
+	container.innerHTML = "<p>AOI Group Colours:</p>";
+
+	const groups = [...new Set(base_lenses.map(lens => lens.group).filter(g => g !== 0))];
+
+	for (const group of groups) {
+		const input = document.createElement("input");
+		input.type = "color";
+		input.id = `aoic_${group}`;
+		input.className = "colorer";
+		input.value = LENS_COLOURS[(group - 1) % LENS_COLOURS.length] || "#ffffff";
+
+		input.oninput = function () {
+			LENS_COLOURS[(group - 1) % LENS_COLOURS.length] = this.value;
+			update_colour_vals();
+		};
+
+		container.appendChild(input);
 	}
 }
