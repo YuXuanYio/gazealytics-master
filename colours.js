@@ -100,6 +100,10 @@ function update_lens_colors(){
 		val = parseInt(document.getElementById('lenslist').children[i].id.split('_')[1]);		
 			if(TIME_DATA=='all') {				
 				document.getElementById(val+"_dragger").style.backgroundColor = 'rgba('+rgbColor(LENS_COLOURS[val%LENS_COLOURS.length])+', .75)';
+				document.getElementById('aoi_color_group_controls').style.display = "none";
+				document.querySelectorAll('[id^="aoigc_"]').forEach(el => {
+					el.style.display = "none";
+				});
 				generateAOIColorControls();
 			} 
 			else{
@@ -346,7 +350,7 @@ function generateGroupAOIColorControls() {
 	for (const group of groups) {
 		const input = document.createElement("input");
 		input.type = "color";
-		input.id = `aoic_${group}`;
+		input.id = `aoigc_${group}`;
 		input.className = "colorer";
 		input.value = LENS_COLOURS[(group - 1) % LENS_COLOURS.length] || "#ffffff";
 
