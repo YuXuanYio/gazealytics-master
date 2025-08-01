@@ -66,7 +66,19 @@ let spatialsketch = (p) => {
 		SpatialCanvas = p.createCanvas(Math.floor(spatial_width), Math.floor(spatial_height));
 		document.getElementById('pj1').style.height = Math.floor(spatial_height)+'px';
 		document.getElementById('canvas_box').style.height = Math.floor(p.windowHeight * CANVAS_BOX_HEIGHT_PERCENTAGE)+'px';
-		
+		document.getElementById('pj1').appendChild(SpatialCanvas.elt);
+    
+		// click handler to close hierarchy popup
+		SpatialCanvas.elt.addEventListener('mousedown', function() {
+			if (window.hierarchyWindow && !window.hierarchyWindow.closed) {
+				window.hierarchyWindow.close();
+				window.isHierarchyVisible = false;
+				// reset any lens visibility changes
+				if (window.setVisibleLenses) setVisibleLenses([], null);
+				if (window.highlightLensesById) highlightLensesById([]);
+			}
+		});
+
 		SPATIAL = p;
 		p.initConfig(p.windowWidth, p.windowHeight);
 		Minimap = p.createGraphics(p.width/2, p.height/2, p.P2D);
@@ -1846,4 +1858,27 @@ function darkenColor(colorHex, percent) {
     return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }
 
+window.hierarchyWindow = null;
+window.isHierarchyVisible = false;
 
+function toggleHierarchyView() {
+    if (window.isHierarchyVisible && window.hierarchyWindow && !window.hierarchyWindow.closed) {
+        window.hierarchyWindow.close();
+        window.isHierarchyVisible = false;
+        return;
+    }
+    
+    window.hierarchyWindow = window.open('hierarchy.html', 'hierarchyPopup', 'width=600,height=400');
+    window.isHierarchyVisible = true;
+    
+    const popupCheck = setInterval(() => {
+        try {
+            if (window.hierarchyWindow.document.readyState === 'complete') {
+                clearInterval(popupCheck);
+                window.hierarchyWindow.setLensesForHierarchy(base_lenses);
+            }
+        } catch (e) {
+            console.log('Popup not ready yet');
+        }
+    }, 100);
+}
