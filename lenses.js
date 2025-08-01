@@ -694,7 +694,6 @@ function create_lens(mx, my){
 	//node.setAttribute('onclick', "if(selected_lens!="+v+"){select_lens("+v+");}else{select_lens(-1);}");
 	node.setAttribute('class', 'lens_item');
 	document.getElementById('lenslist').appendChild(node);
-	generateAOIColorControls();
 	update_lens_colors();
 	node.onclick = function(e){
 		var ec = e.target.className;
@@ -915,11 +914,12 @@ function handleAOITimeChange(time, isString) {
 		}
 
 		if (selectedFilter === 'temporal') {
-			lens.checked = (lens.timeRanges.some(range => time >= range.start && time <= range.end) && lens.isTemporal);
+			lens.included = (lens.timeRanges.some(range => time >= range.start && time <= range.end) && lens.isTemporal);
+			lens.checked = lens.included;
 		} else if (selectedFilter === 'non-temporal') {
 			continue;
 		} else {
-			lens.checked = (lens.timeRanges.some(range => time >= range.start && time <= range.end) && lens.isTemporal || (!lens.isTemporal && lens.checked));
+			lens.included = (lens.timeRanges.some(range => time >= range.start && time <= range.end) && lens.isTemporal || (!lens.isTemporal && lens.checked));
 		}
 		// Find the current time range for the lens, set its current priority to that time range's priority
 		const currentRange = lens.timeRanges.find(range => time >= range.start && time <= range.end);
@@ -930,9 +930,10 @@ function handleAOITimeChange(time, isString) {
 
 		const lensElem = document.getElementById(`lens_${i}_c`);
 		if (lensElem) {
-			lensElem.innerHTML = lens.checked
+			lensElem.innerHTML = lens.included
 				? '<i class="fas fa-eye"></i>'
 				: '<i class="fas fa-eye-slash"></i>';
+			lensElem.checked = lens.included;
 		}
 	}
 
@@ -1011,19 +1012,19 @@ function toggleTemporal(id, state = null) {
 function handleAOIFilterChange(filterType) {
 	base_lenses.forEach((lens, i) => {
 		if (filterType === 'temporal') {
-			lens.checked = lens.isTemporal;
+			lens.included = lens.isTemporal;
 		} else if (filterType === 'non-temporal') {
-			lens.checked = !lens.isTemporal;
+			lens.included = !lens.isTemporal;
 		} else {
-			lens.checked = true;
+			lens.included = true;
 		}
 
 		const lensElem = document.getElementById(`lens_${i}_c`);
 		if (lensElem) {
-			lensElem.innerHTML = lens.checked
+			lensElem.innerHTML = lens.included
 			? '<i class="fas fa-eye"></i>'
 			: '<i class="fas fa-eye-slash"></i>';
-			lensElem.checked = lens.checked;
+			lensElem.checked = lens.included;
 		} else {
 			// console.log(`Element lens_${i}_c not found`);
 		}
@@ -1032,13 +1033,13 @@ function handleAOIFilterChange(filterType) {
 	lenses_update();
 }
 
-function updateLensToggleVisual(id, checked) {
+function updateLensToggleVisual(id, included) {
 	const lensElem = document.getElementById(`lens_${id}_c`);
 	if (lensElem) {
-		lensElem.innerHTML = checked
+		lensElem.innerHTML = included
 			? '<i class="fas fa-eye"></i>'
 			: '<i class="fas fa-eye-slash"></i>';
-		lensElem.checked = checked;
+		lensElem.checked = included;
 	} else {
 		// console.log(`Element lens_${id}_c not found`);
 	}
@@ -1076,16 +1077,17 @@ function handleTWIChange() {
 			}
 
 			if (isStatic) {
-				lens.checked = true;
-				toggleTemporal(i, false);
+				lens.included = true;
+				toggleTemporal(i, false, false);
 			} else if (isPartial) {
-				lens.checked = true;
-				toggleTemporal(i, true);
+				lens.included = true;
+				toggleTemporal(i, true, false);
 			} else {
-				lens.checked = false;
+				lens.included = false;
 			}
+			lens.checked = lens.included;
 
-			updateLensToggleVisual(i, lens.checked);
+			updateLensToggleVisual(i, lens.included);
 			if (lens.name == "aoi25") {console.log(`Lens ${lens.name} included: ${lens.included}, Static: ${isStatic}, Temporal: ${isPartial}`)};
 				
 		}
@@ -1112,16 +1114,22 @@ function duplicate_lens(id) {
 		newLens = new PolyLens(newId, originalLens.x[0], originalLens.y[0], groupId);
 		newLens.x = [...originalLens.x];
 		newLens.y = [...originalLens.y];
+
+		const [cx, cy] = computeCentroid(newLens.x, newLens.y);
+		newLens.centx = cx;
+		newLens.centy = cy;
 	} else if (type === 'ellipse') {
 		newLens = new EllipseLens(newId, originalLens.x1, originalLens.y1, groupId);
 		newLens.x2 = originalLens.x2;
 		newLens.y2 = originalLens.y2;
-		newLens.fix_up();
+		newLens.centx = (newLens.x1 + newLens.x2) / 2;
+		newLens.centy = (newLens.y1 + newLens.y2) / 2;
 	} else if (type === 'rect') {
 		newLens = new RectLens(newId, originalLens.x1, originalLens.y1, groupId);
 		newLens.x2 = originalLens.x2;
 		newLens.y2 = originalLens.y2;
-		newLens.fix_up();
+		newLens.centx = (newLens.x1 + newLens.x2) / 2;
+		newLens.centy = (newLens.y1 + newLens.y2) / 2;
 	} else {
 		console.warn("Unknown lens type; cannot duplicate");
 		return;
@@ -1240,4 +1248,15 @@ function duplicate_lens(id) {
 
 	generateAOIColorControls();
 	update_lens_colors();
+	newLens.draw()
+}
+
+function computeCentroid(xs, ys) {
+	let xSum = 0;
+	let ySum = 0;
+	for (let i = 0; i < xs.length; i++) {
+		xSum += xs[i];
+		ySum += ys[i];
+	}
+	return [xSum / xs.length, ySum / ys.length];
 }

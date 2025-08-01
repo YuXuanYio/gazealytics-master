@@ -229,6 +229,9 @@ function new_file(){
 
 		if( newdata.initialised ){ // new load is valid, accept it
 			var id = DATASETS.length; DATASETS.push(newdata); VIDEOS.push({}); cid = DATASETS.length;
+
+			selectedTwiMaxTime = Math.max(selectedTwiMaxTime, newdata.t_end);
+			selectedTwiMinTime = Math.min(selectedTwiMinTime, newdata.t_start);
 			
 			if (maxEndTime < newdata.t_end) {
 				maxEndTime = newdata.t_end;
@@ -560,10 +563,9 @@ function set_toi(data_id, twi_id){
 
 	if (toisOfSelectedTwi.length > 0 && !toisOfSelectedTwi.every(t => t.twi_id === twi_id)) {
 		toisOfSelectedTwi = [];
+		selectedTwiMaxTime = 0;
+		selectedTwiMinTime = 1000000000000000;
 	}
-
-	selectedTwiMaxTime = 0;
-	selectedTwiMinTime = 1000000000000000;
 
 	if (data.checked) {
 		for (let toi of data.tois) {
