@@ -35,15 +35,9 @@ function setVisibleLenses(arrayOfIds, colorMap = null) {
         }
     }
 
-	if (colorMap) {
-        lensColorMap = colorMap;
-		console.log('if colorMap', lensColorMap);
-    } else {
-        lensColorMap = {};
-		console.log('else colorMap', lensColorMap);
-    }
-
+    lensColorMap = colorMap || {};
     background_changed = true;
+    updateDraggerColors(colorMap);
 }
 
 let spatialsketch = (p) => {
@@ -1881,4 +1875,31 @@ function toggleHierarchyView() {
             console.log('Popup not ready yet');
         }
     }, 100);
+}
+
+function updateDraggerColors(colorMap) {
+    if (!colorMap) {
+        update_lens_colors();
+        return;
+    }
+
+    for (let i = 0; i < base_lenses.length; i++) {
+        const lens = base_lenses[i];
+        const dragger = document.getElementById(lens.id + "_dragger");
+        if (dragger && colorMap[lens.id]) {
+            const hex = colorMap[lens.id].replace('#', '');
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            dragger.style.backgroundColor = `rgba(${r}, ${g}, ${b}, 0.75)`;
+        } else if (dragger) {
+            const colorIndex = (TIME_DATA === 'all') 
+                ? (i % LENS_COLOURS.length)
+                : ((lens.group - 1) % LENS_COLOURS.length);
+            dragger.style.backgroundColor = `rgba(${rgbColor(LENS_COLOURS[colorIndex])}, .75)`;
+        }
+    }
+    
+    timeline_changed = true;
+    matrix_changed = true;
 }

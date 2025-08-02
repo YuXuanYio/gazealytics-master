@@ -270,6 +270,17 @@
                         }
                     });
                 }
+
+                // update main window
+                if (window.opener && window.opener.setVisibleLenses) {
+                    window.opener.setVisibleLenses(idsToShowOnCanvas, 
+                        colorByOption !== 'none' ? canvasColorMap : null);
+                    
+                    // update dragger colors
+                    if (window.opener.updateDraggerColors) {
+                        window.opener.updateDraggerColors(canvasColorMap);
+                    }
+                }
                 mainWindow.setVisibleLenses(idsToShowOnCanvas, colorByOption !== 'none' ? canvasColorMap : null);
             }
 
