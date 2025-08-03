@@ -279,9 +279,18 @@
                     // update dragger colors
                     if (window.opener.updateDraggerColors) {
                         window.opener.updateDraggerColors(canvasColorMap);
+                        // timeline_changed = true;
+                        // matrix_changed = true;
                     }
+
+                    // update timeline
+                    // if(window.opener.timeline) {
+                    //     window.opener.updateTimeline();
+                    // }
                 }
                 mainWindow.setVisibleLenses(idsToShowOnCanvas, colorByOption !== 'none' ? canvasColorMap : null);
+                // timeline_changed = true;
+                // matrix_changed = true;
             }
 
             // update eye icons in both popup and main window lensbox
