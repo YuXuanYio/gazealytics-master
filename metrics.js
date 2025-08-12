@@ -320,12 +320,17 @@ function compute_toi_metrics(data_id, toi_id){
 	for(j=toi.j_min; j<toi.j_max; j++){
 		var current_lens = metric_lenses.length;
 		for(var l=0; l<metric_lenses.length; l++){
-			if(metric_lenses[l].inside(fixs[j].x, fixs[j].y)){
+			// Only consider AOI if it is visible at this time
+			let valid_lens = metric_lenses[l].inside(fixs[j].x, fixs[j].y);
+			let inTimeRange = metric_lenses[l].timeRanges && metric_lenses[l].timeRanges.some(range =>
+				fixs[j].t >= range.start && fixs[j].t <= range.end
+			);
+			if(valid_lens && inTimeRange){
 				current_lens = l;
 			}
 		}
 		if(j == toi.j_min) {
-			// First fixation: start a visit if in AOI
+			// First fixation: start a visit if in AOI and visible
 			visit_lens = current_lens;
 			duration = fixs[j].dt;
 		} else if(current_lens == visit_lens && visit_lens < metric_lenses.length) {
@@ -346,28 +351,43 @@ function compute_toi_metrics(data_id, toi_id){
 		toi.visit_totals[visit_lens] += duration;
 	}
 
-	// handle visit durations at lense group level
+	// handle visit durations at lense group level (respect temporal visibility)
 	visit_lens = ORDERLENSEGROUPIDARRAYINDEX.length;
 	duration = 0;
-	for(j=toi.j_min; j<toi.j_max-1; j++){
+	for(j=toi.j_min; j<toi.j_max; j++){
 		let current_lens = ORDERLENSEGROUPIDARRAYINDEX.length;
-		for(let l=0; l<ORDERLENSEGROUPIDARRAYINDEX.length; l++){ 
+		for(let l=0; l<ORDERLENSEGROUPIDARRAYINDEX.length; l++){
 			for(let l2=0; l2<metric_lenses.length; l2++){
-				if(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]] != undefined && metric_lenses[l2].group == LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]].group && metric_lenses[l2].inside(fixs[j].x, fixs[j].y)){
-					current_lens = l;
+				let groupObj = LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]];
+				if(groupObj != undefined && metric_lenses[l2].group == groupObj.group && metric_lenses[l2].inside(fixs[j].x, fixs[j].y)){
+					// Only count if visible at this time
+					let inTimeRange = metric_lenses[l2].timeRanges && metric_lenses[l2].timeRanges.some(range =>
+						fixs[j].t >= range.start && fixs[j].t <= range.end
+					);
+					if(inTimeRange){
+						current_lens = l;
+					}
 				}
 			}
 		}
-		if( current_lens == visit_lens && visit_lens < ORDERLENSEGROUPIDARRAYINDEX.length ){
+		if(j == toi.j_min) {
+			visit_lens = current_lens;
+			duration = fixs[j].dt;
+		} else if(current_lens == visit_lens && visit_lens < ORDERLENSEGROUPIDARRAYINDEX.length) {
 			duration += (fixs[j].t - fixs[j-1].t) + fixs[j].dt;
-		}else if( visit_lens < ORDERLENSEGROUPIDARRAYINDEX.length ){
-			toi.lensegroup_visit_durations[visit_lens].push(duration); toi.lensegroup_visit_totals[visit_lens] += duration;
+		} else {
+			if(visit_lens < ORDERLENSEGROUPIDARRAYINDEX.length) {
+				toi.lensegroup_visit_durations[visit_lens].push(duration);
+				toi.lensegroup_visit_totals[visit_lens] += duration;
+			}
 			visit_lens = current_lens;
 			duration = fixs[j].dt;
-		}else{
-			visit_lens = current_lens;
-			duration = fixs[j].dt;
-		}		
+		}
+	}
+	// After loop: if last fixation was in lense group, record the visit
+	if(visit_lens < ORDERLENSEGROUPIDARRAYINDEX.length && duration > 0) {
+		toi.lensegroup_visit_durations[visit_lens].push(duration);
+		toi.lensegroup_visit_totals[visit_lens] += duration;
 	}
 	//swap comparison order, needed for medians
 	toi.lensmedian = []; 
