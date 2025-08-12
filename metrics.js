@@ -314,22 +314,36 @@ function compute_toi_metrics(data_id, toi_id){
 	}
 		
 	toi.j_max = j;
-	// visit durations
+	// visit durations (robust: count visits even if first fixation or last fixation is in AOI)
 	var visit_lens = metric_lenses.length;
 	var duration = 0;
-	for(j=toi.j_min; j<toi.j_max-1; j++){
+	for(j=toi.j_min; j<toi.j_max; j++){
 		var current_lens = metric_lenses.length;
-		for(var l=0; l<metric_lenses.length; l++){ if(metric_lenses[l].inside(fixs[j].x, fixs[j].y)){ current_lens = l; } }
-		if( current_lens == visit_lens && visit_lens < metric_lenses.length ){
+		for(var l=0; l<metric_lenses.length; l++){
+			if(metric_lenses[l].inside(fixs[j].x, fixs[j].y)){
+				current_lens = l;
+			}
+		}
+		if(j == toi.j_min) {
+			// First fixation: start a visit if in AOI
+			visit_lens = current_lens;
+			duration = fixs[j].dt;
+		} else if(current_lens == visit_lens && visit_lens < metric_lenses.length) {
 			duration += (fixs[j].t - fixs[j-1].t) + fixs[j].dt;
-		}else if( visit_lens < metric_lenses.length ){
-			toi.visit_durations[visit_lens].push(duration); toi.visit_totals[visit_lens] += duration;
+		} else {
+			// AOI changed or left AOI
+			if(visit_lens < metric_lenses.length) {
+				toi.visit_durations[visit_lens].push(duration);
+				toi.visit_totals[visit_lens] += duration;
+			}
 			visit_lens = current_lens;
 			duration = fixs[j].dt;
-		}else{
-			visit_lens = current_lens;
-			duration = fixs[j].dt;
-		}		
+		}
+	}
+	// After loop: if last fixation was in AOI, record the visit
+	if(visit_lens < metric_lenses.length && duration > 0) {
+		toi.visit_durations[visit_lens].push(duration);
+		toi.visit_totals[visit_lens] += duration;
 	}
 
 	// handle visit durations at lense group level
