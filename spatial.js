@@ -38,6 +38,10 @@ function setVisibleLenses(arrayOfIds, colorMap = null) {
     lensColorMap = colorMap || {};
     background_changed = true;
     updateDraggerColors(colorMap);
+	// updateTimelineColors(colorMap);
+	
+	timeline_changed = true;
+    matrix_changed = true;
 }
 
 let spatialsketch = (p) => {
@@ -1882,13 +1886,6 @@ function updateDraggerColors(colorMap) {
         update_lens_colors();
         return;
     }
-	
-	// const groups = [...new Set(base_lenses.map(lens => lens.h1).filter(g => g !== 0))];
-
-	// for (const group of groups) {
-	// 	LENS_COLOURS[(group - 1) % LENS_COLOURS.length] = this.value;
-	// 	update_colour_vals();
-	// }
 
     for (let i = 0; i < base_lenses.length; i++) {
         const lens = base_lenses[i];
@@ -1910,13 +1907,3 @@ function updateDraggerColors(colorMap) {
     timeline_changed = true;
     matrix_changed = true;
 }
-
-/* function temp() {
-	const groups = [...new Set(base_lenses.map(lens => lens.h1).filter(g => g !== 0))];
-
-	for (const group of groups) {
-		LENS_COLOURS[(group - 1) % LENS_COLOURS.length] = this.value;
-		update_colour_vals();
-	}
-}
-*/

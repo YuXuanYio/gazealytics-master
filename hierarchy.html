@@ -279,18 +279,35 @@
                     // update dragger colors
                     if (window.opener.updateDraggerColors) {
                         window.opener.updateDraggerColors(canvasColorMap);
-                        // timeline_changed = true;
-                        // matrix_changed = true;
-                    }
 
-                    // update timeline
-                    // if(window.opener.timeline) {
-                    //     window.opener.updateTimeline();
-                    // }
+                    }
+                // make timeline use the same colors
+                const w = window.opener;
+                if (w && Array.isArray(w.lenses)) {
+                // stash originals once
+                if (!w.__origLensCol) w.__origLensCol = new Map();
+
+                w.lenses.forEach(lens => {
+                    if (!w.__origLensCol.has(lens.id) && typeof lens.col === 'function') {
+                    w.__origLensCol.set(lens.id, lens.col.bind(lens));
+                    }
+                    lens.col = function(alpha) {
+                    const hex = (colorByOption !== 'none' && canvasColorMap[lens.id]) 
+                        ? canvasColorMap[lens.id] : null;
+                    if (hex && typeof w.makeColor === 'function') {
+                        return w.makeColor(alpha, hex);     
+                    }
+                    // fall back to original behavior
+                    return w.__origLensCol.get(lens.id)(alpha);
+                    };
+                });
+
+                // ask timeline to redraw on next frame
+                if ('timeline_changed' in w) w.timeline_changed = true;
+                }
+
                 }
                 mainWindow.setVisibleLenses(idsToShowOnCanvas, colorByOption !== 'none' ? canvasColorMap : null);
-                // timeline_changed = true;
-                // matrix_changed = true;
             }
 
             // update eye icons in both popup and main window lensbox
