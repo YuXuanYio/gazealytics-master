@@ -3,6 +3,8 @@ let TIMELINE_CANVAS;
 let TIMELINE_draggableRecty = 0;
 let TIMELINE_draggingY = false; // Is the object being dragged?
 let datname;
+let canvasWidth;
+let show_note_legend = false; let show_note_observer_legend = false; 
 
 let timelinesketch = (p) => {
 	//PFont  f; PFont  fb; // the font used for general text writing applications. defined in setup
@@ -34,8 +36,7 @@ let timelinesketch = (p) => {
 
 	p.setup = () => {
 		// put setup code here		
-		timeline_canvas_height = p.windowHeight * (1-SPATIAL_CANVAS_HEIGHT_PERCENTAGE-0.04);
-		
+		timeline_canvas_height = p.windowHeight * (1-SPATIAL_CANVAS_HEIGHT_PERCENTAGE-0.04);		
 		document.getElementById('pj2').style.height = Math.floor(timeline_canvas_height)+'px';
 		TIMELINE_CANVAS = p.createCanvas(Math.floor(spatial_width), Math.floor(timeline_canvas_height));
 		
@@ -51,9 +52,7 @@ let timelinesketch = (p) => {
 				TIMELINE_draggingY = true;
 				// If so, keep track of relative location of click to corner of rectangle
 				p.offsetY = TIMELINE_draggableRecty-(timeline_canvas_height-p.mouseY);
-		
 			}
-
 			p.mouseIsPressed_timeline = true; 
 			beginX = p.mouseX; 
 			currentPressedX = p.mouseX;
@@ -70,11 +69,11 @@ let timelinesketch = (p) => {
 				}
 				if(min_id != data.toi_id){ press_toi = min_id; }
 				else{ press_toi = -1; }				
-			}
+			}	
 		});
 
 		TIMELINE_CANVAS.mouseOver(() => {
-			p.mouseIsOver_timeline = true;
+			p.mouseIsOver_timeline = true;			
 		});
 
 		TIMELINE_CANVAS.mouseOut(() => { p.mouseIsOver_timeline = false; });
@@ -166,9 +165,11 @@ let timelinesketch = (p) => {
 		let longdur = 0;
 		for(let v=0; v<VALUED.length; v++){
 			let dat = DATASETS[VALUED[v]];
+
 			longdur = Math.max(longdur, dat.tmax - dat.tmin);
 		}
 		longest_duration = longdur;
+		
 		TIMELINE.longest_duration = longest_duration; //assigning the value to global variable of longest_duration so that it can be accessed from all files
 		
 
@@ -183,15 +184,15 @@ let timelinesketch = (p) => {
 				TimeLine.colorMode(p.HSB, 100);
 				TimeLine.background(black(100));
 				if(TIME_DATA=='lens'){
-					draw_time_lens(TimeLine);
+					draw_time_lens(TimeLine);					
 				}else if(TIME_DATA=='data'){
 					draw_time_data(TimeLine);
 				}else if(TIME_DATA=='all'|| TIME_DATA=='group'){
 					draw_time_all(TimeLine);
 				}else if(TIME_DATA=='saccades'){
-					draw_time_saccades(TimeLine);					
+					draw_time_saccades(TimeLine);
 				}else if(TIME_DATA=='saccadetype'){
-					draw_time_saccadetype(TimeLine);
+					draw_time_saccadetype(TimeLine);					
 				}	
 			}
 			p.image(TimeLine, 200, 0);
@@ -441,7 +442,7 @@ let timelinesketch = (p) => {
 				let datname='';
 				let toiname='';
 				let row = 0;
-				let k=0;
+				let k=0;				
 				if( selected_data != -1 ){
 					data = DATASETS[selected_data];
 				}
@@ -536,17 +537,20 @@ let timelinesketch = (p) => {
 
 				p.strokeWeight(0); 
 			}
-			if(SPATIAL.mouseIsOver_spatial){ p.do_spatial_overlay(); }
+			if(SPATIAL.mouseIsOver_spatial) { 
+				p.do_spatial_overlay(); 
+			 }
 		}catch (error) { console.error(error); timeline_changed = true; }
 	};
 
+	// tested
 	p.do_spatial_overlay = () => {
 		if( selected_data == -1 || DATASETS[ selected_data ] == undefined){ return; }
 		let dat = DATASETS[ selected_data ]; fixs = dat.fixs; toi = dat.tois[ dat.toi_id ];
 		p.fill(cy(80, dat.group)); 
 		p.noStroke();
 		if(dat.toi_id == -1) return;
-		for(let i= toi.j_min; i< toi.j_max; i++){
+		for(let i= toi.j_min; i< toi.j_max; i++){			
 			if(fixs[i] != undefined) {
 				let dist = (fixs[i].x*(spatial_width/WIDTH) - SPATIAL.mouseX)**2 + (fixs[i].y*(spatial_height/HEIGHT) - SPATIAL.mouseY)**2;
 				let size = Math.exp(FIX_SIZE) * Math.sqrt(fixs[i].dt);
@@ -569,7 +573,7 @@ let timelinesketch = (p) => {
 							p.rect( 100 + ts, timeline_highlight_position, td, 10 );
 						}else{
 							p.stroke(cy(80, dat.group)); 
-							p.line(100 + ts, timeline_highlight_position, 100+ts, timeline_highlight_position+10);
+							p.line(100 + ts, timeline_highlight_position, 100+ts, timeline_highlight_position+10);							
 						}
 					}
 				}
@@ -961,11 +965,11 @@ let draw_time_all = (canvas) => {
 		}
 		
 		if(TIMELINE_CANVAS.num_of_rows > 0) {
-			h2 = canvas.height/TIMELINE_CANVAS.num_of_rows; 			
-
+			h2 = canvas.height/TIMELINE_CANVAS.num_of_rows;
+			
 			for(let k=0, row=0; k<VALUED.length && row<TIMELINE_CANVAS.num_of_rows; k++){
-				let data = DATASETS[VALUED[k]]; 
-	
+				let data = DATASETS[VALUED[k]]; // data.name == PID
+				
 				if(data == undefined || !data.included)
 					continue;
 				if(DAT_MODE == 1 && data.group != selected_grp)
@@ -1011,6 +1015,11 @@ let draw_time_all = (canvas) => {
 						if(data.fixs.length == 0){
 							continue;					
 						}
+
+						if (data.notes) {
+							addBookmarkButton(data, h2top, h2, canvas, toi);
+						}
+					
 						for(let j = toi.j_min; j < toi.j_max; j++){
 							if(data.fixs[j] != undefined && (data.fixs[j].t - toi.tmin)/toi_longest_duration < TIME_ANIMATE) {
 								
@@ -1618,3 +1627,455 @@ let do_matrix_timeline_overlay = (p) => {
 		aggregate_histogram_across_dat_twi(p, data, false, null);
 	}
 };
+
+let bookmarks = [];
+const observers = {};
+let observerColourIndex = 0;
+let DATA_G;
+let H2TOP_G;
+let H2_G;
+let CANVAS_G;
+let TOI_BOOKMARK_G;
+function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
+    let start_time = toi_bookmark.tmin;
+    let end_time = toi_bookmark.tmax;
+    let participantData = data.notes;
+    let max_duration = end_time - start_time;
+    let tolerancePercentage = max_duration * 0.05;
+	DATA_G = data;
+	H2TOP_G = h2top;
+	H2_G = h2;
+	CANVAS_G = canvas;
+	TOI_BOOKMARK_G = toi_bookmark;
+	
+    removeBookmarkButton(data, toi_bookmark);
+    const grouped_events = {};
+    const grouped_within_tolerance = {};
+
+    for (let i = 0; i < participantData.events.length; i++) {
+        let event = participantData.events[i];
+        if (event.visibleOnTimeline === false || event.included === false) {
+            continue;
+        }
+        let observerName = event.observer;
+        let selectedBookmark;
+        event.eventId = i;
+        selectedBookmark = event.eventId;
+
+        if (!observers[observerName]) {
+            observers[observerName] = OBSERVERS[observerColourIndex % OBSERVERS.length];
+            observerColourIndex++;
+        }
+
+        if(!grouped_events[event.timestampMs]) {
+            grouped_events[event.timestampMs] = [];
+        }
+
+        grouped_events[event.timestampMs].push(event);    
+    }
+
+    let sorted_timestamps = Object.keys(grouped_events).map(Number).sort((a, b) => a - b);
+
+    let currentGroup = [];
+    let currentStartTimestamp = sorted_timestamps[0];
+
+    currentGroup.push(...grouped_events[currentStartTimestamp]);
+
+    for (let i = 1; i < sorted_timestamps.length; i++) {
+        let currentTimestamp = sorted_timestamps[i];
+        let previousTimestamp = sorted_timestamps[i - 1];
+
+        if((currentTimestamp - previousTimestamp) <= tolerancePercentage) {
+            currentGroup.push(...grouped_events[currentTimestamp]);
+        } else {
+            grouped_within_tolerance[currentStartTimestamp] = currentGroup;
+            currentStartTimestamp = currentTimestamp;
+            currentGroup = [...grouped_events[currentTimestamp]];
+        }
+    }
+    grouped_within_tolerance[currentStartTimestamp] = currentGroup;
+
+    Object.entries(grouped_within_tolerance).forEach(([timestampMs, events]) => {
+        let ts = (canvas.width * (timestampMs - start_time)) / max_duration;
+
+        if (ts >= 0 && ts <= canvas.width) {
+            let start_y = h2top;
+            let end_y = h2top + h2;
+            let center_y = start_y + (end_y - start_y) / 2;    
+
+            events.forEach((event) => {
+                let button = document.createElement("button");
+                let line = document.createElement("div");
+                let canvasRect = TIMELINE_CANVAS.elt.getBoundingClientRect();
+                let diff = (TIMELINE_CANVAS.width - canvas.width) / 3;
+
+                line.className = `timeline-line-${data.name}-toi-${toi_bookmark.twi_id}`;
+                line.style.position = "absolute";    
+
+                line.style.left = `${canvasRect.left + (diff * 2) + ts}px`;
+                line.style.top = `${canvasRect.top + start_y}px`;
+                line.style.width = "1px";
+                line.style.height = `${end_y - start_y}px`;
+                line.style.backgroundColor = "black";
+                line.style.zIndex = "1";
+
+				let start_x = ts;
+				setTimeout(() => {
+					canvas.line(start_x, start_y, start_x, end_y);
+					canvas.stroke("black");
+					canvas.strokeWeight(1);
+				});
+
+                button.className = `timeline-bookmark-${data.name}-toi-${toi_bookmark.twi_id}`;
+                button.setAttribute("data-observer", event.observer);
+                button.setAttribute("data-event-type", event.type);
+                button.setAttribute("data-event-detail-id", event.eventId);
+
+                button.style.position = "absolute";    
+                button.style.left = `${canvasRect.left + (diff * 2) + ts - 7.5}px`;
+                button.style.top = `${canvasRect.top + center_y - 7.5}px`;
+                button.style.width = "15px";
+                button.style.height = "15px";
+                button.style.background = observers[event.observer];
+                
+                button.style.border = "none";
+                button.style.cursor = "pointer";
+                button.style.borderRadius = "5px";
+                button.style.zIndex = "2";    
+                
+				let toggleButton;
+				if(events.length > 1) {
+					toggleButton = document.createElement('button');
+					toggleButton.className = `timeline-toggle-${data.name}-toi-${toi_bookmark.twi_id}`;
+					toggleButton.innerHTML = events.length;
+					toggleButton.style.position = "absolute";
+					toggleButton.style.left = `${canvasRect.left + (diff * 2) + ts - 8.5}px`;
+					toggleButton.style.top = `${canvasRect.top + center_y - 35}px`;
+					toggleButton.style.zIndex = "3";
+					document.body.appendChild(toggleButton);
+		
+					let noteIndex = 0;
+					toggleButton.addEventListener("click", () => {
+						noteIndex = (noteIndex + 1) % events.length;
+						let currentNote = events[noteIndex];
+						currentNote.eventId = participantData.events.findIndex(e => e.occuredTimestamp === currentNote.occuredTimestamp && e.content === currentNote.content);
+						selectedBookmark = currentNote.eventId;    
+						button.style.background = observers[currentNote.observer];
+						tooltip.innerHTML = `Timestamp: ${currentNote.occuredTimestamp}<br>Type: ${currentNote.type}<br>Details: ${currentNote.content}<br>Observer: ${currentNote.observer}`;
+					});
+				}
+                
+                let tooltip = document.createElement("tooltip");
+                tooltip.className = "tooltip";
+                tooltip.style.position = "absolute";
+                tooltip.style.padding = "10px 10px";
+                tooltip.style.color = "black";
+                tooltip.style.borderRadius = "5px";
+                tooltip.style.fontSize = "14px";
+                tooltip.style.fontWeight = "bold";
+                tooltip.style.fontFamily = "Calibri";
+                tooltip.style.visibility = "hidden";
+                tooltip.style.transition = "opacity 0.3s";
+                tooltip.style.opacity = "0";
+                tooltip.style.zIndex = "1000";
+                tooltip.style.backgroundColor = "white";
+                tooltip.innerHTML = `Timestamp: ${event.occuredTimestamp}<br>Type: ${event.type}<br>Details: ${event.content}<br>Observer: ${event.observer}`;
+                
+                button.addEventListener("mouseenter", () => {
+                    tooltip.style.visibility = "visible";
+                    tooltip.style.opacity = "1";
+                    tooltip.style.left = `${parseFloat(button.style.left) + 20}px`;
+                    tooltip.style.top = `${parseFloat(button.style.top) - 10}px`;
+                    if(!button.classList.contains('selected_bookmark')) {
+                        button.style.outline = "2px solid yellow";
+                    }
+                });
+    
+                button.addEventListener("mouseleave", () => {
+                    tooltip.style.visibility = "hidden";
+                    tooltip.style.opacity = "0";
+                    if(!button.classList.contains('selected_bookmark')) {
+                        button.style.outline = "none";
+                    }
+                });
+
+                button.addEventListener("click", () => {
+                    document.querySelectorAll("[class^='timeline-bookmark-']").forEach(bookmarkButton => {
+                        bookmarkButton.classList.remove('selected_bookmark');
+                        bookmarkButton.style.outline = "none";
+                    });
+                    button.classList.add("selected_bookmark");
+                    button.style.outline = "2px dashed green"
+                    select_note(selectedBookmark);
+                });
+
+                document.addEventListener("DOMContentLoaded", filter_observers_by_colour());
+				bookmarks.push({
+					timestamp: event.timestampMs,
+					start_time,
+					max_duration,
+					button,
+					line,
+					toggleButton
+				});
+				
+                document.body.appendChild(line);
+                document.body.appendChild(button);
+                document.body.appendChild(tooltip);
+            });
+        }
+    });
+}
+
+function updateBookmarkButton(time_animate) {
+	bookmarks.forEach(bookmark => {
+		const { timestamp, start_time, max_duration, button, line, toggleButton } = bookmark; 
+		let scaledTime = (timestamp - start_time) / max_duration;		
+		
+		if(button && line) {
+			if(scaledTime >= time_animate) {
+				button.style.visibility = "hidden";
+				line.style.visibility = "hidden";
+				if(toggleButton) {
+					toggleButton.style.visibility = "hidden";
+				}
+			}
+		}
+	})
+}
+
+function removeBookmarkButton(data, toi_bookmark) {
+	let datasetClass = `timeline-bookmark-${data.name}-toi-${toi_bookmark.twi_id}`;
+	let lineClass = `timeline-line-${data.name}-toi-${toi_bookmark.twi_id}`;
+	let toggleButtonClass = `timeline-toggle-${data.name}-toi-${toi_bookmark.twi_id}`;
+
+	document.querySelectorAll(`.${lineClass}`).forEach((line) => line.remove());
+	document.querySelectorAll(`.${datasetClass}`).forEach((btn) => btn.remove());
+	document.querySelectorAll(`.${toggleButtonClass}`).forEach((btn) => btn.remove());
+}
+
+function removeAllBookmarkButtons() {
+	DATASETS.forEach((data) => {
+		data.tois.forEach((toi) => {
+			removeBookmarkButton(data, toi);
+		});
+	});
+}
+
+function toggle_notes() {
+	// get all the html elements starting with the following classnames
+    let toggleButton = document.getElementById("observer_notes");
+    let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
+	let lines = document.querySelectorAll("[class^='timeline-line-']");
+	let multiNotesButton = document.querySelectorAll("[class^='timeline-toggle-']");
+    
+	// to switch off the notes, lines and multiNotes functions in the timeline
+    if (toggleButton.dataset.toggle === "on") {
+        bookmarks.forEach((btn) => btn.style.display = "none");
+		lines.forEach((line) => line.style.display = "none");
+		multiNotesButton.forEach((btn) => btn.style.display = "none");
+        toggleButton.dataset.toggle = "off";
+        toggleButton.innerHTML = "<i class='fas fa-times-circle'></i>";
+		toggleButton.classList.remove("toggle-on");
+		toggleButton.classList.add("toggle-off");
+    } else {
+        bookmarks.forEach((btn) => btn.style.display = "block");
+		lines.forEach((line) => line.style.display = "block");
+		multiNotesButton.forEach((btn) => btn.style.display = "block");
+        toggleButton.dataset.toggle = "on";
+        toggleButton.innerHTML = "<i class='fas fa-clock'></i>";
+		toggleButton.classList.remove("toggle-off");
+		toggleButton.classList.add("toggle-on");
+    }
+}
+
+// to match all the observers to the observer legend
+function colour_match_observer(observers) {
+    let container = document.getElementById('legend_container');
+    container.innerHTML = "";
+
+    let title = document.createElement('h3');
+    title.textContent = "Observer Legend";
+    title.style.textAlign = "center";
+    title.style.marginBottom = "10px";
+    container.appendChild(title);
+
+    let legendRow = document.createElement('ul');
+	legendRow.style.display = "flex";
+	legendRow.style.flexDirection = "row";
+	legendRow.style.gap = "15px";
+    Object.entries(observers).forEach(([observerName, color]) => {
+        let observerDiv = document.createElement('div');
+		observerDiv.style.display = "flex";
+        observerDiv.style.alignItems = "center";
+        observerDiv.style.marginBottom = "5px";
+		observerDiv.style.justifyContent = "center";
+
+        let colorIndicator = document.createElement('div');
+        colorIndicator.style.width = "15px";
+        colorIndicator.style.height = "15px";
+        colorIndicator.style.borderRadius = "5px"; 
+        colorIndicator.style.background = color; 
+        colorIndicator.style.marginRight = "10px";
+        observerDiv.style.alignItems = "center";
+		observerDiv.style.justifyContent = "center";
+        let observerText = document.createElement('span');
+        observerText.textContent = observerName;
+
+        observerDiv.appendChild(colorIndicator);
+        observerDiv.appendChild(observerText);
+        legendRow.appendChild(observerDiv);
+    });
+
+    container.appendChild(legendRow);
+}
+
+// function to filter bookmark colours
+function filter_observers_by_colour() {
+	let sameCheckbox = document.querySelector('input[value="same"]');
+	let differentCheckbox = document.querySelector('input[value="different"]');
+	let typeCheckbox = document.querySelector('input[value="note_type_colour"]');
+
+	sameCheckbox.addEventListener('change', () => {
+		if (sameCheckbox.checked) {
+			differentCheckbox.checked = false;
+			typeCheckbox.checked = false;
+			show_note_legend = false;
+			show_note_observer_legend = false;
+			change_all_bookmarks_to_grey();
+		}
+	})
+
+	differentCheckbox.addEventListener('change', () => {
+		if (differentCheckbox.checked) {
+			sameCheckbox.checked = false;
+			typeCheckbox.checked = false;
+			show_note_legend = false;
+			show_note_observer_legend = true;
+			change_all_bookmarks_to_original();
+		}
+	});
+
+	typeCheckbox.addEventListener('change', () => {
+		if (typeCheckbox.checked) {
+			sameCheckbox.checked = false;
+			differentCheckbox.checked = false;
+			show_note_legend = true;
+			show_note_observer_legend = false;
+			filter_by_note_type_observer();
+		}
+	});
+}
+
+// function to change the bookmarks to default grey
+function change_all_bookmarks_to_grey() {
+	let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
+	bookmarks.forEach(bookmark => {
+		bookmark.style.background = "#696b6a";
+		bookmark.style.border = "1px solid black";
+	});
+	add_note_legend();
+	updateDefaultNoteColors();
+}
+
+// function to change the bookmark colours to filter by observer 
+function change_all_bookmarks_to_original() {
+	let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
+	bookmarks.forEach(bookmark => {
+		let currentObserver = bookmark.getAttribute("data-observer");
+		let originalColour = observers[currentObserver];
+		if (originalColour) {
+			bookmark.style.background = originalColour;
+			bookmark.style.border = originalColour;
+		}
+	});
+	add_note_legend();
+	update_observer_colors();
+}
+
+let event_colour_map = {};
+
+// function to change the bookmark colours to filter by note type
+function filter_by_note_type_observer() {
+	for(let i=0; i<noteTypes.length; i++) {
+		event_colour_map[noteTypes[i]] = OBSERVERS[i];	
+	}
+	
+	let bookmarks = document.querySelectorAll("[class^='timeline-bookmark-']");
+	bookmarks.forEach(bookmark => {
+		let observer = bookmark.getAttribute("data-event-type");
+		let typeColour = event_colour_map[observer];
+		if (typeColour) {
+			bookmark.style.background = typeColour;
+			bookmark.style.border = typeColour;
+			add_note_legend();
+		}
+	})
+	updateTypeColors();
+}
+
+// function to add a legend to when colour is filtered by note type
+function add_note_legend() {
+	let container = document.getElementById('note_legend');
+	container.innerHTML = "";
+
+	if(show_note_legend === true) {
+		let legendRow = document.createElement("ul");
+		legendRow.style.display = "flex";
+		legendRow.style.flexDirection = "row";
+		legendRow.style.gap = "15px";
+	
+		Object.entries(event_colour_map).forEach(([noteType, colour]) => {
+			let observerDiv = document.createElement('div');
+			observerDiv.style.display = "flex";
+			observerDiv.style.alignItems = "center";
+			observerDiv.style.marginBottom = "5px";
+			observerDiv.style.justifyContent = "center";
+	
+			let colorIndicator = document.createElement('div');
+			colorIndicator.style.width = "15px";
+			colorIndicator.style.height = "15px";
+			colorIndicator.style.borderRadius = "5px"; 
+			colorIndicator.style.background = colour; 
+			colorIndicator.style.marginRight = "10px";
+			observerDiv.style.alignItems = "center";
+			observerDiv.style.justifyContent = "center";
+			let observerText = document.createElement('span');
+			observerText.textContent = noteType;
+	
+			observerDiv.appendChild(colorIndicator);
+			observerDiv.appendChild(observerText);
+			legendRow.appendChild(observerDiv);
+		});
+		container.appendChild(legendRow);
+	} else if (show_note_observer_legend === true) {
+		let legendRow = document.createElement("ul");
+		legendRow.style.display = "flex";
+		legendRow.style.flexDirection = "row";
+		legendRow.style.gap = "15px";
+	
+		Object.entries(observers).forEach(([observer, colour]) => {
+			let observerDiv = document.createElement('div');
+			observerDiv.style.display = "flex";
+			observerDiv.style.alignItems = "center";
+			observerDiv.style.marginBottom = "5px";
+			observerDiv.style.justifyContent = "center";
+	
+			let colorIndicator = document.createElement('div');
+			colorIndicator.style.width = "15px";
+			colorIndicator.style.height = "15px";
+			colorIndicator.style.borderRadius = "5px"; 
+			colorIndicator.style.background = colour; 
+			colorIndicator.style.marginRight = "10px";
+			observerDiv.style.alignItems = "center";
+			observerDiv.style.justifyContent = "center";
+			let observerText = document.createElement('span');
+			observerText.textContent = observer;
+	
+			observerDiv.appendChild(colorIndicator);
+			observerDiv.appendChild(observerText);
+			legendRow.appendChild(observerDiv);
+		});
+		container.appendChild(legendRow);
+	}
+}

@@ -45,6 +45,7 @@ function load_image(){
     }
 	reader.readAsDataURL(f);
 }
+
 // saving a dataset
 function save_data(id){
 	data = DATASETS[id]; fixs = data.fixs;
@@ -73,6 +74,7 @@ function download_file(filename, text) {
 
   document.body.removeChild(element);
 }
+
 function download_toi(data_id){
 	filename = DATASETS[data_id].name + '.tsv';
 	
@@ -90,6 +92,63 @@ function download_toi(data_id){
 	}
 	download_file(filename, file);
 }
+
+async function download_video() {
+    const { createFFmpeg, fetchFile } = FFmpeg;
+    const ffmpeg = createFFmpeg({ log: true });
+
+    const selectedDataId = document.getElementById('datasets_selection').value;
+
+    if (!VIDEOS[selectedDataId] || !VIDEOS[selectedDataId].videoobj || !VIDEOS[selectedDataId].videoobj.src) {
+        alert("No video data to save.");
+        return;
+    }
+
+    const selectedToiId = DATASETS[selectedDataId].toi_id;
+    const selectedToi = DATASETS[selectedDataId].tois[selectedToiId];
+
+    const selectedToiStart = selectedToi.real_range[0] / 1000;
+    const selectedToiEnd = selectedToi.real_range[1] / 1000;
+
+    const videoSrc = VIDEOS[selectedDataId].videoobj.src;
+
+    await ffmpeg.load();
+
+    const videoFile = await fetch(videoSrc).then((res) => res.blob());
+
+    ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(videoFile));
+
+    const outputFile = 'output.mp4';
+
+	console.log(selectedToiStart, selectedToiEnd);
+	await ffmpeg.run(
+		'-ss', selectedToiStart.toString(),  // twi start
+		'-to', selectedToiEnd.toString(),    // twi end
+		'-i', 'input.mp4',   // input
+		'-r', '30',   // forcing frame rate to 30 fps, video corrupts without it
+		'-c:v', 'copy',  // copy video 
+		'-c:a', 'copy',  // copy audio (potentiall not needed, double check)
+		'-movflags', 'faststart',  // optimising for playback
+		'output.mp4'                         
+	);
+	
+    const trimmedVideo = ffmpeg.FS('readFile', outputFile);
+
+    // blob to download new video
+    const videoBlob = new Blob([trimmedVideo.buffer], { type: 'video/mp4' });
+    const videoURL = URL.createObjectURL(videoBlob);
+
+    const videoName = `${DATASETS[selectedDataId].name || "video_trimmed"}.mp4`;
+    const anchor = document.createElement('a');
+    anchor.href = videoURL;
+    anchor.download = videoName;
+    anchor.style.display = 'none';
+
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+}
+
 
 function list_tois(){
 	file = 'data_id\tdata_name\tgroup\tstart_time\tend_time\ttwi_id\ttoi_name\tstart_time\tend_time' + '\n';

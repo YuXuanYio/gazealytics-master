@@ -432,6 +432,28 @@ function load_controls(){
 		FORE_SIZE = parseFloat(document.getElementById("fore_size_sl").noUiSlider.get());
 		foreground_changed = true; 
 	}
+  
+	if( !TIMELINE_SLIDER_DISABLED && TIME_ANIMATE != parseFloat(document.getElementById("time_animate_sl").noUiSlider.get())){
+		TIME_ANIMATE = parseFloat(document.getElementById("time_animate_sl").noUiSlider.get());
+		let data = DATASETS[selected_data]; 
+		if (VIDEOS[selected_data].coords) {
+			let video_coords_index = Math.floor(TIME_ANIMATE * (VIDEOS[selected_data].coords.length - 1));
+			currVidLens.move(VIDEOS[selected_data].coords[video_coords_index].x1, VIDEOS[selected_data].coords[video_coords_index].y1, VIDEOS[selected_data].coords[video_coords_index].x2, VIDEOS[selected_data].coords[video_coords_index].y2);
+		}
+
+		//update video with the time
+		if(VIDEO_LINKING && selected_data != -1 && DATASETS[selected_data] != null && DATASETS[selected_data] != undefined && 
+			currentVideoObj != null && currentVideoObj != undefined) {
+				
+			//get time from dataset
+			let data = DATASETS[selected_data]; 
+			let toi = null
+			if (data.tois_id == -1) {
+				toi = data.tois[ data.toi_id ];
+			} else {
+				toi = data.tois[0];
+			}
+
 	let currentScrubbedTime = selectedTwiMinTime + (selectedTwiMaxTime - selectedTwiMinTime) * TIME_ANIMATE;
 	if( !TIME_PLAY && TIME_ANIMATE != parseFloat(document.getElementById("time_animate_sl").noUiSlider.get())){
 		TIME_ANIMATE = parseFloat(document.getElementById("time_animate_sl").noUiSlider.get());
@@ -451,6 +473,11 @@ function load_controls(){
 						ts = (TimeLine.width * (data.fixs[j].t - data.tmin)) / longest_duration;
 				}
 			}
+					//set video time
+			VIDEOS[selected_data].videoobj.time((ts*VIDEOS[selected_data].videoobj.duration())/TimeLine.width);
+		}
+		background_changed = true; timeline_changed = true;
+	} else if( TIME_PLAY && TIME_ANIMATE < 1.0 ) {
 
 			let start = selectedTwiMinTime / 1000;
 			let end = selectedTwiMaxTime / 1000;
@@ -476,14 +503,25 @@ function load_controls(){
 			const t = currentVideoObj.time();
 			TIME_ANIMATE = (t - selectedTwiMinTime / 1000) / ((selectedTwiMaxTime - selectedTwiMinTime) / 1000);
 			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );
+			if (VIDEOS[selected_data].coords) {
+				let video_coords_index = Math.floor(TIME_ANIMATE * (VIDEOS[selected_data].coords.length - 1));
+				currVidLens.move(VIDEOS[selected_data].coords[video_coords_index].x1, VIDEOS[selected_data].coords[video_coords_index].y1, VIDEOS[selected_data].coords[video_coords_index].x2, VIDEOS[selected_data].coords[video_coords_index].y2);
+			}
 		}
 		else {
+			TIME_ANIMATE = Math.min( 1.0, TIME_ANIMATE + 0.01 );
+			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );	
+			if (VIDEOS[selected_data].coords) {
+				let video_coords_index = Math.floor(TIME_ANIMATE * (VIDEOS[selected_data].coords.length - 1));
+				currVidLens.move(VIDEOS[selected_data].coords[video_coords_index].x1, VIDEOS[selected_data].coords[video_coords_index].y1, VIDEOS[selected_data].coords[video_coords_index].x2, VIDEOS[selected_data].coords[video_coords_index].y2);
+			}	
 			TIME_ANIMATE = Math.min( 1.0, TIME_ANIMATE + 0.002 );
 			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );		
 		}
 		handleAOITimeChange(currentScrubbedTime, false);
 		background_changed = true; timeline_changed = true;
 	}
+	updateBookmarkButton(TIME_ANIMATE);
 	if( SACC_BRIGHT != parseFloat(document.getElementById("sacc_bright_sl").noUiSlider.get())){
 		SACC_BRIGHT = parseFloat(document.getElementById("sacc_bright_sl").noUiSlider.get());
 		midground_changed = SHOW_SACCADE;
@@ -986,6 +1024,8 @@ function click_showtwis(){
 	document.getElementById('showtwis').classList.add( 'toggle-on' );
 	var hidden = document.getElementById('showtwis').innerHTML.includes("slash");
 	if( hidden ){
+		draw_time_all(TimeLine);
+		select_twi(0)
 		document.getElementById('showtwis').innerHTML = " <i class='fas fa-eye'></i>  ";
 		for(var i=0; i<base_twis.length; i++){
 			if(base_twis[i].included) {
@@ -994,6 +1034,7 @@ function click_showtwis(){
 			}			
 		}
 	}else{
+		removeAllBookmarkButtons();
 		document.getElementById('showtwis').innerHTML = " <i class='fas fa-eye-slash'></i> ";
 		for(var i=0; i<base_twis.length; i++){
 			if(base_twis[i].included) {
@@ -1009,8 +1050,15 @@ function not_all_eye(id){
 }
 function click_notes(){
 	SHOW_NOTES = document.getElementById('notes').innerHTML.includes( "slash" );
-	if( SHOW_NOTES ){document.getElementById('notes').innerHTML = " <i class='fas fa-eye'></i> "}
-	else{document.getElementById('notes').innerHTML = " <i class='fas fa-eye-slash'></i> "}
+	if( SHOW_NOTES ) {
+		document.getElementById('notes').innerHTML = " <i class='fas fa-eye'></i> ";
+		document.getElementById('notes').classList.remove("toggle-off");
+		document.getElementById('notes').classList.add('toggle-on');
+	} else {
+		document.getElementById('notes').innerHTML = " <i class='fas fa-eye-slash'></i> ";
+		document.getElementById('notes').classList.remove("toggle-on");
+		document.getElementById('notes').classList.add('toggle-off');
+	}
 }
 function control_state(val){
 	if( CONTROL_STATE == val ){ CONTROL_STATE = ""; }
@@ -1732,7 +1780,45 @@ function export_spatial_canvas(){
 
 	if(EXPORT_METRIC_CANVAS)
 		MATRIX.save(matrixCanvas1, "metrics.jpg");
+	// exportCombinedCanvas();
 }
+
+function exportCombinedCanvas() {
+	console.log(typeof html2canvas);
+
+    const parentElement = document.getElementById("pj2");
+
+	console.log(parentElement);
+    if (!parentElement) {
+        console.error("Element not found: #defaultCanvas1");
+        return;
+    }
+
+	const rect = parentElement.getBoundingClientRect();
+	console.log("Element dimensions:", rect);
+	if (rect.width === 0 || rect.height === 0) {
+		console.error("Element is not visible or has zero dimensions.");
+		return;
+	}
+
+
+	html2canvas(parentElement.childNodes[0].children, { logging: true })
+    .then((canvas) => {
+        console.log("@@@@@@@@@@@@@@@@@@@@@@@");
+        const link = document.createElement("a");
+        link.download = "timeline_with_bookmarks.jpg";
+        link.href = canvas.toDataURL("image/jpeg");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    })
+    .catch((error) => {
+        console.error("Error during html2canvas execution:", error);
+    });
+
+}
+
+
 
 function export_metrics(){
 	var sacc_string = 'data:text/tsv;charset=utf-8,'+ saccades_values_string();

@@ -33,11 +33,13 @@ p {
 	<b><a href="#notes">Notes:</a></b> Allows for attaching plain text notes to the spatial canvas, for additional context or for recording findings.
 	<br><br>
 	<b><a href="#colours">Colours:</a></b> Allows for changing the default colouring options used by the visualisation to some other colour scheme.
+	<br><br>
+	<b><a href="#export">Export:</a></b> Allows to export the current view of the spatial canvas and the timeline.
 </div>
 
 
 
-<h3>The controls panel has 4 tabs:</h3>
+<h3>The controls panel has 5 tabs:</h3>
 <div class="div_class">
 	<b>Overview:</b> Has controls for loading a background image, changing the location of the canvas, changing the data clustering requirements, and cropping the spatial canvas.
 	<br><br>	
@@ -84,12 +86,12 @@ Additionally, Metrics, distributions and transition patterns on and between the 
 
 <h2 class="header" id='notes'>Notes</h2>
 <div class="div_class">
-Notes can be added anywhere on the canvas and repositioned by clicking and dragging within the canvas area. To add or move a Note click on the drawing icon on the tab, then click on the canvas. Clicking on the canvas will continue to add notes until the drawing icon is de-selected or another selection mode (e.g. AOI) has been selected.
+Notes can be added anywhere on the canvas and repositioned by clicking and dragging within the canvas area. To add or move a Note click on the drawing icon on the tab, then click on the canvas. Clicking on the canvas will continue to add notes until the drawing icon is de-selected or another selection mode (e.g. AOI) has been selected. Notes can be added as a bookmark on the timeline and hovering over these bookmarks will show the key details of each note. Notes within a 5% tolerance of eachother will be grouped under a single bookmark and a toggle button will appear on top of the bookmark, which allows to loop through all the notes when clicked. A new note can be create manually by clicking on the spatial canvas and attributes such as the note type, note taker and timestamp of the note can be specified. When clicked on save, it will appear in the notes section and as a bookmark on the timeline.
 </div>
 
 <h2 class="header" id='colours'>Colours</h2>
 <div class="div_class">
-The colours for various features can be edited through the colour tab. Select the colour you wish to edit by clicking on it, make changes in the pop-up window then click outside the window to continue working.
+The colours for various features can be edited through the colour tab. Select the colour you wish to edit by clicking on it, make changes in the pop-up window then click outside the window to continue working. Colour-based filtering allows to colour a note based on the note type or the note taker. Notes can aslo have a uniform default colour of grey.
 </div>
 
 <h2 class="header" id='spatial'>Spatial</h2>
@@ -128,6 +130,17 @@ The colours for various features can be edited through the colour tab. Select th
 	<br>
 	<br><br><b>Cumulative:</b> Displays accumulated fixation durations. This sets the start time to zero and removes time in between fixations in the datasets, so that there are no gaps in the data. This makes visual space in the timeline match fixation duration, and covers up gaps in recordings.
 	<br><br><b>Absolute Timelines:</b> Toggles whether the datasets in the timelines are stretched to fill the entire length, or are shown relative to their actual duration.
+</div>
+
+<h2 class="header" id='timeline'>Video</h2>
+<div class="div_class">
+	Allows for loading a video file to be played in the timeline. The video can be played, paused, and the current time can be adjusted. The video can be played in sync with the timeline, or independently. The video can be scrubbed to a specific time interval, and the video can be muted.
+	<br><br>
+	Coordinates of the video can also be loaded in from a .tsv file, with similar format to the eye-tracking data. These coordinates should represent the location of the video on the spatial canvas at each time point. 
+	<br><br>
+	Once the coordinates are loaded, the rectangle representing the video will show on the spatial canvas. A button will appear beside the "Load Video Coords" button allowing the rectangle to be turned on or off.
+	<br><br>
+	The rectangle will move according to the coordinates loaded in when the timeline is being animated or scrubbed. The video will also play in sync with the timeline so that the video and the eye-tracking data are in sync.
 </div>
 
 <div id='metrics' />
@@ -221,6 +234,8 @@ Allows for viewing distribution-like statistics about the datasets.
 </p>
 </div>
 
+<h2 class="header" id='export'>Export</h2>
+<p>The current view of the spatial canvas and the timeline can be exported in JPG format. Spatial canvas consists of the operator's gaze data as fixations and the timeline has the events as bookmarks that occured during the time period.</p>
 </body>
 
 </html>

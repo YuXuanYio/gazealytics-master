@@ -5,6 +5,7 @@
   width: inherit;
   font-family: Arial, sans-serif;
   font-size: 14px;
+  margin-bottom: 2px;
 }
 .tool2 {
   position: relative;
@@ -112,6 +113,25 @@ button {
 	font-family: Arial, sans-serif;
 	font-size: 14px;
 }
+.timestamp-container{
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	margin-top: 5px;
+}
+.timestamp-container input{
+	flex-grow: 1;
+	padding: 2px 5px;
+	position: relative;
+	display: inline-block;
+	width: max-content;
+	margin-bottom: 5px;
+	font-family: Arial, sans-serif;
+	font-size: 14px;
+}
+.selected_bookmark{
+	outline: 2px dashed green;
+}
 .tabbut2{
 	padding: 4px;
 	margin: 4px;
@@ -153,13 +173,12 @@ button {
 	border-width: 1px;
 	margin-bottom: 3px;
 }
-.note_item{
-	display: grid;
-	grid-template-columns: 15px 220px;
-	width: 236px;
-	height: auto;
-	border-width: 1px;
-	margin-bottom: 3px;
+.note_item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    width: auto;
 }
 .note_dataset {
 	width : 150px;

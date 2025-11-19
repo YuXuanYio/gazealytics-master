@@ -22,7 +22,7 @@ let twibox = '<div class="dragger" draggable="true" ondragend="dragEnd()" ondrag
 + '<div class="controls">'
 + '<input type="text" id="#_twi_name" style="width:110px" value="twi#">'
 + '<div id="#_col" style="display:inline;width:19px;height:19px;"></div>'
-+ '<button id="twi_#_c" checked="true" onclick="not_all_eye("showtwis")> <i class="fas fa-eye"></i> </button>'
++ '<button id="twi_#_c" checked="true"> <i class="fas fa-eye"></i> </button>'
 + '<input class="num" type="number" id="#_twigroup" style="width:50px" value = 1 step=1 min=1 max=20>'
 + '<div class="tool inner_button"><button  id="#_x" onclick="delete_twi(#);"> <i class="far fa-trash-alt"></i> </button><span class="tip">Delete the TWI</span></div>';
 
@@ -265,7 +265,7 @@ function new_file(){
 			if(base_twis.length == 0){
 				base_twis.push({name: "All", group: 1, included: true});
 				add_item_to_twilist("All", 0);
-				document.getElementById("twi_0_c").onclick = function(){ document.getElementById('sort_dropdown').value = 'No_sort'; load_controls(); matrix_changed = true;timeline_changed=true;  this.checked = !this.checked; if(this.checked){this.innerHTML='<i class="fas fa-eye"></i>';}else{this.innerHTML='<i class="fas fa-eye-slash"></i>';} };
+				document.getElementById("twi_0_c").onclick = function(){ document.getElementById('sort_dropdown').value = 'No_sort'; load_controls(); matrix_changed = true;timeline_changed=true;  this.checked = !this.checked; removeAllBookmarkButtons(); if(this.checked){this.innerHTML='<i class="fas fa-eye"></i>';}else{this.innerHTML='<i class="fas fa-eye-slash"></i>'; } };
 			}
 			
 			for(let i = 0; i < tois_to_be_added.length; i++){
@@ -295,6 +295,7 @@ function new_file(){
 		fileCounter += 1;
 		document.getElementById("dataset_load_txt").innerHTML = '';
 		document.getElementById("dataset_button").disabled = false;
+		document.getElementById("load_notes").disabled = false;
 		if(fileCounter < filelist.length){ new_file(); }
 		else{ 
 			if(err_msg.length>0){alert('Not all data was formatted as required. Please note:\n' + err_msg);}
@@ -685,9 +686,21 @@ function add_item_to_twilist(name, twi_id){
 	node.setAttribute('class', 'data_item');
 	document.getElementById('twilist').appendChild(node);
 	update_twi_colors();
-	
+
 	document.getElementById('twi_'+v+'_c').checked = true;
-	document.getElementById('twi_'+v+'_c').onclick = function(){ document.getElementById('sort_dropdown').value = 'No_sort'; load_controls(); matrix_changed = true;timeline_changed=true;  this.checked = !this.checked; if(this.checked){this.innerHTML='<i class="fas fa-eye"></i>';}else{this.innerHTML='<i class="fas fa-eye-slash"></i>';} }
+	document.getElementById("twi_" + v + "_c").onclick = function () {
+		document.getElementById("sort_dropdown").value = "No_sort";
+		load_controls();
+		matrix_changed = true;
+		timeline_changed = true;
+		this.checked = !this.checked;
+		if (this.checked) {
+			this.innerHTML = '<i class="fas fa-eye"></i>';
+		} else {
+			this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+		}
+		removeAllBookmarkButtons();
+	};
 	document.getElementById(v+'_twi_name').value = name;
 	document.getElementById(v+'_twigroup').value = base_twis[v].group;
 }
@@ -1480,4 +1493,76 @@ function bundle(){
 	}
 }
 
+let importNotes = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.tsv';
 
+    input.onchange = function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const content = e.target.result;
+                processNotesTSV(content);
+            };
+            
+            reader.readAsText(file);
+        }
+    };
+
+    input.click();
+}
+
+let processNotesTSV = (notesContent) => {
+    const lines = notesContent.trim().split('\n');
+
+    const COLUMN_SESSION_START_DATE = 0;
+    const COLUMN_SESSION_START_TIME = 1;
+    const COLUMN_OCCURED_DATE = 6;
+    const COLUMN_OCCURED_TIMES = 7;
+    const COLUMN_OBSERVER = 4;
+    const COLUMN_PARTICIPANT_ID = 11;
+    const COLUMN_EVENT_DETAILS = 9;
+    const COLUMN_TYPE = 10;
+
+    const dataByParticipant = {};
+    const hasHeaders = /^[a-zA-Z]/.test(lines[0].split('\t')[0]);
+    const rows = hasHeaders ? lines.slice(1) : lines;
+
+    rows.forEach((line) => {
+        const values = line.split('\t');
+
+        const participantID = values[COLUMN_PARTICIPANT_ID];
+        if (!dataByParticipant[participantID]) {
+            dataByParticipant[participantID] = { events: [] };
+        }
+
+        const OCCURED_TIMESTAMP = values[COLUMN_OCCURED_DATE] + ' ' + values[COLUMN_OCCURED_TIMES];
+        const SESSION_START_DATE_TIME = values[COLUMN_SESSION_START_DATE] + ' ' + values[COLUMN_SESSION_START_TIME];
+
+        if (!dataByParticipant[participantID].startTime) {
+            dataByParticipant[participantID].startTime = SESSION_START_DATE_TIME;
+        }
+
+        const eventType = values[COLUMN_TYPE].trim().toLowerCase();
+        if (!noteTypes.includes(eventType)) {
+            noteTypes.push(eventType);
+        }
+
+        dataByParticipant[participantID].events.push({
+            eventDetails: values[COLUMN_EVENT_DETAILS],
+            type: eventType,
+            timestamp: OCCURED_TIMESTAMP,
+            timestamp_ms: calculateTimeDifferenceInMs(SESSION_START_DATE_TIME, OCCURED_TIMESTAMP),
+            occured_timestamp: calculateTimeDifference(SESSION_START_DATE_TIME, OCCURED_TIMESTAMP),
+            observer: values[COLUMN_OBSERVER],
+        });
+    });
+
+    importedNotes = dataByParticipant;
+
+    updateNoteTypeDropdown();
+    loadNotesFromTSV();
+}

@@ -42,6 +42,8 @@ let button;
 let videoinput;
 let toi_start_timestamp_button = null;
 let toi_end_timestamp_button = null;
+let videoCoordsButton = null;
+let toggleVideoLensButton = null;
 let setvideotime;
 let videomoderadio;
 let videoloaded = false;
@@ -1030,6 +1032,7 @@ let matrixsketch = (p) => {
 		}
 	};
 
+	// MARK: - video_draw
 	p.video_draw = () => {
 		p.textFont(fb); p.textAlign(p.LEFT);
 		if( selected_data == -1){ 
@@ -1088,6 +1091,7 @@ let matrixsketch = (p) => {
 		document.getElementById("selecteddataset").innerHTML = DATASETS[selected_data].name;
 	};
 
+	// MARK: - set_twi_start_time
 	p.set_twi_start_time = () => {
 		if(selected_data != -1 && VIDEOS[selected_data] != null && VIDEOS[selected_data] != undefined && DATASETS[selected_data] != undefined &&
 			DATASETS[selected_data].fixs.length >= 2){
@@ -1096,15 +1100,105 @@ let matrixsketch = (p) => {
 		}
 	};
 
+	// MARK: - set_twi_end_time
 	p.set_twi_end_time = () => {
 		if(selected_data != -1 && VIDEOS[selected_data] != null && VIDEOS[selected_data] != undefined && DATASETS[selected_data] != undefined &&
 			DATASETS[selected_data].fixs.length >= 2){
 			document.getElementById(selected_data+'_right').value = format_time(VIDEOS[selected_data].videoobj.time());
 			update_timeslider(selected_data);			
 		}
-		
 	};
 
+	// MARK: - extractCurrentFrame
+	// p.extractCurrentFrame = () => {
+	// 	console.log("extractCurrentFrame started."); 
+	
+	// 	if (selected_data === -1 || !VIDEOS[selected_data] || !VIDEOS[selected_data].videoobj) {
+	// 		console.error("womp womp");
+	// 		return;
+	// 	}
+	
+	// 	const videoElement = VIDEOS[selected_data].videoobj.elt || VIDEOS[selected_data].videoobj;
+	
+	// 	if (!(videoElement instanceof HTMLVideoElement)) {
+	// 		console.error("video error");
+	// 		return;
+	// 	}
+	
+	// 	// Get the current playback time
+	// 	const currentTime = videoElement.currentTime || VIDEOS[selected_data].videoobj.time();
+	// 	console.log("current playback time:", currentTime);
+	
+	// 	const videoWidth = videoElement.videoWidth;
+	// 	const videoHeight = videoElement.videoHeight;
+	
+	// 	if (!videoWidth || !videoHeight) {
+	// 		console.error("womp womp womp");
+	// 		return;
+	// 	}
+	
+	// 	// temp canvas to draw the video frame and extract the image data
+	// 	const frameCanvas = document.createElement('canvas');
+	// 	frameCanvas.width = videoWidth;
+	// 	frameCanvas.height = videoHeight;
+	// 	const frameContext = frameCanvas.getContext('2d');
+	
+	// 	frameContext.drawImage(videoElement, 0, 0, videoWidth, videoHeight);
+	
+	// 	const frameDataUrl = frameCanvas.toDataURL();
+	
+	// 	image_url = frameDataUrl;
+	// 	image_changed = true;
+	// 	loaded = false;
+	// };
+
+	p.load_video_coords = (file) => {
+		if (!file) {
+			console.error("No file provided for loading video coordinates.");
+			return;
+		}
+	
+		const reader = new FileReader();
+	
+		reader.onload = (event) => {
+			try {
+				const fileContent = event.target.result;
+				const lines = fileContent.split("\n");
+				let coords = [];
+	
+				lines.forEach((line, index) => {
+					if (index === 0) return;
+					const [timestamp, x1, y1, x2, y2] = line.split("\t");
+					if (timestamp && x1 && y1 && x2 && y2) {
+						coords.push({
+							timestamp: parseInt(timestamp.trim(), 10),
+							x1: parseFloat(x1.trim()),
+							y1: parseFloat(y1.trim()),
+							x2: parseFloat(x2.trim()),
+							y2: parseFloat(y2.trim()),
+						});
+					}
+				});
+	
+				VIDEOS[selected_data].coords = coords;
+				console.log("Video coordinates loaded successfully:", coords);
+				console.log(VIDEOS[selected_data].coords[0])
+				console.log(VIDEOS[selected_data].coords[0].x1)
+				midground_changed = true;
+			} catch (error) {
+				console.error("Error processing video coordinates:", error);
+			}
+		};
+	
+		reader.onerror = (error) => {
+			console.error("Error reading the file:", error);
+		};
+	
+		reader.readAsText(file);
+	};
+	
+
+	// MARK: - load_video
 	p.load_video = (file) => {
 		videoloaded = true;
 		if(currentVideoObj != undefined && currentVideoObj != null )
@@ -1142,9 +1236,29 @@ let matrixsketch = (p) => {
 			toi_end_timestamp_button.mousePressed(p.set_twi_end_time);
 			toi_end_timestamp_button.parent("selectfileinput");
 		}
+		if (videoCoordsButton == null) {
+			videoCoordsButton = p.createButton('Load Video Coords');
+			videoCoordsButton.mousePressed(() => {
+				const fileInput = document.createElement('input');
+				fileInput.type = 'file';
+				fileInput.accept = '.tsv';
+		
+				fileInput.click();
+		
+				fileInput.onchange = (event) => {
+					const file = event.target.files[0];
+					if (file) {
+						p.load_video_coords(file);
+					}
+				};
+			});
+			videoCoordsButton.parent("selectfileinput");
+		}
+		
 	};
 };
 
+// MARK: - delete_video
 let delete_video = () => {
 	if(mat_type == "video" && selected_data != -1 && VIDEOS[selected_data] != null && VIDEOS[selected_data] != undefined && VIDEOS[selected_data].videoobj != null &&
 		VIDEOS[selected_data].videoobj != undefined) {
