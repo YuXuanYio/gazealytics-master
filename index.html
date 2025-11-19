@@ -327,7 +327,30 @@
 					<div class="tool"><button type="button" class="toggler" id="lenstype_2" onclick="select_lenstype(2);">Rectangle</button><span class="tip">Make Rectangle AOIs</span></div>
 					<div class="tool"><button href="help.html" target="popup" onclick="window.open('help.html#aois','name','width=600,height=400')"><i class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 					<br>
-					<div class="tool"><button type="button" class="toggler toggle-on" id="show_lenslabel" onclick="click_showlabel();">Labels</button><span class="tip">Toggles visibility of labels within the AOIs on spatial canvas</span></div>
+					<div style="display: flex; gap: 5px; align-items: center; justify-content: center;">
+  					<div class="tool"><button type="button" class="toggler toggle-on" id="show_lenslabel" onclick="click_showlabel();">All Labels</button><span class="tip">Toggles visibility of labels within the AOIs on spatial canvas</span></div>
+  					<div class="tool"><button type="button" class="toggler toggle-on" id="show_grouplabel" onclick="click_showgrouplabel();">Group Labels</button><span class="tip">Toggles visibility of group labels within the AOIs on spatial canvas</span></div>
+
+					<div class="tool">
+					<button type="button" href="hierarchy.html" target="popup" id="hierarchy_popup" onclick="window.open('hierarchy.html','name','width=600, height=400')">Show Hierarchy</button>
+    				<span class="tip">Open AOI hierarchy popup</span>
+  					</div></div>
+					<div class="tool">
+					<label for="aoiFilterSelect">Filter AOIs:</label>
+					<select id="aoiFilterSelect" onchange="handleAOIFilterChange(this.value)">
+						<option value="all">Show all AOIs</option>
+						<option value="temporal">Show only temporal AOIs</option>
+						<option value="non-temporal">Show only non-temporal AOIs</option>
+					</select>
+					<span class="tip">Filter AOIs by temporal property</span>
+					</div>
+
+					<!-- <div class="tool">
+						<label for="timeInput">Time (H:MM:SS.ms):</label>
+						<input type="text" id="timeInput" placeholder="0:00:00.00" onchange="handleAOITimeChange(this.value, isString=true)" value="0:00:00.00" style="width:100px;">
+						<span class="tip">Enter time in H:MM:SS.ms format</span>
+					</div> -->
+					<br>
 				</center>
 				
 				<ul id='lenslist' class="data_list"></ul>
@@ -409,8 +432,9 @@
 				<input type="color" id="twic_18" oninput="TWIS_COLOURS[18]=this.value; update_colour_vals();" class="colorer">
 				<input type="color" id="twic_19" oninput="TWIS_COLOURS[19]=this.value; update_colour_vals();" class="colorer">
 				<br >
-				<p> AOI Colours: </p>
-				<input type="color" id="aoic_0" oninput="LENS_COLOURS[0]=this.value; update_colour_vals();" class="colorer">
+				<div id="aoi_color_controls"></div>
+				<div id="aoi_color_group_controls" hidden></div>
+				<!-- <input type="color" id="aoic_0" oninput="LENS_COLOURS[0]=this.value; update_colour_vals();" class="colorer">
 				<input type="color" id="aoic_1" oninput="LENS_COLOURS[1]=this.value; update_colour_vals();" class="colorer">
 				<input type="color" id="aoic_2" oninput="LENS_COLOURS[2]=this.value; update_colour_vals();" class="colorer">
 				<input type="color" id="aoic_3" oninput="LENS_COLOURS[3]=this.value; update_colour_vals();" class="colorer">
@@ -430,6 +454,16 @@
 				<input type="color" id="aoic_17" oninput="LENS_COLOURS[17]=this.value; update_colour_vals();" class="colorer">
 				<input type="color" id="aoic_18" oninput="LENS_COLOURS[18]=this.value; update_colour_vals();" class="colorer">
 				<input type="color" id="aoic_19" oninput="LENS_COLOURS[19]=this.value; update_colour_vals();" class="colorer">
+				<input type="color" id="aoic_20" oninput="LENS_COLOURS[20]=this.value; update_colour_vals();" class="colorer">
+				<input type="color" id="aoic_21" oninput="LENS_COLOURS[21]=this.value; update_colour_vals();" class="colorer">
+				<input type="color" id="aoic_22" oninput="LENS_COLOURS[22]=this.value; update_colour_vals();" class="colorer">
+				<input type="color" id="aoic_23" oninput="LENS_COLOURS[23]=this.value; update_colour_vals();" class="colorer">
+				<input type="color" id="aoic_24" oninput="LENS_COLOURS[24]=this.value; update_colour_vals();" class="colorer">
+				<input type="color" id="aoic_25" oninput="LENS_COLOURS[25]=this.value; update_colour_vals();" class="colorer">
+				<input type="color" id="aoic_26" oninput="LENS_COLOURS[26]=this.value; update_colour_vals();" class="colorer">
+				<input type="color" id="aoic_27" oninput="LENS_COLOURS[27]=this.value; update_colour_vals();" class="colorer">
+				<input type="color" id="aoic_28" oninput="LENS_COLOURS[28]=this.value; update_colour_vals();" class="colorer">
+				<input type="color" id="aoic_29" oninput="LENS_COLOURS[29]=this.value; update_colour_vals();" class="colorer"> -->
 				<br >
 				<p> Saccade Type Colours (Short, Basic, Glance): </p>
 				<input type="color" id="sacc_0" oninput="SACC_TYPES[0]=this.value; update_colour_vals();" class="colorer">

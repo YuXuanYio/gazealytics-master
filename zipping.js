@@ -125,7 +125,6 @@ function save_zip(){
 			zip.file(filename, file);
 		}
 	}
-	
 	//zip.generateAsync({type:"base64"}).then(function (base64) { download_zip(zip_name(), base64); console.log('zipping complete'); });
 	zip.generateAsync({type:"blob"}).then(function (data) { console.log("zip downloading"); saveAs(data, zip_name()); console.log('zipping complete'); document.getElementById("project_txt").innerHTML = '';	document.getElementById("save_button").disabled = false;});
 }
@@ -238,6 +237,28 @@ function load_zip(){
 									base_lenses[v].group = v % LENS_COLOURS.length;								
 								
 								item.value = base_lenses[v].group;
+
+								// Temporal stuff
+								item = document.getElementById('lens_'+v+'_screen_id');
+								if(base_lenses[v].h1 != undefined && base_lenses[v].h1 != null){
+									item.value = base_lenses[v].h1;
+								}
+								item = document.getElementById('lens_'+v+'_app_id');
+								if(base_lenses[v].h2 != undefined && base_lenses[v].h2 != null){
+									item.value = base_lenses[v].h2;
+								}
+								item = document.getElementById('lens_'+v+'_interface_id');
+								if(base_lenses[v].h3 != undefined && base_lenses[v].h3 != null){
+									item.value = base_lenses[v].h3;
+								}
+								// item = document.getElementById('lens_'+v+'_temporal_btn');
+								// item.checked = base_lenses[v].isTemporal;
+								// if(item.checked){
+								// 	item.innerHTML='<span style="display: inline-flex; align-items: center;"><i class="fas fa-clock"></i><i class="fas fa-times"></i></span>';
+								// }else{
+								// 	item.innerHTML='<i class="fas fa-clock"></i>';
+								// }
+
 							}
 						}
 						//process the remaining lenses
@@ -282,6 +303,11 @@ function load_zip(){
 									base_lenses[v].group = v % LENS_COLOURS.length;								
 								
 								item.value = base_lenses[v].group;
+								item = document.getElementById('lens_'+v+'_screen_id');
+								console.log(base_lenses[v]);
+								if(base_lenses[v].h1 != undefined && base_lenses[v].h1 != null){
+									item.value = base_lenses[v].h1;
+								}
 								
 								console.log("aoi json: "+base_lenses.map(aoi => aoi.group));
 								// console.log("document.getElementById(["+v+"].group="+document.getElementById('lens_'+v+'_lensegroup'));		
@@ -310,6 +336,17 @@ function load_zip(){
 								base_lenses[iter].draw = proto.draw;
 								base_lenses[iter].make_controls = proto.make_controls;
 								// base_lenses[iter].getArea = proto.getArea;
+								base_lenses[iter].edit_start_time = proto.edit_start_time;
+								base_lenses[iter].edit_end_time = proto.edit_end_time;
+								base_lenses[iter].edit_hierarchy = proto.edit_hierarchy;
+								base_lenses[iter].edit_priority = proto.edit_priority;
+							}
+							if (base_lenses[iter].timeRanges === undefined || base_lenses[iter].timeRanges == null) {
+								base_lenses[iter].timeRanges = [];
+								base_lenses[iter].timeRanges.push({start: 0, end: maxEndTime, priority: 1});
+							}
+							if (base_lenses[iter].currentPriority === undefined || base_lenses[iter].currentPriority == null) {
+								base_lenses[iter].currentPriority = 1;
 							}
 						}
 						update_lens_colors();
@@ -377,6 +414,10 @@ function load_zip(){
 								node.setAttribute('onclick', "select_data("+v+")");
 								node.setAttribute('class', 'data_item');
 								document.getElementById('mylist').appendChild(node);
+
+								if (maxEndTime < DATASETS[v].t_end) {
+									maxEndTime = DATASETS[v].t_end;
+								}
 								// add tois
 								for( var i=1; i < DATASETS[v].tois.length; i++ ){
 									ltoi = document.getElementById(v+"_toi");
@@ -427,6 +468,12 @@ function load_zip(){
 							if(selected_data == v)
 								select_data(v);
 						}
+						base_lenses.forEach((lense) => {
+							if (lense.timeRanges[0].end === 0) {
+								lense.timeRanges[0].end = maxEndTime;
+							}
+						})
+						handleAOITimeChange(0, false);
 						if(selected_twi != -1 && document.getElementById("twi_"+selected_twi) != undefined)
 							select_twi(selected_twi);
 						update_all();

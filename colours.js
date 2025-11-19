@@ -6,8 +6,7 @@ SACC_TYPES = ["#99f3ff","#1ae4ff","#fbfd7c"]; // short, basic, glance
 DIRECTIONS = ["#dd4646","#dbd643","#a3dd36","#3dd664","#41d8d8","#4368d6","#8a3dd6","#d83bb1"];
 TWIS_COLOURS = ["#dd4646","#dbd643","#a3dd36","#3dd664","#41d8d8","#4368d6","#8a3dd6","#d83bb1","#f3d1aa","#ffffff",
 "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd"];
-LENS_COLOURS = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a",
-"#7f7f7f", "#bcbd22", "#17becf","#98e2bb","#f3d1aa","#fdaaf3","#fbffc2","#ecacac","#a1b7f7","#dbd643"];
+LENS_COLOURS = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#7f7f7f", "#bcbd22", "#17becf", "#98e2bb", "#f3d1aa", "#fdaaf3", "#fbffc2", "#ecacac", "#a1b7f7", "#dbd643", "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", "#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#7f7f7f", "#bcbd22", "#17becf", "#98e2bb", "#f3d1aa", "#fdaaf3", "#fbffc2", "#ecacac", "#a1b7f7", "#dbd643", "#8dd3c7", "#ffffb3", "#bebada", "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd"];
 ORDERED = ["#e9741c","#ffff7c","#74f05c"]; // before, middle, after
 MATCOL = ["#FFFFFF","#cb181d","#2171b5"];
 OBSERVERS = ["#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5"];
@@ -19,7 +18,7 @@ FIXS_SATURATION = true;
 
 function update_selector_colours(){
 	for(i=0; i< GROUPINGS.length; i++){ document.getElementById('basic_'+i).value = GROUPINGS[i]; }
-	for(i=0; i< LENS_COLOURS.length; i++){ document.getElementById('aoic_'+i).value = LENS_COLOURS[i]; }
+	generateAOIColorControls();
 	for(i=0; i< TWIS_COLOURS.length; i++){ document.getElementById('twic_'+i).value = TWIS_COLOURS[i]; }
 	for(i=0; i< DIRECTIONS.length; i++){ document.getElementById('dir_'+i).value = DIRECTIONS[i]; }
 	for(i=0; i< SACC_TYPES.length; i++){ document.getElementById('sacc_'+i).value = SACC_TYPES[i]; }
@@ -191,10 +190,22 @@ function updateDefaultNoteColors() {
 function update_lens_colors(){
 	for(var i=0;i<document.getElementById('lenslist').children.length;i++){
 		val = parseInt(document.getElementById('lenslist').children[i].id.split('_')[1]);		
-			if(TIME_DATA=='all') 
+			if(TIME_DATA=='all') {				
 				document.getElementById(val+"_dragger").style.backgroundColor = 'rgba('+rgbColor(LENS_COLOURS[val%LENS_COLOURS.length])+', .75)';
-			else 
+				document.getElementById('aoi_color_group_controls').style.display = "none";
+				document.querySelectorAll('[id^="aoigc_"]').forEach(el => {
+					el.style.display = "none";
+				});
+				generateAOIColorControls();
+			} 
+			else{
 				document.getElementById(val+"_dragger").style.backgroundColor = 'rgba('+rgbColor(LENS_COLOURS[(base_lenses[val].group - 1)%LENS_COLOURS.length])+', .75)';
+				document.getElementById('aoi_color_controls').style.display = "none";
+				document.querySelectorAll('[id^="aoic_"]').forEach(el => {
+					el.style.display = "none";
+				});
+				generateGroupAOIColorControls();
+			}
 		timeline_changed = true;
 		matrix_changed = true;
 	}
@@ -362,4 +373,84 @@ function contrastRatioPair(col1, col2) {
 function contrast_bw(colour){
 	var textcol = ['#000000', '#ffffff']
 	return contrastRatioPair(colour, textcol[0])>contrastRatioPair(colour, textcol[1])? textcol[0]:textcol[1]
+}
+
+function generateAOIColorControls() {
+	// Potentially changeable to if order_lenses.length != base_lenses.length then do following, if not then use order_lenses to get indexes
+	const container = document.getElementById('aoi_color_controls');
+	container.style.display = "block";
+	document.querySelectorAll('[id^="aoic_"]').forEach(el => {
+		el.style.display = "block";
+	});
+	container.innerHTML = "<p>AOI Colours:</p>";
+	const startingIndex = order_lenses[0];
+
+	const inputFirst = document.createElement("input");
+	inputFirst.type = "color";
+	inputFirst.id = `aoic_${startingIndex}`;
+	inputFirst.className = "colorer";
+	inputFirst.value = LENS_COLOURS[startingIndex] || "#ffffff";
+
+	console.log("Input color for startingIndex", startingIndex, ":", inputFirst.value);
+
+	inputFirst.oninput = function () {
+		LENS_COLOURS[startingIndex] = this.value;
+		update_colour_vals();
+
+		// Update duplicate color inputs if needed (use exact match!)
+		const el = document.getElementById(`aoic_${startingIndex}`);
+		if (el && el !== this) el.value = this.value;
+	};
+
+	container.appendChild(inputFirst);
+
+	const el = document.getElementById(`aoic_${startingIndex}`);
+	if (el && el !== inputFirst) el.value = inputFirst.value;
+
+	for (let i = 0; i < base_lenses.length; i++) {
+		if (i === startingIndex) continue;
+
+		const input = document.createElement("input");
+		input.type = "color";
+		input.id = `aoic_${i}`;
+		input.className = "colorer";
+		input.value = LENS_COLOURS[i] || "#ffffff";
+
+		input.oninput = function () {
+			LENS_COLOURS[i] = this.value;
+			update_colour_vals();
+
+			const el = document.getElementById(`aoic_${i}`);
+			if (el && el !== this) el.value = this.value;
+		};
+
+		container.appendChild(input);
+
+		document.querySelectorAll(`#aoic_${i}`).forEach(el => {
+			if (el !== input) el.value = input.value;
+		});
+	}
+}
+
+function generateGroupAOIColorControls() {
+	const container = document.getElementById('aoi_color_group_controls');
+	container.style.display = "block";
+	container.innerHTML = "<p>AOI Group Colours:</p>";
+
+	const groups = [...new Set(base_lenses.map(lens => lens.group).filter(g => g !== 0))];
+
+	for (const group of groups) {
+		const input = document.createElement("input");
+		input.type = "color";
+		input.id = `aoigc_${group}`;
+		input.className = "colorer";
+		input.value = LENS_COLOURS[(group - 1) % LENS_COLOURS.length] || "#ffffff";
+
+		input.oninput = function () {
+			LENS_COLOURS[(group - 1) % LENS_COLOURS.length] = this.value;
+			update_colour_vals();
+		};
+
+		container.appendChild(input);
+	}
 }

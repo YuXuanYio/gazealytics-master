@@ -46,6 +46,10 @@ let toi_end = 0;
 let previous_toi_name = "";
 let current_toi_id = 0;
 let tois_to_be_added = [];
+let maxEndTime = 0;
+let toisOfSelectedTwi = [];
+let selectedTwiMaxTime = 0;
+let selectedTwiMinTime = 1000000000000000;
 
 class Node {
     constructor(data) {
@@ -225,6 +229,14 @@ function new_file(){
 
 		if( newdata.initialised ){ // new load is valid, accept it
 			var id = DATASETS.length; DATASETS.push(newdata); VIDEOS.push({}); cid = DATASETS.length;
+
+			selectedTwiMaxTime = Math.max(selectedTwiMaxTime, newdata.t_end);
+			selectedTwiMinTime = Math.min(selectedTwiMinTime, newdata.t_start);
+			
+			if (maxEndTime < newdata.t_end) {
+				maxEndTime = newdata.t_end;
+			}
+
 			q = databox.replace(/#/g, id);
 			var node = document.createElement("li");
 			node.innerHTML = q; node.id = id;
@@ -487,6 +499,15 @@ function delete_item(id){
 	}
 	make_dynamic_legend();	
 }
+function select_data_by_name(sampleName) {
+    for (let i = 0; i < DATASETS.length; i++) {
+        if (DATASETS[i].name === sampleName) {
+            select_data(i);
+            return;
+        }
+    }
+    console.warn("Sample with name '" + sampleName + "' not found.");
+}
 function select_data(id){
 	list = document.getElementById('mylist').children;
 	for(i =0;i < list.length; i++){
@@ -514,7 +535,7 @@ function select_twi(id){
 			list[i].classList.toggle('selected');
 		}
 	}
-	
+
 	selected_twi = id;
 	if(id < base_twis.length)
 		selected_twigroup = base_twis[id].group;
@@ -526,6 +547,7 @@ function select_twi(id){
 		if(DATASETS[data_id].included)
 			set_toi(data_id, id);
 	}
+	handleTWIChange();
 	background_changed |= SHOW_FIX||SHOW_TOPO;
 	if(SHOW_TOPO) update_topo = true;
 }
@@ -539,6 +561,24 @@ function set_toi(data_id, twi_id){
 
 	let data = DATASETS[data_id];
 	data.toi_id = twis.indexOf(twi_id);
+
+	if (toisOfSelectedTwi.length > 0 && !toisOfSelectedTwi.every(t => t.twi_id === twi_id)) {
+		toisOfSelectedTwi = [];
+		selectedTwiMaxTime = 0;
+		selectedTwiMinTime = 1000000000000000;
+	}
+
+	if (data.checked) {
+		for (let toi of data.tois) {
+			if (toi.twi_id == twi_id && toi) {
+				if (!toisOfSelectedTwi.some(t => t === toi)) {
+					toisOfSelectedTwi.push(toi);
+					selectedTwiMaxTime = Math.max(selectedTwiMaxTime, toi.tmax);
+					selectedTwiMinTime = Math.min(selectedTwiMinTime, toi.tmin);
+				}
+			}
+		}
+	}
 
 	let ele = document.getElementById(data_id+"_twi_"+twi_id);
 	

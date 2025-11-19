@@ -191,12 +191,12 @@ function aggregate_hist_metrics_for_export (data, fixs, toi, bins, lense) {
 	}
 	else {
 		if(HIST_METRIC.indexOf("lensegroup") > -1){
-			for(let l2=0; l2<lenses.length; l2++){
-				if(lenses[l2].group == selected_lensegroup) {
+			for(let l2=0; l2<metric_lenses.length; l2++){
+				if(metric_lenses[l2].group == selected_lensegroup) {
 					let val_list = [];
 					if( HIST_METRIC == 'fix_lensegroup_dur'){	
 						let val_list = [];		
-						for(let i=toi.j_min; i<toi.j_max; i++){ if( lense!=-1 && lenses[l2].inside(fixs[i].x, fixs[i].y) ){ val_list.push( fixs[i].dt ); } }
+						for(let i=toi.j_min; i<toi.j_max; i++){ if( lense!=-1 && metric_lenses[l2].inside(fixs[i].x, fixs[i].y) ){ val_list.push( fixs[i].dt ); } }
 						min_val = 0; max_val = 1000;
 						for(let i=0; i<val_list.length; i++){ bins[ Math.min(bins.length-1, Math.floor( (val_list[i]-min_val)/(max_val-min_val)*BINS_N ) ) ] += 1; }
 					}else if( lense!=-1 && HIST_METRIC == 'visit_lensegroup_dur' && ORDERLENSEGROUPID.indexOf(selected_lensegroup) != -1 ){

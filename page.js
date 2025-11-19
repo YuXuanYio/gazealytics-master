@@ -6,7 +6,7 @@ SPATIAL_CANVAS_HEIGHT_PERCENTAGE = 0.7; // percentage of the browser innerHeight
 CANVAS_BOX_HEIGHT_PERCENTAGE = 0.97; // percentage of the browser innerHeight
 MATRIX_CENTER_WIDTH_PERCERTAGE_OVER_INTERFACE_LAYOUT = 38; // percentage of the matrix center of the interface layout
 INTERFACE_LAYOUT_OVER_WINDOWS_WIDTH = 0.88; // percentage of interface_layout width over windows
-RESIZE_CONTROL_PADDING = 30; 
+RESIZE_CONTROL_PADDING = 5; 
 
 spatial_width = window.innerWidth * SPATIAL_CANVAS_WIDTH_PERCENTAGE;
 spatial_height = window.innerHeight * SPATIAL_CANVAS_HEIGHT_PERCENTAGE;
@@ -30,7 +30,7 @@ var offset_ydata = 0; //offset data in relation to other elements (e.g. backgrou
 DEFAULT_SYMMETRIC_SORT = 'No_sort';
 PREVIOUS_MATRIX_DATA_STATE = '';
 NUM_RETRY_BEFORE_DATA_LOADED = 0;
-VIDEO_LINKING = true;
+VIDEO_LINKING = false;
 VIDEO_IN_PLAY = false;
 TIMELINE_SLIDER_DISABLED = false;
 DAT_MODE = 0; // to filter datasets selected for metrics (default-0: "All Samples", 1: "selected Sample", 2: "selected Sample group")
@@ -39,6 +39,7 @@ LENSE_MODE = 0; // to filter fixation statistics (default-0: "Selected AOI Group
 let simulatedVideoTime = 0;
 var loaded = false; //for saved project image cropping
 SHOW_LENSLABEL = true;
+SHOW_GROUPLABEL = true;
 HAAR_VALUE = 0;
 SEQUENCE_SCORE_MISMATCH_PENALTY = 1;
 SEQUENCE_SCORE_GAP_PENALTY = 1;
@@ -50,6 +51,13 @@ EXPORT_METRIC_CANVAS = true;
 EXPORT_CROP_TIMELINE_CANVAS = true;
 TOGGLE_GREEN_BOX_HIGHLIGHTS = true;
 let matrix_changed_retry = 0;
+let videoStartTimeChanged = false;
+
+var TIMELINE_HIGHLIGHT = {
+    tmin: null,
+    tmax: null,
+	fixs: null,
+};
 
 function display(bool){ if(bool){return 'block';}else{return 'none';} }
 function update_all(){ background_changed=true; midground_changed=true; matrix_changed=true; timeline_changed=true; update_topos=true; }
@@ -143,12 +151,14 @@ SHOW_FORE = "spatial"; TIME_DATA = "all";
 DO_BUNDLE = true; MATRIX_MINIMAP = false;
 CONTROL_STATE = "aoi"; SHOW_LENS = true; SHOW_NOTES = true; TIME_STRAT = 'real';
 MATRIX_WRITE = false; prev_count=0;
+let base_lenses = [];
+var hierarchyInputsInitialized = false;
 
 function load_controls(){
 	//data binding of AOI, TWI, Sample with DOM
 
 	// rebuild the lens list
-	order_lenses = []; lenses = []; LENSIDLIST = [];
+	order_lenses = []; lenses = []; LENSIDLIST = []; metric_lenses = [];
 	for(var i=0;i<document.getElementById('lenslist').children.length;i++){
 		v = parseInt( document.getElementById('lenslist').children[i].id.substring(5) );
 		LENSIDLIST[i] = v;
@@ -168,6 +178,7 @@ function load_controls(){
 		if(base_lenses[v].checked != document.getElementById('lens_'+v+'_c').checked) {
 			base_lenses[v].checked = document.getElementById('lens_'+v+'_c').checked;
 			update_metrics = true;
+			matrix_changed = true;
 		}
 		
 		base_lenses[v].locked = document.getElementById('lens_'+v+'_l').checked;
@@ -183,10 +194,14 @@ function load_controls(){
 			update_lens_colors();			
 		}
 
-		if(base_lenses[v].checked && base_lenses[v].included){
-			SHOW_LENS = true;
-			order_lenses.push( v );
-			lenses.push(base_lenses[ v ]);
+		if(base_lenses[v].included){
+			// Always include all lenses in metric_lenses for computation regardless of visibility
+			metric_lenses.push(base_lenses[v]);
+			if (base_lenses[v].checked){
+				SHOW_LENS = true;
+				order_lenses.push( v );
+				lenses.push(base_lenses[ v ]);
+			}
 		}
 	}
 	for(var i=0; i<base_lenses.length; i++){ base_lenses[i].included = ( document.getElementById('lens_'+i)!=undefined ); }
@@ -439,15 +454,23 @@ function load_controls(){
 				toi = data.tois[0];
 			}
 
-			let longest_duration = data.tmax - data.tmin;
-			let ts = 0;
+	let currentScrubbedTime = selectedTwiMinTime + (selectedTwiMaxTime - selectedTwiMinTime) * TIME_ANIMATE;
+	if( !TIME_PLAY && TIME_ANIMATE != parseFloat(document.getElementById("time_animate_sl").noUiSlider.get())){
+		TIME_ANIMATE = parseFloat(document.getElementById("time_animate_sl").noUiSlider.get());
+		handleAOITimeChange(currentScrubbedTime, false);
+		if (VIDEO_LINKING && selected_data != -1 && DATASETS[selected_data] != null && DATASETS[selected_data] != undefined && 
+			currentVideoObj != null && currentVideoObj != undefined && !TIME_PLAY) {
 
-			if(lenses.length == 0){
-				for(let j = toi.j_min; j < toi.j_max && (data.fixs[j].t - data.tmin)/longest_duration < TIME_ANIMATE; j++){
-					if(data.fixs[j].t - data.tmin < 0)
+			let data = DATASETS[selected_data];
+			toi = data.tois[data.toi_id];
+			let longest_duration = data.tmax - data.tmin;
+
+			if (lenses.length == 0) {
+				for (let j = toi.j_min; j < toi.j_max && (data.fixs[j].t - data.tmin)/longest_duration < TIME_ANIMATE; j++) {
+					if (data.fixs[j].t - data.tmin < 0)
 						ts = 0;
 					else
-						ts = (TimeLine.width*(data.fixs[j].t - data.tmin))/longest_duration;					
+						ts = (TimeLine.width * (data.fixs[j].t - data.tmin)) / longest_duration;
 				}
 			}
 					//set video time
@@ -455,10 +478,30 @@ function load_controls(){
 		}
 		background_changed = true; timeline_changed = true;
 	} else if( TIME_PLAY && TIME_ANIMATE < 1.0 ) {
+
+			let start = selectedTwiMinTime / 1000;
+			let end = selectedTwiMaxTime / 1000;
+			let scrubbedTime = start + TIME_ANIMATE * (end - start);
+			currentVideoObj.time(scrubbedTime);
+		}
+		background_changed = true; timeline_changed = true;
+	}else if( TIME_PLAY && TIME_ANIMATE < 1.0 ){
+		
+		// If video is playing, we need to update the time animate slider proportionally to the video time
 		if(VIDEO_LINKING && selected_data != -1 && VIDEOS[selected_data] != null && VIDEOS[selected_data] != undefined && 
 			currentVideoObj != null && currentVideoObj != undefined) {
+				if (!videoStartTimeChanged) {
+					currentVideoObj.time(selectedTwiMinTime/1000);
+					videoStartTimeChanged = true;
+				} else {
+					if (currentVideoObj.time() >= selectedTwiMaxTime/1000) {
+						currentVideoObj.pause();
+						videoStartTimeChanged = false;
+					}
+				}
 			
-			TIME_ANIMATE = Math.min( 1.0, TIME_ANIMATE + 0.01/100 );
+			const t = currentVideoObj.time();
+			TIME_ANIMATE = (t - selectedTwiMinTime / 1000) / ((selectedTwiMaxTime - selectedTwiMinTime) / 1000);
 			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );
 			if (VIDEOS[selected_data].coords) {
 				let video_coords_index = Math.floor(TIME_ANIMATE * (VIDEOS[selected_data].coords.length - 1));
@@ -472,7 +515,10 @@ function load_controls(){
 				let video_coords_index = Math.floor(TIME_ANIMATE * (VIDEOS[selected_data].coords.length - 1));
 				currVidLens.move(VIDEOS[selected_data].coords[video_coords_index].x1, VIDEOS[selected_data].coords[video_coords_index].y1, VIDEOS[selected_data].coords[video_coords_index].x2, VIDEOS[selected_data].coords[video_coords_index].y2);
 			}	
+			TIME_ANIMATE = Math.min( 1.0, TIME_ANIMATE + 0.002 );
+			document.getElementById("time_animate_sl").noUiSlider.set( TIME_ANIMATE );		
 		}
+		handleAOITimeChange(currentScrubbedTime, false);
 		background_changed = true; timeline_changed = true;
 	}
 	updateBookmarkButton(TIME_ANIMATE);
@@ -553,7 +599,24 @@ function load_controls(){
 		if(e instanceof SyntaxError)
 			console.log(e);
 	}
+	if (!hierarchyInputsInitialized && base_lenses.length > 0) {
+        for (let i = 0; i < base_lenses.length; i++) {
+            setHierarchyInputs(base_lenses[i]);
+        }
+        hierarchyInputsInitialized = true;
+    }
 }
+
+function setHierarchyInputs(lens) {
+    const id = lens.id;
+    const screenInput = document.getElementById(`lens_${id}_screen_id`);
+    const appInput = document.getElementById(`lens_${id}_app_id`);
+    const interfaceInput = document.getElementById(`lens_${id}_interface_id`);
+    if (screenInput) screenInput.value = (lens.h1 === -1 || lens.h1 == null) ? '' : lens.h1;
+    if (appInput) appInput.value = (lens.h2 === -1 || lens.h2 == null) ? '' : lens.h2;
+    if (interfaceInput) interfaceInput.value = (lens.h3 === -1 || lens.h3 == null) ? '' : lens.h3;
+}
+
 // for changes to cropping from fields not mouse click
 function crop_resize(){
 	if(WIDTH != parseFloat(document.getElementById('WIDTH').value)){
@@ -882,6 +945,7 @@ function click_time_play(){
 	TIME_PLAY = document.getElementById('time_play').classList.value.includes('toggle-on');
 	background_changed = true;
 
+	/*
 	if (TIME_PLAY) {
 		TIMELINE_SLIDER_DISABLED = true;
 		document.getElementById("time_animate_sl").setAttribute('disabled', true);
@@ -889,7 +953,7 @@ function click_time_play(){
 	else {
 		TIMELINE_SLIDER_DISABLED = false;
 		document.getElementById("time_animate_sl").removeAttribute('disabled');
-	}
+	} */
 		
 		
 	if(TIME_PLAY && VIDEO_LINKING && selected_data != -1 && DATASETS[selected_data] != null && DATASETS[selected_data] != undefined && 
@@ -899,11 +963,12 @@ function click_time_play(){
 		VIDEOS[selected_data].videoobj.loop();
 		
 	}
+	
 	else if(!TIME_PLAY && VIDEO_LINKING && selected_data != -1 && VIDEOS[selected_data] != null && VIDEOS[selected_data] != undefined && 
 		currentVideoObj != null && currentVideoObj != undefined) {
 		VIDEOS[selected_data].videoobj.pause();
-		let timelinetime = TT(Math.floor(VIDEOS[selected_data].videoobj.time()*1000));
-		document.getElementById("time_animate_sl").noUiSlider.set( parseFloat(timelinetime/TimeLine.width).toFixed(2) );
+		//let timelinetime = TT(Math.floor(VIDEOS[selected_data].videoobj.time()*1000));
+		//document.getElementById("time_animate_sl").noUiSlider.set( parseFloat(timelinetime/TimeLine.width).toFixed(2) );
 	}
 }
 function click_size(){
@@ -932,6 +997,8 @@ function click_showlens(){
 				document.getElementById('lens_'+i+'_c').checked=true;
 			}			
 		}
+		selectedFilter = document.getElementById('aoiFilterSelect').value;
+		handleAOIFilterChange(selectedFilter);
 	}else{
 		document.getElementById('showlens').innerHTML = " <i class='fas fa-eye-slash'></i> ";
 		for(var i=0; i<base_lenses.length; i++){
@@ -941,10 +1008,16 @@ function click_showlens(){
 			}			
 		}
 	}
+	matrix_changed = true; //  foreground_changed = true;
 }
 function click_showlabel(){
 	document.getElementById('show_lenslabel').classList.toggle( 'toggle-on' );
 	SHOW_LENSLABEL = document.getElementById('show_lenslabel').classList.value.includes('toggle-on');
+	foreground_changed = true;
+}
+function click_showgrouplabel(){
+	document.getElementById('show_grouplabel').classList.toggle( 'toggle-on' );
+	SHOW_GROUPLABEL = document.getElementById('show_grouplabel').classList.value.includes('toggle-on');
 	foreground_changed = true;
 }
 function click_showtwis(){
