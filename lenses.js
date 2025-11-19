@@ -961,6 +961,7 @@ class VidRectLens {
 			this.area = (this.x2 - this.x1) * (this.y2 - this.y1);
 		}
 	}
+}
 	
 function formatMilliseconds(ms) {
     ms = Math.round(ms / 10) * 10; // round to nearest 10ms

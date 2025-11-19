@@ -319,7 +319,7 @@ function load_controls(){
 		if(base_twis[v].included && base_twis[v].checked){
 			order_twis.push( v );			
 		}
-	}
+	}}
 	
 	//update matrix reordering dropdown 
 	var matrixrowcolnames = MATRIX_VIEW_STATE.split("_");
