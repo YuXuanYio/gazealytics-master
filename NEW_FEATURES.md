@@ -167,6 +167,158 @@ Each TWI row in the data panel now includes an **eye icon** button. Clicking it:
 
 ---
 
+---
+
+## 11. AOI Groups (Lens Groups)
+
+Each AOI on the spatial canvas belongs to a numbered **group**. The group number is set via a small numeric input (`1`–`30`) in the AOI list entry.
+
+### What groups do
+- All AOIs in the same group share a color drawn from the `LENS_COLOURS` palette (group 1 → index 0, group 2 → index 1, …)
+- Selecting an AOI automatically highlights every AOI in the same group on the spatial canvas
+- **Group Labels** can be toggled on/off independently of individual AOI name labels (see Section 13)
+
+### Group-level metrics
+`metrics.js` computes a parallel set of statistics for lens groups alongside the per-AOI metrics:
+
+| Metric | Description |
+|--------|-------------|
+| `lensegroup_lenscount` | Fixation count per group |
+| `lensegroup_lenstime` | Total dwell time per group |
+| `lensegroup_direct_transitions` | Direct transition counts between groups |
+| `lensegroup_indirect_transitions` | Indirect transition counts between groups |
+| `lensegroup_triples` | Transition triple counts |
+| `lensegroup_visit_durations` | Visit duration distributions per group |
+
+### Matrix view states for groups
+The matrix can be switched into any view that has `lensegroup` as a row or column axis:
+
+| State | Rows | Columns |
+|-------|------|---------|
+| `lensegroup_lensegroup` | AOI Groups | AOI Groups |
+| `dat_lensegroup` | Datasets | AOI Groups |
+| `toi_lensegroup` | TWIs | AOI Groups |
+| `twigroup_lensegroup` | TWI Groups | AOI Groups |
+| `grp_lensegroup` | Participant Groups | AOI Groups |
+
+Hovering on a group row/column in the matrix highlights the corresponding AOIs on the spatial canvas.
+
+---
+
+## 12. Temporal AOIs
+
+Any AOI can be made **temporal** — active only within one or more time ranges relative to the session.
+
+### Making an AOI temporal
+Click the **clock** button (<i class="fas fa-clock"></i>) on the AOI list entry. A green clock icon indicates the AOI is currently temporal.
+
+### Time rows
+When temporal mode is on, time-range rows appear below the AOI entry:
+- Each row has a **start time** and **end time** input (format `H:MM:SS.ms`)
+- Additional time ranges can be added with **Add Time Row**; individual rows can be removed
+- Multiple non-overlapping ranges are supported on a single AOI
+
+### Runtime behavior
+- As the animation slider is scrubbed (or the video plays), `handleAOITimeChange()` is called every frame
+- Each temporal AOI checks whether the current time falls inside any of its ranges and shows or hides itself accordingly
+- The spatial canvas redraws automatically
+
+### Filtering
+A **Filter AOIs** dropdown in the AOI controls area lets you restrict the AOI list (and spatial canvas) to:
+
+| Option | Effect |
+|--------|--------|
+| Show all AOIs | Default — all AOIs visible |
+| Show only temporal AOIs | Hides non-temporal AOIs |
+| Show only non-temporal AOIs | Hides temporal AOIs |
+
+---
+
+## 13. AOI Label Visibility Toggles
+
+Two toggle buttons appear above the AOI list on the spatial canvas toolbar:
+
+| Button | Effect |
+|--------|--------|
+| **All Labels** | Show or hide every individual AOI name label drawn inside the lens |
+| **Group Labels** | Show or hide the "Group N" label drawn at the AOI centroid |
+
+Both buttons are active (`toggle-on`) by default and update the canvas immediately on click.
+
+---
+
+## 14. AOI Hierarchy (Screen / App / Interface)
+
+Each AOI carries three optional hierarchy fields:
+
+| Field | Input ID | Description |
+|-------|----------|-------------|
+| **Screen ID** | `lens_#_screen_id` | Which screen/display the AOI belongs to |
+| **App ID** | `lens_#_app_id` | Which application within that screen |
+| **Interface ID** | `lens_#_interface_id` | Which interface or view within that app |
+
+Values are entered as integers in the AOI properties panel and saved by clicking the checkmark button.
+
+### Hierarchy popup (`hierarchy.html`)
+A **Show Hierarchy** button (in the spatial canvas toolbar) opens `hierarchy.html` in a small popup window (`600 × 400 px`). The popup:
+- Displays all AOIs as a collapsible tree: **Screen → App → Interface → AOI**
+- Provides a **Filter by Screen** dropdown to narrow the tree
+- Provides a **Colour by** radio group (Screen / App / Interface) that recolors nodes in the tree
+- Highlighted AOIs (from `setHighlightedLenses()`) are marked with a yellow stripe in the tree
+
+---
+
+## 15. AOI Duplication
+
+A **Duplicate** button (<i class="far fa-copy"></i>) appears on each AOI list entry. Clicking it:
+- Instantiates a new AOI of the same type (`PolyLens`, `EllipseLens`, or `RectLens`) with the same vertices/bounds
+- Copies the group, hierarchy IDs, and temporal ranges from the original
+- Appends the new entry to the AOI list and assigns it the next available ID
+
+---
+
+## 16. AOI Colouring Modes
+
+The **Colouring** tab now has two AOI colouring sub-modes selected via radio buttons:
+
+| Mode | Dragger color | Spatial canvas color |
+|------|---------------|----------------------|
+| **By AOI** | `LENS_COLOURS[aoi_index]` | Each AOI gets a unique color based on its list position |
+| **By Group** | `LENS_COLOURS[group − 1]` | All AOIs in the same group share one color |
+
+Switching modes hides/shows the corresponding color-picker controls (`aoi_color_controls` vs `aoi_color_group_controls`).
+
+The `LENS_COLOURS` array is a 60-slot palette (two repetitions of a 30-color ColorBrewer qualitative sequence) whose individual entries can be edited via color pickers in the Colouring tab.
+
+---
+
+## 17. TWI Groups and Extended Matrix View States
+
+TWIs can be assigned to named **groups** (`base_twis[i].group`). This unlocks additional matrix axes:
+
+| TWI group axis value | Description |
+|----------------------|-------------|
+| `twigroup_aoi` | TWI Groups × AOIs |
+| `twigroup_dat` | TWI Groups × Datasets |
+| `twigroup_toi` | TWI Groups × TWIs |
+| `twigroup_lensegroup` | TWI Groups × AOI Groups |
+| `twigroup_grp` | TWI Groups × Participant Groups |
+
+The full set of `MATRIX_VIEW_STATE` values now also includes `grp_twigroup` and `toi_twigroup` orientations. When `TWI_MODE == 1` and a `selected_twigroup` is active, metric aggregation is scoped to TWIs belonging to that group only.
+
+---
+
+## 18. Video–Animation Synchronization
+
+The animation loop in `page.js` was extended so that video playback and the time slider stay in sync:
+
+- **Slider → video**: when the user drags the slider while `VIDEO_LINKING` is on, the video is seeked to `selectedTwiMinTime + TIME_ANIMATE × (selectedTwiMaxTime − selectedTwiMinTime)` (in seconds)
+- **Video → slider**: during `TIME_PLAY`, `TIME_ANIMATE` is derived from `currentVideoObj.time()` so the slider tracks the video head rather than incrementing blindly
+- The video is automatically paused when it reaches `selectedTwiMaxTime`
+- `handleAOITimeChange()` is called on every frame so temporal AOI visibility stays in sync with the current playback position
+
+---
+
 ## New Files
 
 | File | Purpose |
@@ -174,7 +326,7 @@ Each TWI row in the data panel now includes an **eye icon** button. Clicking it:
 | `helpers.js` | Shared date/time utility functions |
 | `ffmpeg.min.js` | FFmpeg WebAssembly build for in-browser video trimming |
 | `html2canvas.min.js` | html2canvas library for timeline screenshot export |
-| `hierarchy.html` | AOI hierarchy editor view (in development) |
+| `hierarchy.html` | AOI hierarchy popup — tree view of Screen → App → Interface → AOI |
 
 ---
 
@@ -182,6 +334,6 @@ Each TWI row in the data panel now includes an **eye icon** button. Clicking it:
 
 | Library | Source | Use |
 |---------|--------|-----|
-| Font Awesome 6 | CDN | Icons throughout the notes panel UI |
+| Font Awesome 6 | CDN | Icons throughout the notes panel UI and AOI controls |
 | FFmpeg.wasm | Bundled (`ffmpeg.min.js`) | In-browser video trimming |
 | html2canvas | Bundled (`html2canvas.min.js`) | Timeline screenshot export |
