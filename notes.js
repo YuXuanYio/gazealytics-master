@@ -244,7 +244,7 @@ function new_note(
 			newnote.timestampMs = convertToMilliseconds(formattedInput);
 			newnote.visibleOnTimeline = true;	
 		});
-		DATA_G.notes.events.push(newnote);
+		if (DATA_G && DATA_G.notes) { DATA_G.notes.events.push(newnote); }
 	}
 
 	textarea.addEventListener("input", function () {
