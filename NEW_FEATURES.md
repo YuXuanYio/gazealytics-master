@@ -7,51 +7,97 @@ This repository is a fork of the upstream [gazealytics/gazealytics-master](https
 ### New features
 
 **Enhanced Notes system**
+
 In field studies, one or more researchers typically sit alongside participants and write down observations as the session unfolds. These notes are not just reminders; they are a core data source that needs to be analyzed alongside the gaze data. The enhanced notes system turns notes from free-text scratchpad entries into structured records, each tagged with a type (general / technical / alarm / other), the name of the observer who wrote it, a timestamp showing when in the session it occurred, and which participant it refers to. This makes it possible to systematically filter and compare observations across participants and sessions, not just read through them one by one.
 
+---
+
 **Notes import from TSV**
+
 Researchers rarely take notes directly in Gazealytics during a live session. They use dedicated observation tools, spreadsheets, or purpose-built field study software. The TSV import lets you bring those existing notes straight in, with timestamps automatically calculated from the session start time, so you do not have to re-enter anything by hand.
 
+---
+
 **Timeline bookmarks**
+
 Once notes have timestamps, you want to see them in context with the gaze data rather than reading a separate list. Timeline bookmarks place each note as a clickable marker on the timeline at the exact moment it was recorded. This lets you jump straight to interesting moments identified by the observer, and see what the participant's eyes were doing at that point. When multiple events happen close together, they are clustered into a single marker so the timeline does not get cluttered.
 
+---
+
 **Note filtering and color coding**
+
 When you have multiple observers and many types of events across multiple participants, you need to be able to cut the notes down to just what you are looking for. You can filter by note type (e.g., show only alarms), by participant, or by observer. Color coding lets you see at a glance which observer made each note, or which category of event it was, directly on the timeline without having to hover over every marker.
 
+---
+
 **Observer color palette**
+
 Each researcher who contributed notes gets their own color. The palette is customizable via color pickers in the Colouring tab so teams can use colors that match their own conventions or that are accessible for color-blind team members.
 
+---
+
 **AOI groups**
+
 In studies involving complex interfaces or multi-screen setups, individual AOIs often belong to logical categories: all the navigation elements, all the content areas, the toolbar versus the main workspace. Grouping lets you analyze gaze at the category level rather than just at the level of individual drawn regions. AOIs in the same group share a color and are highlighted together, and the matrix view gains new axes for comparing gaze across groups rather than across individual AOIs.
 
+---
+
 **Temporal AOIs**
+
 In a dynamic session, the interface changes over time. A button that only appears during one phase of the task, or a panel that slides in partway through the recording, should not be counted as an AOI for the entire session; doing so would contaminate your metrics with time when that region did not even exist on screen. Temporal AOIs solve this by letting you define time ranges during which each AOI is active. Outside those ranges the AOI is invisible and excluded from metric calculations, so your numbers reflect only the periods when it was actually meaningful.
 
+---
+
 **AOI hierarchy (Screen / App / Interface)**
+
 In multi-screen or multi-app studies, you often want to ask questions at different levels of granularity: not just which button did the participant look at, but which application were they focused on, or which screen? The hierarchy system lets you tag each AOI with a Screen ID, App ID, and Interface ID. A separate popup then visualises all your AOIs as a collapsible tree, so you can get an overview of the whole structure and filter or color-code by level.
 
+---
+
 **AOI duplication**
+
 If the same interface element appears in multiple screens or states (the same close button appearing on three different dialogs, for example), you can draw it once and then duplicate it rather than redrawing from scratch. The duplicate carries over the group, hierarchy tags, and temporal ranges, so you only need to adjust what actually differs.
 
+---
+
 **AOI label visibility toggles**
+
 When you have a large number of AOIs on a dense interface, the name labels can obscure the gaze data underneath. Two toggle buttons let you hide individual AOI name labels and group labels independently, so you can switch between a labeled view for reference and a clean view for actually reading the fixation patterns.
 
+---
+
 **AOI coloring modes**
+
 Coloring AOIs by group rather than by individual AOI makes it immediately obvious which regions belong together, which is especially useful when you have many AOIs spread across a complex layout. Both modes have their own editable color palettes in the Colouring tab.
 
+---
+
 **TWI groups and extended matrix states**
+
 In studies with multiple conditions or phases, individual time windows of interest (TWIs) often belong to a higher-level category: all baseline trials, all task trials, all recovery periods. TWI groups let you aggregate across these categories in the matrix view, so you can compare how gaze differed between conditions rather than having to compare individual time windows one by one.
 
+---
+
 **Video coordinate tracking (`VidRectLens`)**
+
 In field studies, the thing the participant is looking at is often moving. A person they are watching, a vehicle in a traffic study, a moving cursor or interface element. Gaze coordinates are fixed to the stimulus image, but if the region of interest is moving through the frame, you need a way to show where it was at each point in time. The `VidRectLens` is a bounding-box overlay that moves through the spatial canvas frame by frame, driven by a TSV of coordinates you supply. This lets you visually relate the participant's fixations to the moving target throughout the session.
 
+---
+
 **Video trimming and export**
+
 When you want to share a clip of a particular session segment with a collaborator, or include it in a presentation or paper, you do not want to have to open a separate video editor. The trim and export feature clips the loaded video to the currently selected TWI and downloads it as an MP4, entirely in the browser.
 
+---
+
 **Timeline screenshot export**
+
 The timeline panel, once annotated with bookmarks, is a useful artifact in itself for reporting and discussion. The screenshot export captures the full panel including the bookmark overlays as a JPEG, ready to drop into a report or slide deck. Currently accessible from the browser console as `exportCombinedCanvas()`; a button in the UI is planned.
 
+---
+
 **Video and animation synchronisation improvements**
+
 Previously, scrubbing the time slider and playing the video could get out of sync, making it hard to connect what you were seeing in the gaze animation with what was happening in the video. The slider and video now track each other bidirectionally. Dragging the slider seeks the video, and during playback the slider follows the video head. Temporal AOI visibility also updates in real time as you play, so you always see the correct set of active AOIs for the current moment.
 
 ### Bugs fixed
