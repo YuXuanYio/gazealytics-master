@@ -24,6 +24,8 @@ Please reference using the reference below:
 }
 
 ## Used by
+Zhang, Y., Athukorala, N., Liang, Z., Qiao, Y., -, S., Yio, Y. X., Lawrence, L., Tag, B., Vered, M., Wybrow, M., & Goodwin, S. (2025). Streamlining Eye-Tracking and Observational Data for Field Study Visual Analysis. In Proceedings of the 2025 Symposium on Eye Tracking Research and Applications (pp. 1-9).
+
 Vriend, S. A., Vidyapu, S., Rama, A., Chen, K. T., & Weiskopf, D. (2024, June). Which Experimental Design is Better Suited for VQA Tasks?: Eye Tracking Study on Cognitive Load, Performance, and Gaze Allocations. In Proceedings of the 2024 Symposium on Eye Tracking Research and Applications (pp. 1-7).
 
 Wang, Y., Jiang, Y., Hu, Z., Ruhdorfer, C., Bâce, M., Bulling, A. (2024, June). VisRecall++: Analysing and Predicting Visualisation Recallability from Gaze Behaviour. in Proceedings of the ACM on Human-Computer Interaction (PACM HCI), vol. 8, no. ETRA, Art. 239.
@@ -197,6 +199,9 @@ Past developers:
   * Joshua Langmead (Monash University)
   * Ishwari Bhade (Monash University)
   * Ryan T Whitelock-Jones (Monash University)
+  * Yu Xuan Yio (Monash University)
+  * Nethara Athukorala (Monash University)
+  * Christian Moore (Monash University)
 
 Main contributors:
   * Kun-Ting Chen (Centre for Research on Engineering Software Technologies, University of Adelaide)
