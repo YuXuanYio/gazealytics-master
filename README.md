@@ -213,8 +213,8 @@ Main contributors:
   * Christophe Hurter (ENAC, Université de Toulouse)
   * Daniel Weiskopf (University of Stuttgart)
   * Sarah Goodwin (Monash University)
+  * Yu Xuan Yio (Monash University)
+  * Yidan Zhang (Monash University)
 
 ## License
 Gazealytics is provided under the MIT License.
-
-test committttt
