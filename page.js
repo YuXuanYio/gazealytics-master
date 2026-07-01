@@ -1,6 +1,4 @@
-
 // useful constants
-
 SPATIAL_CANVAS_WIDTH_PERCENTAGE = 0.525; // percentage of the browser innerWidth
 SPATIAL_CANVAS_HEIGHT_PERCENTAGE = 0.7; // percentage of the browser innerHeight
 CANVAS_BOX_HEIGHT_PERCENTAGE = 0.97; // percentage of the browser innerHeight

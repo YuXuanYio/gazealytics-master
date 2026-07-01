@@ -41,7 +41,7 @@ Cai, M., Zheng, B., & Demmans Epp, C. (2022, July). Towards Supporting Adaptive 
 
 ## Requirements
   * This repository
-  * Python 3.5 or above (web server scripting)
+  * Python 3.5 or above (For web server scripting, 3.13 recommended)
 
 ## Tutorial
 
@@ -182,7 +182,7 @@ conda install -c conda-forge py
 conda install -c conda-forge numpy
 conda install -c conda-forge pyopencl 
 conda install -c conda-forge pocl
-<the path to python3.7 binary> <the path to server.py>
+<the path to python3.13 binary> <the path to server.py>
 ```
 
 This starts a server in development mode at http://localhost:8080/.
