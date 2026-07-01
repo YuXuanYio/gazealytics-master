@@ -1,18 +1,13 @@
 <html>
-<style>
-p {
-	text-indent: 0px;
-	margin-left: 25px;
-}
-</style>
 <link rel="stylesheet" href="css/help.css">
 <body>
 
-<div id='help' />
-<div id='overview' />
+<div id='help'></div>
+<div id='overview'></div>
 
 <h2 class="header">Layout Overview</h2>
-<center> <image src="/layout.png" style="width:50%"/> </center>
+<div style="text-align: center">
+<image src="/layout.png" style="width:50%"/></div>
 
 <h3>Visualisation is split across 3 panels:</h3>
 <div class="div_class">
@@ -55,17 +50,23 @@ p {
 
 <h2 class="header" id='data'>Sample List</h2>
 <div class="div_class">
-New datasets, consisting of tsv files with three columns: Time, X-location, and Y-location, can be loaded in from the &quot;Load .tsv&quot; button. Time is assumed to be in milliseconds, and the location on an arbitrarily sized plane, preferably starting from 0. Multiple datasets can be loaded simultaneously by opening multiple files. Each sample is represented in a list, with several controls. It can be deleted with the bin-button, hidden with the eye-button, renamed, and assigned to a group value, which controls the colour that is used and allows samples to be grouped. The samples in the list can be reordered by dragging the coloured panel on the left side to a new location.
+	<p>
+	New datasets, consisting of tsv files with three columns: Time, X-location, and Y-location, can be loaded in from the &quot;Load .tsv&quot; button. Time is assumed to be in milliseconds, and the location on an arbitrarily sized plane, preferably starting from 0. Multiple datasets can be loaded simultaneously by opening multiple files. Each sample is represented in a list, with several controls. It can be deleted with the bin-button, hidden with the eye-button, renamed, and assigned to a group value, which controls the colour that is used and allows samples to be grouped. The samples in the list can be reordered by dragging the coloured panel on the left side to a new location.
+	</p>
 </div>
 
 <h2 class="header">TOI list</h2>
 <div class="div_class">
-Each Sample can further be filtered onto a window of time. Multiple different time intervals of interest can be created and defined, either on the timeline attached to the sample or using the timeline canvas if the sample is selected. Metrics over these different time intervals of interest can then be compared on the matrix canvas.
+	<p>
+	Each Sample can further be filtered onto a window of time. Multiple different time intervals of interest can be created and defined, either on the timeline attached to the sample or using the timeline canvas if the sample is selected. Metrics over these different time intervals of interest can then be compared on the matrix canvas.
+	</p>
 </div>
 
 <h2 class="header">Clustering</h2>
 <div class="div_class">
-Raw eye-movement data is clustered onto the selected space (determined by the size and offset controls, or by cropping), using the minimum distance and duration controls in the overview tab. A fixation is marked whenever sample attention stays within a given area for some time period. Fixations outside the current rectangle of consideration, or which were shorter than the minimum duration, are excluded.
+	<p>
+	Raw eye-movement data is clustered onto the selected space (determined by the size and offset controls, or by cropping), using the minimum distance and duration controls in the overview tab. A fixation is marked whenever sample attention stays within a given area for some time period. Fixations outside the current rectangle of consideration, or which were shorter than the minimum duration, are excluded.
+	</p>
 </div>
 
 <h2 class="header">Cropping</h2>
@@ -74,28 +75,33 @@ Raw eye-movement data is clustered onto the selected space (determined by the si
 	<p>
 	The position of the data in relation to the canvas, the background and AOI can be adjusted by changing the scale and offset values. 
 	</p>
-	<div id='cropping' />
-		<h3>Cropping</h3>
-		<p>
-		The rectangle of possible coordinates (from x and y coordinates, with span width and height) that will be included within the analysis can be altered either using the &quot;from&quot; and &quot;span&quot; controls in the Overview tab, or by cropping on the canvas. To crop on the canvas, select the crop control option in the overview tab, and then drag a rectangle on the spatial canvas to select it. Alternatively you can click on an AOI to crop to the bounding rectangle of that AOI. The width and height of the cropped area (in relation to the data values) is shown under the crop button in the &quot;from&quot; and &quot;span&quot; fields. While cropping, all mouse-clicks on the spatial canvas will be interpreted as cropping until the crop tool is deselected. Cropping can be undone with the <q>undo</q> button, or reset to the size of the uploaded background image (if one exists), with the <q>reset</q> button.
-		</p>
-	</div>
+	<div id='cropping'></div>
+	<h3>Cropping</h3>
+	<p>
+	The rectangle of possible coordinates (from x and y coordinates, with span width and height) that will be included within the analysis can be altered either using the &quot;from&quot; and &quot;span&quot; controls in the Overview tab, or by cropping on the canvas. To crop on the canvas, select the crop control option in the overview tab, and then drag a rectangle on the spatial canvas to select it. Alternatively you can click on an AOI to crop to the bounding rectangle of that AOI. The width and height of the cropped area (in relation to the data values) is shown under the crop button in the &quot;from&quot; and &quot;span&quot; fields. While cropping, all mouse-clicks on the spatial canvas will be interpreted as cropping until the crop tool is deselected. Cropping can be undone with the <q>undo</q> button, or reset to the size of the uploaded background image (if one exists), with the <q>reset</q> button.
+	</p>
 </div>
 
 <h2 class="header" id='aois'>Areas of Interest List</h2>
 <div class="div_class">
-Areas of Interest can be defined on the spatial canvas as either a polygon, ellipse, or rectangle. The kind of AOI to be created can be selected from the AOI panel, and then two or more clicks can be made on the spatial canvas to define the shape. AOIs can then be renamed, reordered, deleted, or hidden on the AOI list. AOIs can be reshaped on the spatial canvas by dragging from near an edge or polygon vertex, or exact values of the perimeter can be edited on the AOI list. A single AOI at a time can be selected, which can be used to filter the data on or around.
-Additionally, Metrics, distributions and transition patterns on and between the AOIs can be calculated and viewed on the matrix canvas.
+	<p>
+	Areas of Interest can be defined on the spatial canvas as either a polygon, ellipse, or rectangle. The kind of AOI to be created can be selected from the AOI panel, and then two or more clicks can be made on the spatial canvas to define the shape. AOIs can then be renamed, reordered, deleted, or hidden on the AOI list. AOIs can be reshaped on the spatial canvas by dragging from near an edge or polygon vertex, or exact values of the perimeter can be edited on the AOI list. A single AOI at a time can be selected, which can be used to filter the data on or around.
+	<br><br>Additionally, Metrics, distributions and transition patterns on and between the AOIs can be calculated and viewed on the matrix canvas.
+	</p>
 </div>
 
 <h2 class="header" id='notes'>Notes</h2>
 <div class="div_class">
-Notes can be added anywhere on the canvas and repositioned by clicking and dragging within the canvas area. To add or move a Note click on the drawing icon on the tab, then click on the canvas. Clicking on the canvas will continue to add notes until the drawing icon is de-selected or another selection mode (e.g. AOI) has been selected. Notes can be added as a bookmark on the timeline and hovering over these bookmarks will show the key details of each note. Notes within a 5% tolerance of eachother will be grouped under a single bookmark and a toggle button will appear on top of the bookmark, which allows to loop through all the notes when clicked. A new note can be create manually by clicking on the spatial canvas and attributes such as the note type, note taker and timestamp of the note can be specified. When clicked on save, it will appear in the notes section and as a bookmark on the timeline.
+	<p>
+	Notes can be added anywhere on the canvas and repositioned by clicking and dragging within the canvas area. To add or move a Note click on the drawing icon on the tab, then click on the canvas. Clicking on the canvas will continue to add notes until the drawing icon is de-selected or another selection mode (e.g. AOI) has been selected. Notes can be added as a bookmark on the timeline and hovering over these bookmarks will show the key details of each note. Notes within a 5% tolerance of eachother will be grouped under a single bookmark and a toggle button will appear on top of the bookmark, which allows to loop through all the notes when clicked. A new note can be create manually by clicking on the spatial canvas and attributes such as the note type, note taker and timestamp of the note can be specified. When clicked on save, it will appear in the notes section and as a bookmark on the timeline.
+	</p>
 </div>
 
 <h2 class="header" id='colours'>Colours</h2>
 <div class="div_class">
-The colours for various features can be edited through the colour tab. Select the colour you wish to edit by clicking on it, make changes in the pop-up window then click outside the window to continue working. Colour-based filtering allows to colour a note based on the note type or the note taker. Notes can aslo have a uniform default colour of grey.
+	<p>
+	The colours for various features can be edited through the colour tab. Select the colour you wish to edit by clicking on it, make changes in the pop-up window then click outside the window to continue working. Colour-based filtering allows to colour a note based on the note type or the note taker. Notes can aslo have a uniform default colour of grey.
+	</p>
 </div>
 
 <h2 class="header" id='spatial'>Spatial</h2>
@@ -105,13 +111,13 @@ The colours for various features can be edited through the colour tab. Select th
 	<br><br>
 	<b>Background image:</b> Optionally, a background image can be attached to a project to provide spatial context. The brightness for this background image can be controlled by a slider in the Overview tab.
 	<br><br>
-	<div id='fixation' />
+	<div id='fixation'></div>
 	<b>Fixations:</b> Draws a circular mark at the location of each fixation within the selected time interval of each sample. Colour depends on the group value of the sample, and size is proportional to the length in time that the sample fixated for. Relative size and mark transparency can both be controlled using sliders on the fixation panel.
 	<br><br>
 	<b>Contours:</b> Draws a contour map for each sample, using a kernel-density estimation based on the fixations within the selected time interval. Kernel shape and width can both be controlled. Colour again depends on the group value of the sample.
 	<br><br>
 	</div>
-	<div id='saccade' />
+	<div id='saccade'></div>
 	<b>Saccades:</b> Draws the saccades, the transitions between fixations, for each sample. Width and brightness can both be controlled by sliders. The saccades can be filtered by direction (into 8 general directions) or by type (short saccades or glancing saccades). Saccades can also be filtered by their interaction with the AOIs (eg. saccades within an AOI, to or from an AOI, around an AOI, between different AOIs). Saccades can be coloured in 3 ways: By the group value of the sample, by the direction, or by the saccade type.
 	Additionally, saccades for each sample can be bundled spatially, based on the current filtering and colour mode, with a user-defined amount of elasticity and heat. This only affects the spatial view of the saccade data.
 	<br><br>
@@ -138,7 +144,7 @@ The colours for various features can be edited through the colour tab. Select th
 	<br><br><b>Absolute Timelines:</b> Toggles whether the datasets in the timelines are stretched to fill the entire length, or are shown relative to their actual duration.
 </div>
 
-<h2 class="header" id='timeline'>Video</h2>
+<h2 class="header" id='video'>Video</h2>
 <div class="div_class">
 	Allows for loading a video file to be played in the timeline. The video can be played, paused, and the current time can be adjusted. The video can be played in sync with the timeline, or independently. The video can be scrubbed to a specific time interval, and the video can be muted.
 	<br><br>
@@ -149,7 +155,7 @@ The colours for various features can be edited through the colour tab. Select th
 	The rectangle will move according to the coordinates loaded in when the timeline is being animated or scrubbed. The video will also play in sync with the timeline so that the video and the eye-tracking data are in sync.
 </div>
 
-<div id='metrics' />
+<div id='metrics'></div>
 <h2 class="header">Metrics</h2>
 <div class="div_class">
 <h3>Matrix</h3>
@@ -224,38 +230,27 @@ The colours for various features can be edited through the colour tab. Select th
 	<b>Reverse Cuthill Mckee</b> Useful to reveal potential visual patterns of transitions between pairs of AOIs. All the non-zero cells are placed close to the diagonal. It is a graph-based approach and thus supports only square matrix. It minimises the bandwidth (i.e., max distance between rows (and respective columns)) in a given ordering. 
 	<br><br>
 	<b>Principal Component Analysis</b> A dimension reduction-based approach useful to reveal potential off-diagonal patterns, and tends to produce patterns along the anti-diagonal of a matrix. This method supports only square matrix.
-</p>
+	</p>
 </div>
 
 <h2 class="header">Histograms</h2>
 <div class="div_class">
 	<p>
 	Allows for viewing distribution-like statistics about the datasets.
-	<br><br>
+	<br /><br />
 	<b>Fixation Duration:</b> Histogram of the fixation durations for the selected sample, filtered onto the selected lens if one exists.
-	<br><br>
+	<br /><br />
 	<b>Visit, Duration:</b> Shows the full distribution of visit durations for the selected sample with respect to the selected lens.
-	<br><br>
-	<b>Saccade, Length:</b> Histogram of the saccade lengths for the selected sample.
-	</p>
-</div>
-
-<h2 class="header">Matrix</h2>
-<div class="div_class">
-	<p>
-	Allows for viewing insights and co-occurences of patterns between 
-	<br><br>
-	<b>Fixation Duration:</b> Histogram of the fixation durations for the selected sample, filtered onto the selected lens if one exists.
-	<br><br>
-	<b>Visit, Duration:</b> Shows the full distribution of visit durations for the selected sample with respect to the selected lens.
-	<br><br>
+	<br /><br />
 	<b>Saccade, Length:</b> Histogram of the saccade lengths for the selected sample.
 	</p>
 </div>
 
 <h2 class="header" id='export'>Export</h2>
 <div class="div_class">
-	<p>The current view of the spatial canvas and the timeline can be exported in JPG format. Spatial canvas consists of the operator's gaze data as fixations and the timeline has the events as bookmarks that occured during the time period.</p>
+	<p>
+	The current view of the spatial canvas and the timeline can be exported in JPG format. Spatial canvas consists of the operator's gaze data as fixations and the timeline has the events as bookmarks that occured during the time period.
+	</p>
 </div>
 </body>
 
