@@ -34,3 +34,8 @@ h4 {
   font-family: serif;
   padding: 10px;
 }
+
+p {
+	text-indent: 0px;
+	margin-left: 25px;
+}

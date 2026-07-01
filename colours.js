@@ -172,6 +172,7 @@ function updateDefaultNoteColors() {
 		let childId = child.id;
 
 		if (childId && childId.startsWith("note_")) {
+			let val = parseInt(childId.split("_")[1]);
 			let dragger = child.querySelector(".data_dragger");
 
 			if (dragger) {

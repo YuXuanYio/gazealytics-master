@@ -962,7 +962,7 @@ class VidRectLens {
 		}
 	}
 }
-	
+
 function formatMilliseconds(ms) {
     ms = Math.round(ms / 10) * 10; // round to nearest 10ms
     const hours = Math.floor(ms / 3600000);

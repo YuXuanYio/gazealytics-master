@@ -424,7 +424,7 @@ let spatialsketch = (p) => {
 					spatial_width, spatial_height);
 			}
 		}
-		if (VIDEOS[selected_data].coords) {
+		if (selected_data != -1 && VIDEOS[selected_data] != null && VIDEOS[selected_data] != undefined && VIDEOS[selected_data].coords) {
 			if (currVidLens == null) {
 				currVidLens = new VidRectLens(VIDEOS[selected_data].coords[0].x1,VIDEOS[selected_data].coords[0].y1);
 				currVidLens.add(VIDEOS[selected_data].coords[0].x2, VIDEOS[selected_data].coords[0].y2);
