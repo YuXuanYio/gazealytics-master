@@ -317,7 +317,7 @@ function load_controls(){
 		if(base_twis[v].included && base_twis[v].checked){
 			order_twis.push( v );			
 		}
-	}}
+	}
 	
 	//update matrix reordering dropdown 
 	var matrixrowcolnames = MATRIX_VIEW_STATE.split("_");
@@ -581,6 +581,7 @@ function load_controls(){
         hierarchyInputsInitialized = true;
     }
 }
+
 
 function setHierarchyInputs(lens) {
     const id = lens.id;
@@ -1792,8 +1793,6 @@ function exportCombinedCanvas() {
     });
 
 }
-
-
 
 function export_metrics(){
 	var sacc_string = 'data:text/tsv;charset=utf-8,'+ saccades_values_string();
