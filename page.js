@@ -221,6 +221,12 @@ function load_controls(){
 		if(DATASETS[val] != undefined && DATASETS[val].included && DATASETS[val].tois != undefined && DATASETS[val].toi_id != -1 && 
 				DATASETS[val].tois[DATASETS[val].toi_id].included) {
 			DATASETS[val].tois[DATASETS[val].toi_id].range = slid_vals;
+			
+			if(TIME_STRAT == 'real' && DATASETS[val].tois[DATASETS[val].toi_id].real_range != undefined){
+				let t0r = DATASETS[val].t_start; let t1r = DATASETS[val].t_end;
+				DATASETS[val].tois[DATASETS[val].toi_id].real_range[0] = slid_vals[0] * (t1r - t0r) + t0r;
+				DATASETS[val].tois[DATASETS[val].toi_id].real_range[1] = slid_vals[1] * (t1r - t0r) + t0r;
+			}
 			if(DATASETS[val].slid_vals[0] != slid_vals[0] || DATASETS[val].slid_vals[1] != slid_vals[1]){
 				DATASETS[val].slid_vals = slid_vals;
 				compute_toi_metrics(val, DATASETS[val].toi_id);

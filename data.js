@@ -428,6 +428,12 @@ function update_times(){
 		if(DATASETS[val] != undefined && DATASETS[val].tois != undefined && DATASETS[val].toi_id != -1 &&
 				DATASETS[val].tois[DATASETS[val].toi_id] != undefined && DATASETS[val].tois[DATASETS[val].toi_id].included){
 			DATASETS[val].tois[DATASETS[val].toi_id].range = range;
+
+			if(TIME_STRAT == 'real' && DATASETS[val].tois[DATASETS[val].toi_id].real_range != undefined){
+				let t0r = DATASETS[val].t_start; let t1r = DATASETS[val].t_end;
+				DATASETS[val].tois[DATASETS[val].toi_id].real_range[0] = range[0] * (t1r - t0r) + t0r;
+				DATASETS[val].tois[DATASETS[val].toi_id].real_range[1] = range[1] * (t1r - t0r) + t0r;
+			}
 			if(DATASETS[val].slid_vals[0] != range[0] || DATASETS[val].slid_vals[1] != range[1]){
 				DATASETS[val].slid_vals = range;
 				compute_toi_metrics(val, DATASETS[val].toi_id);
@@ -435,11 +441,6 @@ function update_times(){
 				background_changed |= SHOW_FIX||SHOW_TOPO; midground_changed |= SHOW_SACCADE;
 				foreground_changed = true; timeline_changed = true; matrix_changed = true; update_topos = true;
 			}
-		}
-		else if(DATASETS[val] != undefined && (DATASETS[val].slid_vals[0] != range[0] || DATASETS[val].slid_vals[1] != range[1])){
-			DATASETS[val].slid_vals = range;
-			background_changed |= SHOW_FIX||SHOW_TOPO; midground_changed |= SHOW_SACCADE;
-			foreground_changed = true; timeline_changed = true; matrix_changed = true; update_topos = true;
 		}
 
 		if(DATASETS[val].fixs.length >= 2){
