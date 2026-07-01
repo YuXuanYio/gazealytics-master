@@ -77,7 +77,7 @@ button {
 	white-space: nowrap;	
 }
 .control_box{
-	height: 95%; /* Full-height: remove this if you want "auto" height */
+	height: 100%; /* Full-height: remove this if you want "auto" height */
 	overflow-y: auto;
 	width: 12%; /* Set the width of the sidebar */
 	position: fixed; /* Fixed Sidebar (stay in place on scroll) */
