@@ -113,6 +113,10 @@ button {
 	font-family: Arial, sans-serif;
 	font-size: 14px;
 }
+
+.data_content_toolbar {
+	text-align: center;
+}
 .timestamp-container{
 	display: flex;
 	align-items: center;
@@ -292,6 +296,7 @@ table, th, td {
 	font-family: Arial, sans-serif;
 	font-size: 14px;
 }
+
 
 /* matrix arrangement css */
 .greyed_out {
