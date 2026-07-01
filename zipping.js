@@ -1,5 +1,3 @@
-
-
 function download_zip(filename, base64) {
   var element = document.createElement('a');
   element.setAttribute('href', "data:application/zip;base64," + base64);
@@ -142,7 +140,6 @@ function zip_name(){
 	return 'Gazealytics_' + ( date.getMonth()+1 ) + '-' + date.getDate() + '-' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.zip';
 }
 
-
 function load_zip(){
 	document.getElementById("project_txt").innerHTML = 'Loading...';
 	document.getElementById("load_button").disabled = true;
@@ -258,7 +255,6 @@ function load_zip(){
 								// }else{
 								// 	item.innerHTML='<i class="fas fa-clock"></i>';
 								// }
-
 							}
 						}
 						//process the remaining lenses
@@ -353,7 +349,7 @@ function load_zip(){
 						background_changed = true; matrix_changed = true; timeline_changed = true;
 					}catch (error) { console.error(error); }
 				});
-				zip.file("TWIs.json").async("string").then(function (data) {
+				let twisLoadPromise = zip.file("TWIs.json").async("string").then(function (data) {
 					try{
 						let content = JSON.parse(data);
 						
@@ -395,7 +391,9 @@ function load_zip(){
 						background_changed = true; matrix_changed = true; timeline_changed = true;
 					}catch (error) { console.error(error); }
 				});
-			zip.file("Participants.json").async("string").then(function (data) {
+			twisLoadPromise.then(function() {
+				return zip.file("Participants.json").async("string");
+			}).then(function (data) {
 					try{
 						let content = JSON.parse(data);
 						// update datasets array
@@ -677,14 +675,3 @@ function load_zip(){
 			document.getElementById("load_button").disabled = false;
 			});
 }
-
-
-
-
-
-
-
-
-
-
-
