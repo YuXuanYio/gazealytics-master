@@ -530,7 +530,11 @@ function load_toi_list(id){
 			if(selected_twi == -1)
 				select_twi(0);
 
-			try{ compute_toi_metrics(id, 0); give_topography(id, 0); load_controls();  }catch( error ){ console.error(error); }
+			try{ 
+				compute_toi_metrics(id, 0); give_topography(id, 0); load_controls();  
+			} catch( error ){ 
+				console.error('Error during initial TOI metrics/topography/load_controls after dataset load:', error); 
+			}
 			background_changed = true; timeline_changed = true; matrix_changed = true;
 
 			if(err_count > 0) {

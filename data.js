@@ -263,7 +263,7 @@ function new_file(){
 			
 			select_data(id); 
 			if(base_twis.length == 0){
-				base_twis.push({name: "All", group: 1, included: true});
+				base_twis.push({name: "All", group: 1, included: true, checked: true});
 				add_item_to_twilist("All", 0);
 				document.getElementById("twi_0_c").onclick = function(){ document.getElementById('sort_dropdown').value = 'No_sort'; load_controls(); matrix_changed = true;timeline_changed=true;  this.checked = !this.checked; removeAllBookmarkButtons(); if(this.checked){this.innerHTML='<i class="fas fa-eye"></i>';}else{this.innerHTML='<i class="fas fa-eye-slash"></i>'; } };
 			}
@@ -287,7 +287,11 @@ function new_file(){
 			if(selected_twi == -1)
 				select_twi(0);
 
-			try{ compute_toi_metrics(id, 0); give_topography(id, 0); load_controls();  }catch( error ){ console.error(error); }
+			try{ 
+				compute_toi_metrics(id, 0); give_topography(id, 0); load_controls();  
+			} catch( error ){ 
+				console.error('Error during initial TOI metrics/topography/load_controls after dataset load:', error); 
+			}
 			background_changed = true; timeline_changed = true; matrix_changed = true;
 			make_note_dataset_selectors();
 			if(newdata.fixs.length < 2){cluster_warn+= '   ' +newdata.name+'\n'}
@@ -762,7 +766,7 @@ function add_toi(data_id, t0, t1, type, name, t0_real, t1_real){
 		let groupnum = base_twis.length+1;
 		if(groupnum > TWIS_COLOURS.length)
 			groupnum = TWIS_COLOURS.length;
-		base_twis.push({name: name, group: groupnum});
+		base_twis.push({name: name, group: groupnum, checked: true});
 		twi_id = base_twis.length-1;
 		order_twis.push(twi_id);	
 		add_item_to_twilist(name, twi_id);
