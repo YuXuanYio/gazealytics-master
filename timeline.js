@@ -153,7 +153,7 @@ let timelinesketch = (p) => {
 			p.strokeWeight(0);
 			p.rect(0,0,p.width,p.height);
 			p.fill(white(100));
-			p.textFont(f); 
+			p.textFont(f.fontName, f.fontSize); 
 			p.textAlign( p.CENTER );
 			p.text("Timeline Canvas, shows the chronological arrangement\nof the data", p.width/2, p.height/2);
 			return;
@@ -174,8 +174,7 @@ let timelinesketch = (p) => {
 		
 
 		try{
-			p.background(black(100)); 
-			p.textFont(f); 
+			p.background(black(100));  
 			p.fill(white(100)); 
 			p.stroke(white(100));
 
@@ -198,13 +197,13 @@ let timelinesketch = (p) => {
 			p.image(TimeLine, 200, 0);
 			// Time Endvalue labels
 			if(TIME_DATA=='lens'){
+				p.textFont('Arial',16);
 				let current_lense_mode = document.getElementsByClassName("lense_mode")[0].innerHTML;
 				if( current_lense_mode.indexOf("Selected AOI Group")>-1){
 					for(let l=0; l<ORDERLENSEGROUPIDARRAYINDEX.length && ORDERLENSEGROUPIDARRAYINDEX.length<100; l++){ 
 						let s = "AOI G"+LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[l]].group;
 						let d = timeline_height/ORDERLENSEGROUPIDARRAYINDEX.length;
 						let h = timeline_height/ORDERLENSEGROUPIDARRAYINDEX.length*l;
-						p.textFont('Arial',16);
 						if(p.textAscent(s)<d){
 							p.text( s, 90 - p.textWidth(s), h+p.textAscent()+(.1*d));							
 							if( ORDERLENSEGROUPID.indexOf(selected_lensegroup) == l ){
@@ -225,7 +224,6 @@ let timelinesketch = (p) => {
 						// let h = (120*(l+0.5))/lenses.length;
 						let d = timeline_height/lenses.length;
 						let h = timeline_height/lenses.length*l;
-						p.textFont('Arial',16);
 						if(p.textAscent(s)<d){
 							p.text( s, 90 - p.textWidth(s), h+p.textAscent()+(.1*d));
 							if( order_lenses.indexOf(selected_lens) == l ){
@@ -242,11 +240,11 @@ let timelinesketch = (p) => {
 				}
 				if(selected_data != -1){
 					let data = DATASETS[selected_data];
-					p.textFont('Arial',16);
 					p.text( format_time(data.tmin/1000), 30, p.height-p.textAscent()); // draws start/end times
 					p.text( format_time(data.tmax/1000), p.width-30 - p.textWidth(format_time(data.tmax/1000)), p.height-p.textAscent());
 				}
 			}else if(TIME_DATA=='data' || TIME_DATA=='all' || TIME_DATA=='group' || TIME_DATA=='saccades' || TIME_DATA=='saccadetype'){
+				p.textFont('Arial',16);
 				TIMELINE_CANVAS.num_of_rows = 0;
 				let toi_longest_duration = 0;
 				let k2 = VALUED.indexOf(selected_data);
@@ -342,7 +340,6 @@ let timelinesketch = (p) => {
 							h = timeline_height/TIMELINE_CANVAS.num_of_rows*row;
 							toi = data.tois[ w ];
 							p.strokeWeight(0);
-							p.textFont('Arial',16);
 							if(p.textAscent(s)<d){
 								p.text(s.substring(0,9), 4, h+p.textAscent()+(.1*d));
 								// p.text(twi_id < 0 ? "" : base_twis[twi_id].name.substring(0,9), 104, h+p.textAscent()+(.1*d));
@@ -1709,15 +1706,11 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
                 let canvasRect = TIMELINE_CANVAS.elt.getBoundingClientRect();
                 let diff = (TIMELINE_CANVAS.width - canvas.width) / 3;
 
-                line.className = `timeline-line-${data.name}-toi-${toi_bookmark.twi_id}`;
-                line.style.position = "absolute";    
-
-                line.style.left = `${canvasRect.left + (diff * 2) + ts}px`;
-                line.style.top = `${canvasRect.top + start_y}px`;
-                line.style.width = "1px";
-                line.style.height = `${end_y - start_y}px`;
-                line.style.backgroundColor = "black";
-                line.style.zIndex = "1";
+				line.className = `timeline-line-${data.name}-toi-${toi_bookmark.twi_id}`;
+				line.classList.add("timeline_bookmark_line");
+				line.style.left = `${canvasRect.left + (diff * 2) + ts}px`;
+				line.style.top = `${canvasRect.top + start_y}px`;
+				line.style.height = `${end_y - start_y}px`;
 
 				let start_x = ts;
 				setTimeout(() => {
@@ -1726,32 +1719,24 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 					canvas.strokeWeight(1);
 				});
 
-                button.className = `timeline-bookmark-${data.name}-toi-${toi_bookmark.twi_id}`;
-                button.setAttribute("data-observer", event.observer);
-                button.setAttribute("data-event-type", event.type);
-                button.setAttribute("data-event-detail-id", event.eventId);
+				button.className = `timeline-bookmark-${data.name}-toi-${toi_bookmark.twi_id}`;
+				button.classList.add("timeline_bookmark_button");
+				button.setAttribute("data-observer", event.observer);
+				button.setAttribute("data-event-type", event.type);
+				button.setAttribute("data-event-detail-id", event.eventId);
 
-                button.style.position = "absolute";    
-                button.style.left = `${canvasRect.left + (diff * 2) + ts - 7.5}px`;
-                button.style.top = `${canvasRect.top + center_y - 7.5}px`;
-                button.style.width = "15px";
-                button.style.height = "15px";
-                button.style.background = observers[event.observer];
-                
-                button.style.border = "none";
-                button.style.cursor = "pointer";
-                button.style.borderRadius = "5px";
-                button.style.zIndex = "2";    
+				button.style.left = `${canvasRect.left + (diff * 2) + ts - 7.5}px`;
+				button.style.top = `${canvasRect.top + center_y - 7.5}px`;
+				button.style.background = observers[event.observer];  
                 
 				let toggleButton;
 				if(events.length > 1) {
 					toggleButton = document.createElement('button');
 					toggleButton.className = `timeline-toggle-${data.name}-toi-${toi_bookmark.twi_id}`;
+					toggleButton.classList.add("timeline_bookmark_toggle");
 					toggleButton.innerHTML = events.length;
-					toggleButton.style.position = "absolute";
 					toggleButton.style.left = `${canvasRect.left + (diff * 2) + ts - 8.5}px`;
 					toggleButton.style.top = `${canvasRect.top + center_y - 35}px`;
-					toggleButton.style.zIndex = "3";
 					document.body.appendChild(toggleButton);
 		
 					let noteIndex = 0;
@@ -1766,20 +1751,8 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
 				}
                 
                 let tooltip = document.createElement("tooltip");
-                tooltip.className = "tooltip";
-                tooltip.style.position = "absolute";
-                tooltip.style.padding = "10px 10px";
-                tooltip.style.color = "black";
-                tooltip.style.borderRadius = "5px";
-                tooltip.style.fontSize = "14px";
-                tooltip.style.fontWeight = "bold";
-                tooltip.style.fontFamily = "Calibri";
-                tooltip.style.visibility = "hidden";
-                tooltip.style.transition = "opacity 0.3s";
-                tooltip.style.opacity = "0";
-                tooltip.style.zIndex = "1000";
-                tooltip.style.backgroundColor = "white";
-                tooltip.innerHTML = `Timestamp: ${event.occuredTimestamp}<br>Type: ${event.type}<br>Details: ${event.content}<br>Observer: ${event.observer}`;
+				tooltip.className = "tooltip";
+				tooltip.innerHTML = `Timestamp: ${event.occuredTimestamp}<br>Type: ${event.type}<br>Details: ${event.content}<br>Observer: ${event.observer}`;
                 
                 button.addEventListener("mouseenter", () => {
                     tooltip.style.visibility = "visible";
@@ -1894,32 +1867,21 @@ function colour_match_observer(observers) {
     let container = document.getElementById('legend_container');
     container.innerHTML = "";
 
-    let title = document.createElement('h3');
-    title.textContent = "Observer Legend";
-    title.style.textAlign = "center";
-    title.style.marginBottom = "10px";
-    container.appendChild(title);
+	let title = document.createElement('h3');
+	title.textContent = "Observer Legend";
+	title.classList.add("timeline_legend_title");
+	container.appendChild(title);
 
-    let legendRow = document.createElement('ul');
-	legendRow.style.display = "flex";
-	legendRow.style.flexDirection = "row";
-	legendRow.style.gap = "15px";
-    Object.entries(observers).forEach(([observerName, color]) => {
-        let observerDiv = document.createElement('div');
-		observerDiv.style.display = "flex";
-        observerDiv.style.alignItems = "center";
-        observerDiv.style.marginBottom = "5px";
-		observerDiv.style.justifyContent = "center";
+	let legendRow = document.createElement('ul');
+	legendRow.classList.add("timeline_legend_row");
+	Object.entries(observers).forEach(([observerName, color]) => {
+		let observerDiv = document.createElement('div');
+		observerDiv.classList.add("timeline_legend_item");
 
-        let colorIndicator = document.createElement('div');
-        colorIndicator.style.width = "15px";
-        colorIndicator.style.height = "15px";
-        colorIndicator.style.borderRadius = "5px"; 
-        colorIndicator.style.background = color; 
-        colorIndicator.style.marginRight = "10px";
-        observerDiv.style.alignItems = "center";
-		observerDiv.style.justifyContent = "center";
-        let observerText = document.createElement('span');
+		let colorIndicator = document.createElement('div');
+		colorIndicator.classList.add("timeline_legend_color");
+		colorIndicator.style.background = color; 
+		let observerText = document.createElement('span');
         observerText.textContent = observerName;
 
         observerDiv.appendChild(colorIndicator);
@@ -2019,63 +1981,30 @@ function add_note_legend() {
 	let container = document.getElementById('note_legend');
 	container.innerHTML = "";
 
+	let legendSource = null;
 	if(show_note_legend === true) {
-		let legendRow = document.createElement("ul");
-		legendRow.style.display = "flex";
-		legendRow.style.flexDirection = "row";
-		legendRow.style.gap = "15px";
-	
-		Object.entries(event_colour_map).forEach(([noteType, colour]) => {
-			let observerDiv = document.createElement('div');
-			observerDiv.style.display = "flex";
-			observerDiv.style.alignItems = "center";
-			observerDiv.style.marginBottom = "5px";
-			observerDiv.style.justifyContent = "center";
-	
-			let colorIndicator = document.createElement('div');
-			colorIndicator.style.width = "15px";
-			colorIndicator.style.height = "15px";
-			colorIndicator.style.borderRadius = "5px"; 
-			colorIndicator.style.background = colour; 
-			colorIndicator.style.marginRight = "10px";
-			observerDiv.style.alignItems = "center";
-			observerDiv.style.justifyContent = "center";
-			let observerText = document.createElement('span');
-			observerText.textContent = noteType;
-	
-			observerDiv.appendChild(colorIndicator);
-			observerDiv.appendChild(observerText);
-			legendRow.appendChild(observerDiv);
-		});
-		container.appendChild(legendRow);
-	} else if (show_note_observer_legend === true) {
-		let legendRow = document.createElement("ul");
-		legendRow.style.display = "flex";
-		legendRow.style.flexDirection = "row";
-		legendRow.style.gap = "15px";
-	
-		Object.entries(observers).forEach(([observer, colour]) => {
-			let observerDiv = document.createElement('div');
-			observerDiv.style.display = "flex";
-			observerDiv.style.alignItems = "center";
-			observerDiv.style.marginBottom = "5px";
-			observerDiv.style.justifyContent = "center";
-	
-			let colorIndicator = document.createElement('div');
-			colorIndicator.style.width = "15px";
-			colorIndicator.style.height = "15px";
-			colorIndicator.style.borderRadius = "5px"; 
-			colorIndicator.style.background = colour; 
-			colorIndicator.style.marginRight = "10px";
-			observerDiv.style.alignItems = "center";
-			observerDiv.style.justifyContent = "center";
-			let observerText = document.createElement('span');
-			observerText.textContent = observer;
-	
-			observerDiv.appendChild(colorIndicator);
-			observerDiv.appendChild(observerText);
-			legendRow.appendChild(observerDiv);
-		});
-		container.appendChild(legendRow);
+		legendSource = event_colour_map;
+	} else if(show_note_observer_legend === true) {
+		legendSource = observers;
 	}
+	if(legendSource == null) return;
+
+	let legendRow = document.createElement("ul");
+	legendRow.classList.add("timeline_legend_row");
+
+	Object.entries(legendSource).forEach(([label, colour]) => {
+		let observerDiv = document.createElement('div');
+		observerDiv.classList.add("timeline_legend_item");
+
+		let colorIndicator = document.createElement('div');
+		colorIndicator.classList.add("timeline_legend_color");
+		colorIndicator.style.background = colour; 
+		let observerText = document.createElement('span');
+		observerText.textContent = label;
+
+		observerDiv.appendChild(colorIndicator);
+		observerDiv.appendChild(observerText);
+		legendRow.appendChild(observerDiv);
+	});
+	container.appendChild(legendRow);
 }
