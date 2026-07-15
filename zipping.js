@@ -456,7 +456,7 @@ function load_zip(){
 
 								//backward compatibility
 								for(let toi = 0; toi < DATASETS[v].tois.length; toi++){
-									if(DATASETS[v].tois[toi].real_range == undefined && TIME_STRAT == 'real') {
+									if(TIME_STRAT == 'real') {
 										DATASETS[v].tois[toi].real_range = [];
 										DATASETS[v].tois[toi].real_range[0] = (DATASETS[v].tois[toi].range[0])*(DATASETS[v].t_end - DATASETS[v].t_start)+DATASETS[v].t_start;
 										DATASETS[v].tois[toi].real_range[1] = (DATASETS[v].tois[toi].range[1])*(DATASETS[v].t_end - DATASETS[v].t_start)+DATASETS[v].t_start;
