@@ -1,41 +1,65 @@
 html{
-    max-width: 800px;
+    max-width: 65vw;
     width: 85%;
+    font-family: Arial, sans-serif;
     margin: 0 auto;
     padding: 25px 0;
   }
 
-h2 {
-    font-size: 25px;
-    line-height: 1;
-    text-align: center;
-  }
-
-.header {
-  background: #2F3061;
-  color: #F7FFF7;
+body {
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
 }
 
-h3 {
+#toc {
+  position: sticky;
+  top: 25px;
+  flex: 0 0 160px;
+  font-size: 14px;
+}
+
+#toc a {
+  display: block;
+  padding: 4px 0;
+  color: #343434;
+  text-decoration: none;
+}
+
+#toc a.active {
+  font-weight: bold;
+  color: #2F3061;
+}
+
+#content {
+  flex: 1;
+  min-width: 0;
+}
+
+h2.header {
   font-size: 18px;
-  line-height: 1;
-  padding-left: 15px;
+  font-weight: bold;
+  text-align: left;
+  border-top: 3px solid #2F3061;
+  padding-top: 14px;
+  margin-top: 40px;
 }
 
-h4 {
-  font-size: 15px;
-  line-height: 1;
+h3, h4 {
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1.4;
   padding-left: 15px;
 }
 
 .div_class{
-  background: #F6FA9E;
   color: #343434;
-  font-family: serif;
   padding: 10px;
+  font-size: 14px;
 }
 
 p {
 	text-indent: 0px;
 	margin-left: 25px;
+	font-size: 14px;
 }
