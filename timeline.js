@@ -92,11 +92,13 @@ let timelinesketch = (p) => {
 		// Quit dragging; Resizing canvas
 		if(TIMELINE_draggingY) {
 			TIMELINE_draggingY = false;
+			p.mouseIsPressed_timeline = false;
 			let timeline_canvas_height_new = TIMELINE_draggableRecty+15;
 			SPATIAL_CANVAS_HEIGHT_PERCENTAGE = 1 - timeline_canvas_height_new / p.windowHeight - 0.1;
 
 			SPATIAL.resizeElements(false, true);
-			p.resizeElements(false, true);				
+			p.resizeElements(false, true);
+			document.getElementById('canvas_box').style.height = Math.floor(spatial_height + timeline_canvas_height)+'px';
 			return;
 		}
 
@@ -120,12 +122,13 @@ let timelinesketch = (p) => {
 			background_changed = true; timeline_changed=true; matrix_changed = true; return;
 		}
 		if( selected_data == -1 ){ return; }
-		
+
 		data = DATASETS[selected_data];
 
 		if( press_toi==-1 && Math.abs(Math.floor(endX)-Math.floor(beginX)) > 3 
 				&& beginX >= 200 && beginX <= p.width-100 && endX >= 200 && endX <= p.width-100
-				&& beginY < timeline_highlight_position && endY < timeline_highlight_position ){
+				&& beginY < timeline_highlight_position && endY < timeline_highlight_position 
+				&& endY > RESIZE_CONTROL_PADDING && endY < timeline_highlight_position ){
 			beginT = (beginX - 200)/(p.width-300) * (data.slid_vals[1] - data.slid_vals[0]) + data.slid_vals[0];
 			endT = (endX - 200)/(p.width-300) * (data.slid_vals[1] - data.slid_vals[0]) + data.slid_vals[0];
 			beginT = Math.max(0, Math.min(1, beginT)); endT = Math.max(0, Math.min(1, endT));
@@ -411,7 +414,7 @@ let timelinesketch = (p) => {
 						}
 					}
 				}
-				if( p.mouseIsPressed_timeline && press_toi == -1 ){					
+				if( p.mouseIsPressed_timeline && press_toi == -1 && beginY > RESIZE_CONTROL_PADDING ){					
 					y = p.mouseY;
 					dy = 30;
 					p.noStroke(); 
@@ -588,6 +591,7 @@ let timelinesketch = (p) => {
 
 	p.resizeElements = (width_changed, height_changed) => {
 		timeline_canvas_height = p.windowHeight * (1-SPATIAL_CANVAS_HEIGHT_PERCENTAGE-0.01);
+		
 
 		p.resizeCanvas(Math.floor(spatial_width), Math.floor(timeline_canvas_height));		
 		p.initConfig(p.windowWidth, p.windowHeight);
