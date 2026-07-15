@@ -51,11 +51,11 @@
 		<button type="button" class="tabbut2" id="tab0" style='background-color:lightblue' onclick='collapse(0)'>
 			Overview </button>
 		<button type="button" class="tabbut2" id="tab1" onclick='collapse(1)'> Fixation </button>
-		<div class="tool" style='display: inline'><button href="help.html" target="popup"
-				onclick="openHelp('overview')"><i
-					class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 		<button type="button" class="tabbut2" id="tab2" onclick='collapse(2)'> Saccades </button>
 		<button type="button" class="tabbut2" id="tab3" onclick='collapse(3)'> Timeline </button>
+		<div class="tool" style='display: inline'><button href="help.html" target="popup"
+		onclick="openHelp('overview')"><i
+			class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 		<hr>
 		<!-- MARK: Overview-->
 		<div class="collapsing" id='part0' style='display: block'>
@@ -162,13 +162,13 @@
 						class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 			<div id='fix_controls' style="display:block">
 				<br>
-				<div class="tool2">fixation size:<div id="fix_size_sl" class="slider"></div>
+				<div class="tool2">Fixation size:<div id="fix_size_sl" class="slider"></div>
 					<script>noUiSlider.create(document.getElementById('fix_size_sl'), { start: [0], step: 0.01, range: { 'min': -3, 'max': 3 } });</script>
 					<span class="tip">Controls the size of fixation marks</span>
 				</div>
 				<br>
-				<div class="tool2">fixation opacity:<div id="fix_alpha_sl" class="slider"></div><br />
-					<div class="tool">fixation sequence
+				<div class="tool2">Fixation opacity:<div id="fix_alpha_sl" class="slider"></div><br />
+					<div class="tool">Fixation sequence
 						<input type="checkbox" id="fixs_saturation" checked="true"
 							onclick="FIXS_SATURATION=this.checked;background_changed=true;">
 						<span class="tip">Toggles showing fixation sequence</span>
@@ -999,8 +999,7 @@
 		<!-- MARK: Canvas (p5js)-->
 		<div class="canvas_box" id="canvas_box">
 			<div>
-				<span style="background-color: aqua; font-size:12; font-family: Arial, sans-serif">Data
-					filtering:</span>
+				<span><b>Data filtering:</b></span>
 				<div class="tool" style="display: inline"><button type="button" id="dat_mode"
 						class="toggler toggle-on dat_mode" onclick="click_dat_mode();">All Samples</button><span
 						class="tip">Toggles showing the entire data, selected individual data, or selected group</span>
@@ -1013,7 +1012,7 @@
 						class="toggler toggle-on lense_mode" onclick="click_lense_mode();">Selected AOI
 						Group</button><span class="tip">Toggles showing selected individual AOI, or selected AOI
 						group</span></div>
-				<span style="background-color: yellow; font-size:12; font-family: Arial, sans-serif">Shortcut:</span>
+				<span class="shortcut_row"><b>Shortcuts:</b></span>
 				<div class="tool" style="display: inline"><button type="button" id="aoi_sequence_shortcut"
 						class="toggler toggle-on dat_mode" onclick="click_shortcut('aoi_sequence_shortcut')">AOI
 						Sequence</button><!--span class="tip">To open up AOI sequence comparison or transition cosine similarity matrix with AOI (group) sequence timelines</span-->
