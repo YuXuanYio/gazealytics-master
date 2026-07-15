@@ -21,6 +21,8 @@ let timelinesketch = (p) => {
 	p.mouseIsPressed_timeline = false; 
 	beginX = -1; 
 	endX = -1;
+	beginY = -1;
+	endY = -1;
 	p.press_toi = 0;
 	p.currentPressedX = -1;
 
@@ -54,6 +56,7 @@ let timelinesketch = (p) => {
 			}
 			p.mouseIsPressed_timeline = true; 
 			beginX = p.mouseX; 
+			beginY = p.mouseY;
 			currentPressedX = p.mouseX;
 			if( selected_data != -1 ){
 				data = DATASETS[selected_data];
@@ -94,13 +97,16 @@ let timelinesketch = (p) => {
 
 			SPATIAL.resizeElements(false, true);
 			p.resizeElements(false, true);				
+			return;
 		}
+
+		if(!p.mouseIsPressed_timeline) return;
 
 		//exclude mouse release handling below outside the canvas
 		if(p.mouseX < 0 || p.mouseY < 0 || p.mouseX > p.width || p.mouseY > p.height) return;
 
-		p.mouseIsPressed_timeline = false; endX = p.mouseX; // press_toi = 0; currentPressedX = -1;
-		if( beginX < 100 && endX < 100 && p.mouseY < timeline_highlight_position ){ // we clicked on the object list control part of the window
+		p.mouseIsPressed_timeline = false; endX = p.mouseX; endY = p.mouseY; // press_toi = 0; currentPressedX = -1;
+		if( beginX < 100 && endX < 100 && p.mouseY < timeline_highlight_position ){ 
 			if( TIME_DATA=="lens" && lenses.length > 0 ){
 				k = Math.floor((p.mouseY*lenses.length)/timeline_highlight_position);
 				selected_lens = k;
@@ -108,16 +114,18 @@ let timelinesketch = (p) => {
 				k = Math.floor((p.mouseY*TIMELINE_CANVAS.num_of_rows)/timeline_highlight_position);				
 				let sampleIndex = VALUED[k];
 				let sampleName = DATASETS[sampleIndex].name;
-				// console.log("Selected Data: " + sampleName);
 
 				select_data_by_name(sampleName);
-				// selected_data = k;
 			}else{return;}
 			background_changed = true; timeline_changed=true; matrix_changed = true; return;
 		}
 		if( selected_data == -1 ){ return; }
+		
 		data = DATASETS[selected_data];
-		if( press_toi==-1 && Math.abs(Math.floor(endX)-Math.floor(beginX)) > 3 ){
+
+		if( press_toi==-1 && Math.abs(Math.floor(endX)-Math.floor(beginX)) > 3 
+				&& beginX >= 200 && beginX <= p.width-100 && endX >= 200 && endX <= p.width-100
+				&& beginY < timeline_highlight_position && endY < timeline_highlight_position ){
 			beginT = (beginX - 200)/(p.width-300) * (data.slid_vals[1] - data.slid_vals[0]) + data.slid_vals[0];
 			endT = (endX - 200)/(p.width-300) * (data.slid_vals[1] - data.slid_vals[0]) + data.slid_vals[0];
 			beginT = Math.max(0, Math.min(1, beginT)); endT = Math.max(0, Math.min(1, endT));
