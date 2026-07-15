@@ -335,30 +335,31 @@ let timelinesketch = (p) => {
 							}
 						}
 		
-						if(bFilteredIn) {
-							h = timeline_height/TIMELINE_CANVAS.num_of_rows*row;
-							toi = data.tois[ w ];
-							p.strokeWeight(0);
-							if(p.textAscent(s)<d){
-								p.text(s.substring(0,9), 4, h+p.textAscent()+(.1*d));
-								// p.text(twi_id < 0 ? "" : base_twis[twi_id].name.substring(0,9), 104, h+p.textAscent()+(.1*d));
-								if(!startTimeLabelDrawn && p.textAscent(s)<d){p.text( format_time(data.tois[w].tmin/1000), 104, h+p.textAscent()+(.1*d)); startTimeLabelDrawn = true; }
-								
-								if( VALUED.indexOf(selected_data) == k && TOGGLE_GREEN_BOX_HIGHLIGHTS){
-									//green box
-									p.strokeWeight(1); 
-									p.stroke( makeColor(80, SELECTED)); 
-									p.fill( makeColor(2, SELECTED));
-									p.rect( 2, h+2, 96, d-1);
-									p.stroke( white(100) ); 
-									p.fill( white(100) );
-								}
+					if(bFilteredIn) {
+						h = timeline_height/TIMELINE_CANVAS.num_of_rows*row;
+						toi = data.tois[ w ];
+						p.strokeWeight(0);
+						if(p.textAscent(s)<d){
+							p.text(s.substring(0,9), 4, h+p.textAscent()+(.1*d));
+							if( twi_id >= 0 && twi_id < base_twis.length && base_twis[twi_id] != undefined && p.textAscent(s)*2<d ){
+								p.text( base_twis[twi_id].name.substring(0,9), 4, h+p.textAscent()*2+(.1*d) );
 							}
-							p.strokeWeight(0);
-							if(!startTimeLabelDrawn && p.textAscent(s)*2<d){p.text( format_time(data.tois[w].tmin/1000), 90-p.textWidth( format_time(data.tois[w].tmin/1000) ), h+d-(.1*d) ); startTimeLabelDrawn = true;}
-							if(p.textAscent(s)<d){p.text( format_time(data.tois[w].tmax/1000), p.width-90, h+d-(.1*d) );}
-							row++;
-						}	
+							if(!startTimeLabelDrawn && p.textAscent(s)<d){p.text( format_time(data.tois[w].tmin/1000), 104, h+p.textAscent()+(.1*d)); startTimeLabelDrawn = true; }
+							
+							if( VALUED.indexOf(selected_data) == k && TOGGLE_GREEN_BOX_HIGHLIGHTS){
+								//green box
+								p.strokeWeight(1); 
+								p.stroke( makeColor(80, SELECTED)); 
+								p.fill( makeColor(2, SELECTED));
+								p.rect( 2, h+2, 96, d-1);
+								p.stroke( white(100) ); 
+								p.fill( white(100) );
+							}
+						}
+						p.strokeWeight(0);
+						if(p.textAscent(s)<d){p.text( format_time(data.tois[w].tmax/1000), p.width-90, h+d-(.1*d) );}
+						row++;
+						}
 					}
 				}				
 			}
