@@ -397,11 +397,11 @@
 		var toc = document.getElementById('toc');
 		var headings = document.querySelectorAll('#content h2[id]');
 		var observer = new IntersectionObserver(function(entries){
-			entries.forEach(function(entry){
-				if(!entry.isIntersecting) return;
-				toc.querySelectorAll('a').forEach(function(a){ a.classList.remove('active'); });
-				toc.querySelector('a[href="#' + entry.target.id + '"]').classList.add('active');
-			});
+			var visible = entries.filter(function(e){ return e.isIntersecting; });
+			if(visible.length === 0) return;
+			visible.sort(function(a,b){ return a.boundingClientRect.top - b.boundingClientRect.top; });
+			toc.querySelectorAll('a').forEach(function(a){ a.classList.remove('active'); });
+			toc.querySelector('a[href="#' + visible[0].target.id + '"]').classList.add('active');
 		}, { rootMargin: '0px 0px -70% 0px' });
 		headings.forEach(function(h){
 			var a = document.createElement('a');
@@ -410,6 +410,14 @@
 			toc.appendChild(a);
 			observer.observe(h);
 		});
+
+		if(location.hash){
+			var target = toc.querySelector('a[href="' + location.hash + '"]');
+			if(target){
+				toc.querySelectorAll('a').forEach(function(a){ a.classList.remove('active'); });
+				target.classList.add('active');
+			}
+		}
 	</script>
 </body>
 </html>
