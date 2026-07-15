@@ -395,6 +395,7 @@ function index_location(array, value){ // binary search for array index where va
 	}
 	return s;
 }
+
 function add_item(){
 	var v = cid; cid += 1;
 	q = databox.replace(/#/g, v);
@@ -414,6 +415,7 @@ function add_item(){
 	document.getElementById(v+"_g").value = (v+1)%GROUPINGS.length;
 	select_data(v); document.getElementById(v+'_f').click(); make_dynamic_legend();
 }
+
 function update_times(){
 	list = document.getElementById('mylist').children;
 	let bUpdateVideo = false; 
@@ -422,6 +424,25 @@ function update_times(){
 	for(var i=0; i<list.length; i++){
 		val = list[i].id;
 		range = document.getElementById(val+'_sl').noUiSlider.get();
+
+		if(DATASETS[val] != undefined && DATASETS[val].tois != undefined && DATASETS[val].toi_id != -1 &&
+				DATASETS[val].tois[DATASETS[val].toi_id] != undefined && DATASETS[val].tois[DATASETS[val].toi_id].included){
+			DATASETS[val].tois[DATASETS[val].toi_id].range = range;
+
+			if(TIME_STRAT == 'real' && DATASETS[val].tois[DATASETS[val].toi_id].real_range != undefined){
+				let t0r = DATASETS[val].t_start; let t1r = DATASETS[val].t_end;
+				DATASETS[val].tois[DATASETS[val].toi_id].real_range[0] = range[0] * (t1r - t0r) + t0r;
+				DATASETS[val].tois[DATASETS[val].toi_id].real_range[1] = range[1] * (t1r - t0r) + t0r;
+			}
+			if(DATASETS[val].slid_vals[0] != range[0] || DATASETS[val].slid_vals[1] != range[1]){
+				DATASETS[val].slid_vals = range;
+				compute_toi_metrics(val, DATASETS[val].toi_id);
+				give_topography(val, DATASETS[val].toi_id);
+				background_changed |= SHOW_FIX||SHOW_TOPO; midground_changed |= SHOW_SACCADE;
+				foreground_changed = true; timeline_changed = true; matrix_changed = true; update_topos = true;
+			}
+		}
+
 		if(DATASETS[val].fixs.length >= 2){
 			t0 = DATASETS[val].t_start; t1 = DATASETS[val].t_end;
 			tmin = range[0] * ( t1 - t0 ) + t0; tmax = range[1] * ( t1 - t0 ) + t0;
@@ -454,7 +475,6 @@ function update_times(){
 	//update video with the time
 	if(bUpdateVideo && selected_data != -1 && DATASETS[selected_data] != null && DATASETS[selected_data] != undefined && 
 		currentVideoObj != null && currentVideoObj != undefined) {
-		// type_select('video');
 		VIDEOS[selected_data].videoobj.time(set_video_cursor);
 	}
 }

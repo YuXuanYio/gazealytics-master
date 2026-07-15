@@ -47,11 +47,25 @@ button {
 	z-index: 2;
 }
 
+.tooltip {
+	position: absolute;
+	padding: 10px 10px;
+	color: black;
+	background-color: white;
+	border-radius: 5px;
+	font-size: 14px;
+	font-weight: bold;
+	visibility: hidden;
+	opacity: 0;
+	transition: opacity 0.3s;
+	z-index: 1000;
+}
+
 .interface_layout {
 	margin: 0;
 	display: grid;
 	grid-template-columns: 32% 0.5% 67%;
-	width: 88%;
+	width: 90%;
 	overflow-x: hidden;
 	overflow-y: hidden;
 	height: 70%;
@@ -296,7 +310,47 @@ table, th, td {
 	font-family: Arial, sans-serif;
 	font-size: 14px;
 }
-
+/* Timeline specific css */
+.timeline_bookmark_line {
+	position: absolute;
+	width: 1px;
+	background-color: black;
+	z-index: 1;
+}
+.timeline_bookmark_button {
+	position: absolute;
+	width: 15px;
+	height: 15px;
+	border: none;
+	cursor: pointer;
+	border-radius: 5px;
+	z-index: 2;
+}
+.timeline_bookmark_toggle {
+	position: absolute;
+	z-index: 3;
+}
+.timeline_legend_title {
+	text-align: center;
+	margin-bottom: 10px;
+}
+.timeline_legend_row {
+	display: flex;
+	flex-direction: row;
+	gap: 15px;
+}
+.timeline_legend_item {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 5px;
+}
+.timeline_legend_color {
+	width: 15px;
+	height: 15px;
+	border-radius: 5px;
+	margin-right: 10px;
+}
 
 /* matrix arrangement css */
 .greyed_out {
