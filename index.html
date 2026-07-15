@@ -51,9 +51,6 @@
 		<button type="button" class="tabbut2" id="tab0" style='background-color:lightblue' onclick='collapse(0)'>
 			Overview </button>
 		<button type="button" class="tabbut2" id="tab1" onclick='collapse(1)'> Fixation </button>
-		<div class="tool" style='display: inline'><button href="help.html" target="popup"
-				onclick="openHelp('overview')"><i
-					class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 		<button type="button" class="tabbut2" id="tab2" onclick='collapse(2)'> Saccades </button>
 		<button type="button" class="tabbut2" id="tab3" onclick='collapse(3)'> Timeline </button>
 		<hr>
@@ -76,6 +73,7 @@
 					image</span>
 			</div><br>
 			<script>noUiSlider.create(document.getElementById('back_sl'), { start: [0.5], step: 0.001, range: { 'min': 0.01, 'max': 0.99 } });</script>
+			<br>
 			<div class="text_pattern">Dispersion-based fixation identification (I-DT):</div>
 			<div class="tool2">
 				<div class="text_pattern">Max Cluster Distance:</div>
@@ -161,13 +159,13 @@
 						class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 			<div id='fix_controls' style="display:block">
 				<br>
-				<div class="tool2">fixation size:<div id="fix_size_sl" class="slider"></div>
+				<div class="tool2">Fixation size:<div id="fix_size_sl" class="slider"></div>
 					<script>noUiSlider.create(document.getElementById('fix_size_sl'), { start: [0], step: 0.01, range: { 'min': -3, 'max': 3 } });</script>
 					<span class="tip">Controls the size of fixation marks</span>
 				</div>
 				<br>
-				<div class="tool2">fixation opacity:<div id="fix_alpha_sl" class="slider"></div><br />
-					<div class="tool">fixation sequence
+				<div class="tool2">Fixation opacity:<div id="fix_alpha_sl" class="slider"></div><br />
+					<div class="tool">Fixation sequence
 						<input type="checkbox" id="fixs_saturation" checked="true"
 							onclick="FIXS_SATURATION=this.checked;background_changed=true;">
 						<span class="tip">Toggles showing fixation sequence</span>
@@ -232,7 +230,7 @@
 		<div class="collapsing" id='part2'>
 			<div class="tool">
 				<button type="button" id="sacs" class="toggler" onclick="click_sacs();">Saccades: Hidden</button>
-				<div class="tool" style='display:inline'><button href="help.html" target="popup"
+				<div class="tool"><button href="help.html" target="popup"
 						onclick="openHelp('saccade')"><i
 							class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 				<span class="tip">Toggles showing saccade lines connecting fixations </span>
@@ -414,7 +412,7 @@
 	<div class="interface_layout" id="interface">
 		<div class="data_box">
 			<div class="data_top" id="left_box">
-				<div style="margin: 15px;margin-bottom: 0px; padding-left: 33px;">
+				<div class="data_top_header">
 					<div class="tabbut" type="button" id="cont1_button" onclick="view_panel(1)"
 						style="background-color:#CCC">Samples</div>
 					<div class="tabbut" type="button" id="cont2_button" onclick="view_panel(2)">TWIs</div>
@@ -995,37 +993,42 @@
 			</div>
 		</div>
 		<div></div>
+		
 		<!-- MARK: Canvas (p5js)-->
 		<div class="canvas_box" id="canvas_box">
-			<div>
-				<span style="background-color: aqua; font-size:12; font-family: Arial, sans-serif">Data
-					filtering:</span>
-				<div class="tool" style="display: inline"><button type="button" id="dat_mode"
+			<div class="spatial_header_row">
+				<span><b>Data filtering:</b></span>
+				<div class="tool"><button type="button" id="dat_mode"
 						class="toggler toggle-on dat_mode" onclick="click_dat_mode();">All Samples</button><span
 						class="tip">Toggles showing the entire data, selected individual data, or selected group</span>
 				</div>
-				<div class="tool" style="display: inline"><button type="button" id="twi_mode"
+				<div class="tool"><button type="button" id="twi_mode"
 						class="toggler toggle-on twi_mode" onclick="click_twi_mode();">All TWIs</button><span
 						class="tip">Toggles showing the entire twi data, selected individual twi, or selected twi
 						group</span></div>
-				<div class="tool" style="display: inline"><button type="button" id="lense_mode"
+				<div class="tool"><button type="button" id="lense_mode"
 						class="toggler toggle-on lense_mode" onclick="click_lense_mode();">Selected AOI
 						Group</button><span class="tip">Toggles showing selected individual AOI, or selected AOI
 						group</span></div>
-				<span style="background-color: yellow; font-size:12; font-family: Arial, sans-serif">Shortcut:</span>
-				<div class="tool" style="display: inline"><button type="button" id="aoi_sequence_shortcut"
+				<span class="shortcut_row"><b>Shortcuts:</b></span>
+				<div class="tool"><button type="button" id="aoi_sequence_shortcut"
 						class="toggler toggle-on dat_mode" onclick="click_shortcut('aoi_sequence_shortcut')">AOI
 						Sequence</button><!--span class="tip">To open up AOI sequence comparison or transition cosine similarity matrix with AOI (group) sequence timelines</span-->
 				</div>
-				<div class="tool" style="display: inline"><button type="button" id="saccade_distribution_shortcut"
+				<div class="tool"><button type="button" id="saccade_distribution_shortcut"
 						class="toggler toggle-on dat_mode"
 						onclick="click_shortcut('saccade_distribution_shortcut')">Saccade
 						Distribution</button><!--span class="tip">To see the histogram of saccade length distribution with saccades visualisations</span-->
 				</div>
-				<div class="tool" style="display: inline"><button type="button" id="aoi_fixation_mode_shortcut"
+				<div class="tool"><button type="button" id="aoi_fixation_mode_shortcut"
 						class="toggler toggle-on dat_mode"
 						onclick="click_shortcut('aoi_fixation_mode_shortcut')">Fixation
 						Overlap</button><!--span class="tip">To see the fixation density overlap comparisons with Coloured AOI (group) timelines</span-->
+				</div>
+				<div class="tool help_button_float">
+					<button href="help.html" target="popup"
+					onclick="openHelp('overview')"><i class="far fa-question-circle"></i>
+					</button>
 				</div>
 				<!-- <div class="tool" style="display: inline"><button type="button" id="report_mode_shortcut" class="toggler toggle-on dat_mode" onclick="click_shortcut('report_mode_shortcut')">Storytelling</button><span class="tip">To see the gaze replay over timelines, turn on "Fixations" and "Saccades", move the timeline animate slider, click on "Play"</span></div>					 -->
 			</div>
