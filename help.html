@@ -5,12 +5,12 @@
 </head>
 
 <body>
-	<div id='help'></div>
-	<div id='overview'></div>
+	<nav id="toc"></nav>
+	<main id="content">
 
-	<h2 class="header">Layout Overview</h2>
+	<h2 class="header" id='overview'>Layout Overview</h2>
 	<div style="text-align: center">
-		<image src="/layout.png" style="width:50%" />
+		<image src="/layout.png" style="width:80%" />
 	</div>
 
 	<h3>Visualisation is split across 3 panels:</h3>
@@ -73,7 +73,7 @@
 		</p>
 	</div>
 
-	<h2 class="header">TOI list</h2>
+	<h2 class="header" id='toi'>TOI list</h2>
 	<div class="div_class">
 		<p>
 			Each Sample can further be filtered onto a window of time. Multiple different time intervals of interest can
@@ -83,7 +83,7 @@
 		</p>
 	</div>
 
-	<h2 class="header">Clustering</h2>
+	<h2 class="header" id='clustering'>Clustering</h2>
 	<div class="div_class">
 		<p>
 			Raw eye-movement data is clustered onto the selected space (determined by the size and offset controls, or
@@ -92,8 +92,8 @@
 			rectangle of consideration, or which were shorter than the minimum duration, are excluded.
 		</p>
 	</div>
-
-	<h2 class="header">Cropping</h2>
+	<!--Called cropping section because there are two cropping headings on the page, so needed diff ids-->
+	<h2 class="header" id='cropping-section'>Cropping</h2>
 	<div class="div_class">
 		<h3>Scale and Offset</h3>
 		<p>
@@ -154,6 +154,15 @@
 		</p>
 	</div>
 
+	<h2 class="header" id='export'>Export</h2>
+	<div class="div_class">
+		<p>
+			The current view of the spatial canvas and the timeline can be exported in JPG format. Spatial canvas
+			consists of the operator's gaze data as fixations and the timeline has the events as bookmarks that occured
+			during the time period.
+		</p>
+	</div>
+
 	<h2 class="header" id='spatial'>Spatial</h2>
 	<div class="div_class">
 		The spatial canvas displays spatial properties of the datasets, split over several different features. For
@@ -175,7 +184,7 @@
 		within the selected time interval. Kernel shape and width can both be controlled. Colour again depends on the
 		group value of the sample.
 		<br><br>
-	</div>
+
 	<div id='saccade'></div>
 	<b>Saccades:</b> Draws the saccades, the transitions between fixations, for each sample. Width and brightness can
 	both be controlled by sliders. The saccades can be filtered by direction (into 8 general directions) or by type
@@ -185,7 +194,7 @@
 	Additionally, saccades for each sample can be bundled spatially, based on the current filtering and colour mode,
 	with a user-defined amount of elasticity and heat. This only affects the spatial view of the saccade data.
 	<br><br>
-	<b>Foreground fixation marks and histograms:</b> Shows fixations from the selected dataset which are immediately
+	<b id="selection">Foreground fixation marks and histograms:</b> Shows fixations from the selected dataset which are immediately
 	before, after, or both (ie. glances) fixations within the selected AOI. These fixations can be shown at their
 	correct spatial location, as a histogram above the timeline marking when they occurred, or as a histogram around the
 	AOI perimeter marking the direction the chronologically adjacent fixation is located in. This can be used to show
@@ -203,7 +212,6 @@
 	<br><br>
 	<b>Notes:</b> The user can attach text notes to a sample dataset and display them at a chosen location on the
 	screen. These text notes can similarly be defined and created on the spatial canvas.
-	</div>
 	</div>
 
 	<h2 class="header" id='timeline'>Timeline</h2>
@@ -247,8 +255,7 @@
 		The video will also play in sync with the timeline so that the video and the eye-tracking data are in sync.
 	</div>
 
-	<div id='metrics'></div>
-	<h2 class="header">Metrics</h2>
+	<h2 class="header" id='metrics'>Metrics</h2>
 	<div class="div_class">
 		<h3>Matrix</h3>
 		<p>
@@ -369,7 +376,7 @@
 		</p>
 	</div>
 
-	<h2 class="header">Histograms</h2>
+	<h2 class="header" id='histograms'>Histograms</h2>
 	<div class="div_class">
 		<p>
 			Allows for viewing distribution-like statistics about the datasets.
@@ -380,17 +387,37 @@
 			<b>Visit, Duration:</b> Shows the full distribution of visit durations for the selected sample with respect
 			to the selected lens.
 			<br /><br />
-			<b>Saccade, Length:</b> Histogram of the saccade lengths for the selected sample.
+		<b>Saccade, Length:</b> Histogram of the saccade lengths for the selected sample.
 		</p>
 	</div>
 
-	<h2 class="header" id='export'>Export</h2>
-	<div class="div_class">
-		<p>
-			The current view of the spatial canvas and the timeline can be exported in JPG format. Spatial canvas
-			consists of the operator's gaze data as fixations and the timeline has the events as bookmarks that occured
-			during the time period.
-		</p>
-	</div>
+	</main>
+
+	<script>
+		var toc = document.getElementById('toc');
+		var headings = document.querySelectorAll('#content h2[id]');
+		var observer = new IntersectionObserver(function(entries){
+			var visible = entries.filter(function(e){ return e.isIntersecting; });
+			if(visible.length === 0) return;
+			visible.sort(function(a,b){ return a.boundingClientRect.top - b.boundingClientRect.top; });
+			toc.querySelectorAll('a').forEach(function(a){ a.classList.remove('active'); });
+			toc.querySelector('a[href="#' + visible[0].target.id + '"]').classList.add('active');
+		}, { rootMargin: '0px 0px -70% 0px' });
+		headings.forEach(function(h){
+			var a = document.createElement('a');
+			a.href = '#' + h.id;
+			a.textContent = h.textContent;
+			toc.appendChild(a);
+			observer.observe(h);
+		});
+
+		if(location.hash){
+			var target = toc.querySelector('a[href="' + location.hash + '"]');
+			if(target){
+				toc.querySelectorAll('a').forEach(function(a){ a.classList.remove('active'); });
+				target.classList.add('active');
+			}
+		}
+	</script>
 </body>
 </html>

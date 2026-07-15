@@ -60,6 +60,13 @@ var TIMELINE_HIGHLIGHT = {
 function display(bool){ if(bool){return 'block';}else{return 'none';} }
 function update_all(){ background_changed=true; midground_changed=true; matrix_changed=true; timeline_changed=true; update_topos=true; }
 
+//Used in index.html to define how to open help page entries for each section
+function openHelp(anchor){
+	var w = window.innerWidth * 0.8;
+	var h = window.innerHeight * 0.95;
+	window.open('help.html#'+anchor,'name','width='+w+',height='+h); 
+}
+
 var tooltip_css = ".tool:hover .tip {$} .tool2:hover .tip {$}";
 function toggle_tips(){
 	document.getElementById('control_tooltip').classList.toggle( 'toggle-on' );
