@@ -13,6 +13,7 @@ body {
 button {
 	padding: 1px 2px;
 	font-family: Arial, sans-serif;
+	font-weight: bold;
 }
 
 .data_pane_button {
@@ -29,7 +30,18 @@ button {
 }
 
 .help_button_float {
-	right: 0;
+	margin-left: auto;
+}
+
+.spatial_header_row {
+	display: flex;
+	width: 100%;
+	gap: 8px;
+	align-items: center;
+}
+
+.spatial_header_row .tool {
+	width: auto;
 }
 
 /** Tooltip styles **/
@@ -111,10 +123,10 @@ button {
 	margin: 0 15px 0 15px;
 }
 .canvas_box {
-	overflow: overlay;
+	overflow: auto;
 	overflow-y: hidden;
-	white-space: nowrap;
-	width: auto;	
+	white-space: normal;	
+	width: 52.5vw;
 }
 .control_box{
 	height: 100%;
@@ -192,9 +204,7 @@ button {
   overflow: visible;
   white-space: normal;
 }
-button {
-	font-weight: bold;
-}
+
 .toggler {
 	color: black;
 }
