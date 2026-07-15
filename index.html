@@ -52,7 +52,7 @@
 			Overview </button>
 		<button type="button" class="tabbut2" id="tab1" onclick='collapse(1)'> Fixation </button>
 		<div class="tool" style='display: inline'><button href="help.html" target="popup"
-				onclick="window.open('help.html#overview','name','width=600,height=400')"><i
+				onclick="openHelp('overview')"><i
 					class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 		<button type="button" class="tabbut2" id="tab2" onclick='collapse(2)'> Saccades </button>
 		<button type="button" class="tabbut2" id="tab3" onclick='collapse(3)'> Timeline </button>
@@ -128,7 +128,7 @@
 					onclick="image_changed=true;reset_crop();"> Reset </button> <span class="tip">Reset the spatial
 					screen to the size of the background image, if one has been loaded</span></div>
 			<div class="tool" style='display:inline'><button href="help.html" target="popup"
-					onclick="window.open('help.html#cropping','name','width=600,height=400')"><i
+					onclick="openHelp('cropping')"><i
 						class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 			<div class="tool">
 				<br>
@@ -157,7 +157,7 @@
 					onclick="click_fixs();">Fixations: Shown</button><span class="tip">Toggles showing the background
 					fixations. Colour depends on sample group, size is proportional to duration</span></div>
 			<div class="tool" style='display:inline'><button href="help.html" target="popup"
-					onclick="window.open('help.html#fixation','name','width=600,height=400')"><i
+					onclick="openHelp('fixation')"><i
 						class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 			<div id='fix_controls' style="display:block">
 				<br>
@@ -197,7 +197,7 @@
 			</div>
 			<hr>
 			<div class="tool" style='float:right'><button href="help.html" target="popup"
-					onclick="window.open('help.html#selection','name','width=600,height=400')"><i
+					onclick="openHelp('selection')"><i
 						class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 			<div class="tool">
 				<button type="button" id="fore" class="toggler toggle-on"
@@ -233,7 +233,7 @@
 			<div class="tool">
 				<button type="button" id="sacs" class="toggler" onclick="click_sacs();">Saccades: Hidden</button>
 				<div class="tool" style='display:inline'><button href="help.html" target="popup"
-						onclick="window.open('help.html#saccade','name','width=600,height=400')"><i
+						onclick="openHelp('saccade')"><i
 							class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 				<span class="tip">Toggles showing saccade lines connecting fixations </span>
 			</div><br>
@@ -346,7 +346,7 @@
 			<div class="tool">
 				Timeline Mode:
 				<div class="tool" style="display:inline"><button href="help.html" target="popup"
-						onclick="window.open('help.html#timeline','name','width=600,height=400')"><i
+						onclick="openHelp('timeline')"><i
 							class="far fa-question-circle"></i></button><span class="tip">Opens help page</span></div>
 				<button type="button" id="timeall" class="toggler toggle-on" onclick="click_time('all');">Coloured
 					AOIs</button> <br>
@@ -445,7 +445,7 @@
 								onclick="click_timecontrolForCanvas()"><i class="fas fa-eye"></i></button><span
 								class="tip">Show/hide all samples on the canvas</span></div>
 						<div class="tool"><button href="help.html" target="popup"
-								onclick="window.open('help.html#data','name','width=600,height=400')"><i
+								onclick="openHelp('data')"><i
 									class="far fa-question-circle"></i></button><span class="tip">Opens help page</span>
 						</div>
 						<br>
@@ -472,7 +472,7 @@
 								onclick="click_showtwis();"> <i class="fas fa-eye"></i> </button><span
 								class="tip">Show/hide all TWIs on the canvas</span></div>
 						<div class="tool"><button href="help.html" target="popup"
-								onclick="window.open('help.html#data','name','width=600,height=400')"><i
+								onclick="openHelp('data')"><i
 									class="far fa-question-circle"></i></button><span class="tip">Opens help page</span>
 						</div>
 					</div>
@@ -493,7 +493,7 @@
 								onclick="select_lenstype(2);">Rectangle</button><span class="tip">Make Rectangle
 								AOIs</span></div>
 						<div class="tool"><button href="help.html" target="popup"
-								onclick="window.open('help.html#aois','name','width=600,height=400')"><i
+								onclick="openHelp('aois')"><i
 									class="far fa-question-circle"></i></button><span class="tip">Opens help page</span>
 						</div>
 						<br>
@@ -544,7 +544,7 @@
 								onclick="click_notes();"> <i class="fas fa-eye"></i> </button><span class="tip">Toggle
 								visibility of notes on spatial canvas</span></div>
 						<div class="tool"><button href="help.html" target="popup"
-								onclick="window.open('help.html#notes','name','width=600,height=400')"><i
+								onclick="openHelp('notes')"><i
 									class="far fa-question-circle"></i></button><span class="tip">Opens help page</span>
 						</div>
 
@@ -578,7 +578,7 @@
 					<div class="data_content_toolbar">
 						<div class="tool">
 							<button href="help.html" target="popup"
-								onclick="window.open('help.html#colours','name','width=600,height=400')">
+								onclick="openHelp('colours')">
 								<i class="far fa-question-circle"></i>
 							</button>
 							<span class="tip">
@@ -768,7 +768,7 @@
 					onclick="update_filter_colors();update_group_colors(); update_lens_colors(); update_observer_colors()">
 					<div class="data_content_toolbar">
 						<div class="tool"><button href="help.html" target="popup"
-								onclick="window.open('help.html#export','name','width=600,height=400')"><i
+								onclick="openHelp('export')"><i
 									class="far fa-question-circle"></i></button><span class="tip">Opens help page</span>
 						</div>
 					</div>
@@ -809,7 +809,7 @@
 						<button type="button" id="type_hist" class="toggler"
 							onclick="type_select('hist')">HISTOGRAM</button>
 						<div class="tool"><button href="help.html" target="popup"
-								onclick="window.open('help.html#metrics','name','width=600,height=400')">
+								onclick="openHelp('metrics')">
 								<i class="far fa-question-circle"></i>
 							</button><span class="tip">Opens help page</span>
 						</div>
@@ -938,7 +938,7 @@
 							<div class="tool"><button onclick="export_spatial_canvas()"> <i class="far fa-save"></i>
 								</button><span class="tip">Export the current canvas</span></div>
 							<div class="tool"><button href="help.html" target="popup"
-									onclick="window.open('help.html#export','name','width=600,height=400')"><i
+									onclick="openHelp('export')"><i
 										class="far fa-question-circle"></i></button><span class="tip">Opens help
 									page</span></div>
 
