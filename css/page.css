@@ -44,6 +44,17 @@ button {
 	width: auto;
 }
 
+.export_action_row {
+	text-align: center;
+	margin-top: 10px;
+}
+
+.section_heading {
+	font-size: 16px;
+	font-weight: bold;
+	text-align: center;
+}
+
 /** Tooltip styles **/
 
 .tool {
@@ -154,6 +165,7 @@ button {
 	white-space: normal;
 	font-family: Arial, sans-serif;
 }
+
 .data_content{
 	padding-top: 20px;
 	margin-left: 5%;
@@ -164,11 +176,25 @@ button {
 	overflow-y: hidden;
 	font-family: Arial, sans-serif;
 	font-size: 14px;
+	position: relative;
+}
+
+.data_content p {
+	margin-top: 14px;
+	margin-bottom: 4px;
 }
 
 .data_content_toolbar {
 	text-align: center;
 }
+
+.tool.section_help_icon {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	width: auto;
+}
+
 .timestamp-container{
 	display: flex;
 	align-items: center;

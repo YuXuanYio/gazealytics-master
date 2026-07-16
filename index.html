@@ -428,6 +428,11 @@
 					<div class="tabbut" type="button" id="cont6_button" onclick="view_panel(6)">Export</div>
 				</div>
 				<div id='cont1' class='data_content' style='display: block'>
+					<div class="tool section_help_icon"><button href="help.html" target="popup"
+							onclick="openHelp('data')"><i
+								class="far fa-question-circle"></i></button><span class="tip">Opens help page</span>
+					</div>
+					<p class="section_heading">Samples and Participants</p>
 					<div class="data_content_toolbar">
 						<input id="new_f" type="file" name="name" style="display: none;" onchange="new_file()"
 							multiple />
@@ -442,10 +447,6 @@
 						<div class="tool"><button id="time_control_canvas" class="toggler"
 								onclick="click_timecontrolForCanvas()"><i class="fas fa-eye"></i></button><span
 								class="tip">Show/hide all samples on the canvas</span></div>
-						<div class="tool"><button href="help.html" target="popup"
-								onclick="openHelp('data')"><i
-									class="far fa-question-circle"></i></button><span class="tip">Opens help page</span>
-						</div>
 						<br>
 						Sort By:
 						<div class="tool"><button type="button" id="sortalpha"
@@ -464,19 +465,25 @@
 					<ul id='mylist' class="data_list"></ul>
 				</div>
 				<div id='cont2' class='data_content'>
+					<div class="tool section_help_icon"><button href="help.html" target="popup"
+							onclick="openHelp('data')"><i
+								class="far fa-question-circle"></i></button><span class="tip">Opens help page</span>
+					</div>
+					<p class="section_heading">Time Windows of Interest</p>
 					<div class="data_content_toolbar">
 						<div id="twi_load_txt" style="display:inline-block"></div>
 						<div class="tool"><button type="button" id="showtwis" class="toggler"
 								onclick="click_showtwis();"> <i class="fas fa-eye"></i> </button><span
 								class="tip">Show/hide all TWIs on the canvas</span></div>
-						<div class="tool"><button href="help.html" target="popup"
-								onclick="openHelp('data')"><i
-									class="far fa-question-circle"></i></button><span class="tip">Opens help page</span>
-						</div>
 					</div>
 					<ul id='twilist' class="data_list"></ul>
 				</div>
 				<div id='cont3' class='data_content'>
+					<div class="tool section_help_icon"><button href="help.html" target="popup"
+							onclick="openHelp('aois')"><i
+								class="far fa-question-circle"></i></button><span class="tip">Opens help page</span>
+					</div>
+					<p class="section_heading">Areas of Interest</p>
 					<div class="data_content_toolbar">
 						<div class="tool"><button type="button" id="showlens" class="toggler"
 								onclick="click_showlens();"> <i class="fas fa-eye"></i> </button><span
@@ -490,10 +497,6 @@
 						<div class="tool"><button type="button" class="toggler" id="lenstype_2"
 								onclick="select_lenstype(2);">Rectangle</button><span class="tip">Make Rectangle
 								AOIs</span></div>
-						<div class="tool"><button href="help.html" target="popup"
-								onclick="openHelp('aois')"><i
-									class="far fa-question-circle"></i></button><span class="tip">Opens help page</span>
-						</div>
 						<br>
 						<div style="display: flex; gap: 5px; align-items: center; justify-content: center;">
 							<div class="tool"><button type="button" class="toggler toggle-on" id="show_lenslabel"
@@ -531,6 +534,11 @@
 					<ul id='lenslist' class="data_list"></ul>
 				</div>
 				<div id='cont4' class='data_content'>
+					<div class="tool section_help_icon"><button href="help.html" target="popup"
+							onclick="openHelp('notes')"><i
+								class="far fa-question-circle"></i></button><span class="tip">Opens help page</span>
+					</div>
+					<p class="section_heading">Notes</p>
 					<div class="data_content_toolbar">
 						<div class="tool"><button id="load_notes" type="button" onclick="importNotes()" disabled>Load
 								.tsv </button><span class="tip">Load notes for each sample after loading samples</span>
@@ -541,11 +549,6 @@
 						<div class="tool"><button type="button" id="notes" class="toggler toggle-on"
 								onclick="click_notes();"> <i class="fas fa-eye"></i> </button><span class="tip">Toggle
 								visibility of notes on spatial canvas</span></div>
-						<div class="tool"><button href="help.html" target="popup"
-								onclick="openHelp('notes')"><i
-									class="far fa-question-circle"></i></button><span class="tip">Opens help page</span>
-						</div>
-
 						<br>
 						Filter By:
 						<div class="dropdown">
@@ -573,17 +576,16 @@
 				</div>
 				<div id='cont5' class='data_content'
 					onclick="update_filter_colors();update_group_colors(); update_lens_colors(); update_observer_colors()">
-					<div class="data_content_toolbar">
-						<div class="tool">
-							<button href="help.html" target="popup"
-								onclick="openHelp('colours')">
-								<i class="far fa-question-circle"></i>
-							</button>
-							<span class="tip">
-								Opens help page
-							</span>
-						</div>
+					<div class="tool section_help_icon">
+						<button href="help.html" target="popup"
+							onclick="openHelp('colours')">
+							<i class="far fa-question-circle"></i>
+						</button>
+						<span class="tip">
+							Opens help page
+						</span>
 					</div>
+					<p class="section_heading">Colour Definitions</p>
 					<p> Data Grouping Colours: </p>
 					<input type="color" id="basic_0" oninput="GROUPINGS[0]=this.value; update_colour_vals();"
 						class="colorer">
@@ -764,12 +766,11 @@
 				</div>
 				<div id='cont6' class='data_content'
 					onclick="update_filter_colors();update_group_colors(); update_lens_colors(); update_observer_colors()">
-					<div class="data_content_toolbar">
-						<div class="tool"><button href="help.html" target="popup"
-								onclick="openHelp('export')"><i
-									class="far fa-question-circle"></i></button><span class="tip">Opens help page</span>
-						</div>
+					<div class="tool section_help_icon"><button href="help.html" target="popup"
+							onclick="openHelp('export')"><i
+								class="far fa-question-circle"></i></button><span class="tip">Opens help page</span>
 					</div>
+					<p class="section_heading">Export Images</p>
 					<p> Spatial Canvas: </p>
 					<div class="tool">
 						<input type="checkbox" checked=true id="export_spatial_canvas"
@@ -788,11 +789,20 @@
 							onclick="EXPORT_CROP_TIMELINE_CANVAS=this.checked;">
 						<span> Crop timeline canvas by timeline chart</span>
 					</div>
-					<p> Metric Canvas: </p>
+					<p> Matrix Canvas: </p>
 					<div class="tool">
-						<input type="checkbox" checked=true id="export_metric_canvas"
-							onclick="EXPORT_METRIC_CANVAS=this.checked;">
-						<span> Export metric canvas</span>
+						<input type="checkbox" checked=true id="export_matrix_canvas"
+							onclick="EXPORT_MATRIX_CANVAS=this.checked;">
+						<span> Export matrix canvas (If not empty)</span>
+					</div>
+					<p> Histogram: </p>
+					<div class="tool">
+						<input type="checkbox" checked=true id="export_histogram_canvas"
+							onclick="EXPORT_HISTOGRAM_CANVAS=this.checked;">
+						<span> Export histogram chart (If it is not empty)</span>
+					</div>
+					<div class="export_action_row">
+						<div class="tool"><button onclick="export_enabled_canvas()">Export Images</button></div>
 					</div>
 				</div>
 			</div>
@@ -841,9 +851,6 @@
 							<div class="tool inner_button"><button onclick="export_histogram()"> <i
 										class="far fa-save"></i> </button><span class="tip">Save the histogram
 									values</span></div>
-							<div class="tool inner_button"><button onclick="export_spatial_canvas()"> <i
-										class="far fa-save"></i> </button><span class="tip">Export the current
-									canvas</span></div>
 						</div>
 						<div id="matrix_top_controls">
 							<div id="matsel_0" class="matsel"> <select id="metrics_0" style="font-size:12">
@@ -933,8 +940,6 @@
 							</div>
 							<div class="tool"><button onclick="export_matrix()"> <i class="far fa-save"></i>
 								</button><span class="tip">Save the metric values</span></div>
-							<div class="tool"><button onclick="export_spatial_canvas()"> <i class="far fa-save"></i>
-								</button><span class="tip">Export the current canvas</span></div>
 							<div class="tool"><button href="help.html" target="popup"
 									onclick="openHelp('export')"><i
 										class="far fa-question-circle"></i></button><span class="tip">Opens help

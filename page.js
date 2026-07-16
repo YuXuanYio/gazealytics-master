@@ -45,7 +45,8 @@ SEQUENCE_SCORE_SKEW_PENALTY = 0.5;
 EXPORT_SPATIAL_CANVAS = true;
 EXPORT_CROP_SPATIAL_CANVAS = true;
 EXPORT_TIMELINE_CANVAS = true;
-EXPORT_METRIC_CANVAS = true;
+EXPORT_MATRIX_CANVAS = true;
+EXPORT_HISTOGRAM_CANVAS = true;
 EXPORT_CROP_TIMELINE_CANVAS = true;
 TOGGLE_GREEN_BOX_HIGHLIGHTS = true;
 let matrix_changed_retry = 0;
@@ -1756,7 +1757,7 @@ function export_matrix(){
 	download_string(matrix_string, matrix_filename);
 }
 
-function export_spatial_canvas(){
+function export_enabled_canvas(){
 	if(EXPORT_SPATIAL_CANVAS && EXPORT_CROP_SPATIAL_CANVAS)
 		SPATIAL.save(SpatialCanvas.get(ground_x, ground_y, cropimage.width, cropimage.height), "spatial.jpg");
 	else if(EXPORT_SPATIAL_CANVAS && !EXPORT_CROP_SPATIAL_CANVAS)
@@ -1767,9 +1768,10 @@ function export_spatial_canvas(){
 	else if(EXPORT_TIMELINE_CANVAS && !EXPORT_CROP_TIMELINE_CANVAS)
 		TIMELINE.save(TIMELINE_CANVAS, "timelines.jpg");
 
-	if(EXPORT_METRIC_CANVAS)
-		MATRIX.save(matrixCanvas1, "metrics.jpg");
-	// exportCombinedCanvas();
+	if(EXPORT_MATRIX_CANVAS && mat_type == 'mat' && VALUED.length > 0 && order_twis.length > 0)
+		MATRIX.save(matrixCanvas1, "matrix.jpg");
+	if(EXPORT_HISTOGRAM_CANVAS && mat_type == 'hist' && VALUED.length > 0 && order_twis.length > 0)
+		MATRIX.save(matrixCanvas1, "histogram.jpg");
 }
 
 function exportCombinedCanvas() {
