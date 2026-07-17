@@ -39,7 +39,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.path = '/index.html'
         elif self.path == '/killthisserver':
             os._exit(4)
-        elif self.path == '/favicon.ico':
+        elif self.path == 'images/favicon.ico':
             self.send_response(200)
             self.send_header('Content-type', 'image/png')
             self.end_headers()
