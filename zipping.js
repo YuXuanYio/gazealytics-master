@@ -149,6 +149,20 @@ function load_zip(){
 		document.getElementById("load_button").disabled = false;
 		return;
 	}
+	if(!f.name.toLowerCase().endsWith('.zip')){
+		alert('A filetype other than .zip has been provided, please upload your project as a .zip file');
+		document.getElementById("project_txt").innerHTML = '';
+		document.getElementById("load_button").disabled = false;
+		return;
+	}
+	let zip_load_error_shown = false;
+	let show_zip_load_error = function(err){
+		console.error(err);
+		if(!zip_load_error_shown){
+			zip_load_error_shown = true;
+			alert('Your zip was unable to be loaded, please check the zip format against the sample project in GitHub to identify any mismatches.');
+		}
+	};
 	JSZip.loadAsync(f)                                   // 1) read the Blob
 		.then(function(zip) {
 			zip.file("back.png").async("base64").then(function (data) {
@@ -340,7 +354,7 @@ function load_zip(){
 						}
 						update_lens_colors();
 						background_changed = true; matrix_changed = true; timeline_changed = true;
-					}catch (error) { console.error(error); }
+					}catch (error) { console.error(error); show_zip_load_error(error);}
 				});
 				let twisLoadPromise = zip.file("TWIs.json").async("string").then(function (data) {
 					try{
@@ -382,7 +396,7 @@ function load_zip(){
 						}
 						update_twi_colors();
 						background_changed = true; matrix_changed = true; timeline_changed = true;
-					}catch (error) { console.error(error); }
+					}catch (error) { console.error(error); show_zip_load_error(error);}
 				});
 			twisLoadPromise.then(function() {
 				return zip.file("Participants.json").async("string");
@@ -506,10 +520,11 @@ function load_zip(){
 								updateNoteTypeDropdown();
 								document.getElementById("load_notes").disabled = false;
 							} catch (error) {
+								show_zip_load_error(error);
 								console.error("Error parsing notes:", error);
 							}
 						});	
-					}catch (error) { console.error(error); }
+					}catch (error) { console.error(error); show_zip_load_error(error);}
 				});
 			zip.file("settings.json").async("string").then(function (data) {
 					try{
@@ -658,12 +673,13 @@ function load_zip(){
 						make_note_dataset_selectors();
 						reorder_matrix(DEFAULT_SYMMETRIC_SORT);
 						background_changed = true; matrix_changed = true; timeline_changed = true;
-					}catch (error) { console.error(error); }
+					}catch (error) { console.error(error); show_zip_load_error(error);}
 				});
 			document.getElementById("project_txt").innerHTML = '';
 			document.getElementById("load_button").disabled = false;
 		}).catch(function (err) {
 			console.log('Unable to parse', err);
+			show_zip_load_error(err);
 			document.getElementById("project_txt").innerHTML = '';
 			document.getElementById("load_button").disabled = false;
 			});
