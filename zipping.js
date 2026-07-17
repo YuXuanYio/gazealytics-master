@@ -1,3 +1,4 @@
+/** Saving zip code **/
 function download_zip(filename, base64) {
   var element = document.createElement('a');
   element.setAttribute('href', "data:application/zip;base64," + base64);
@@ -140,6 +141,41 @@ function zip_name(){
 	return 'Gazealytics_' + ( date.getMonth()+1 ) + '-' + date.getDate() + '-' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.zip';
 }
 
+
+/** Loading zip code **/
+// Handles case insensitivity when looking for zip internal file names
+function find_zip_entry(zip, filename){
+	let matches = zip.file(new RegExp('^' + filename.replace(/\./g, '\\.') + '$', 'i'));
+	return matches.length ? matches[0] : null;
+}
+
+function read_zip_file(zip, filename, type){
+	let entry = find_zip_entry(zip, filename);
+	if(entry == null){
+		console.warn(filename + ' not found in zip, skipping load.');
+		return Promise.resolve(null);
+	}
+	return entry.async(type).then(function(data){
+		if(!data || (type == 'string' && data.trim() == '')){
+			console.warn(filename + ' is empty, skipping load.');
+			return null;
+		}
+		return data;
+	});
+}
+
+function read_zip_json(zip, filename, requiredKey){
+	return read_zip_file(zip, filename, 'string').then(function(data){
+		if(data == null) return null;
+		let content = JSON.parse(data);
+		if(requiredKey && content[requiredKey] == null){
+			console.warn(filename + ' has no ' + requiredKey + ', skipping load.');
+			return null;
+		}
+		return content;
+	});
+}
+
 function load_zip(){
 	document.getElementById("project_txt").innerHTML = 'Loading...';
 	document.getElementById("load_button").disabled = true;
@@ -155,23 +191,26 @@ function load_zip(){
 		document.getElementById("load_button").disabled = false;
 		return;
 	}
-	let zip_load_error_shown = false;
-	let show_zip_load_error = function(err){
-		console.error(err);
-		if(!zip_load_error_shown){
-			zip_load_error_shown = true;
-			alert('Your zip was unable to be loaded, please check the zip format against the sample project in GitHub to identify any mismatches.');
-		}
+	let zip_load_errors = [];
+	let show_zip_load_error = function(file, error){
+		console.error(file + ':', error);
+		zip_load_errors.push(file);
 	};
+	setTimeout(function(){
+		if(zip_load_errors.length > 0){
+			alert('There was a problem loading the following file(s) from your zip, please check them against the sample project in GitHub: ' + zip_load_errors.join(', '));
+		}
+	}, 500);
 	JSZip.loadAsync(f)                                   // 1) read the Blob
 		.then(function(zip) {
-			zip.file("back.png").async("base64").then(function (data) {
+			read_zip_file(zip, "back.png", "base64").then(function(data){
+					if(data == null) return;
 					image_url = "data:image/png;base64," + data;
-					image_changed = true; loaded = true; 
-				});
-			zip.file("AOIs.json").async("string").then(function (data) {
+					image_changed = true; loaded = true;
+				}).catch(function(error){ show_zip_load_error("back.png", error); });
+				read_zip_json(zip, "AOIs.json", "base_lenses").then(function(content){
+					if(content == null) return;
 					try{
-						let content = JSON.parse(data);
 						// update lenses array, rebuild lens functions
 						base_lenses = content.base_lenses; order_lenses = content.order_lenses; lid = base_lenses.length;
 						selected_lens = content.selected_lens; building_lens_id = content.building_lens_id; selected_lensegroup = content.selected_lensegroup
@@ -354,12 +393,11 @@ function load_zip(){
 						}
 						update_lens_colors();
 						background_changed = true; matrix_changed = true; timeline_changed = true;
-					}catch (error) { console.error(error); show_zip_load_error(error);}
-				});
-				let twisLoadPromise = zip.file("TWIs.json").async("string").then(function (data) {
+					} catch (error) { show_zip_load_error("AOIs.json", error); }
+				}).catch(function(error){ show_zip_load_error("AOIs.json", error); });
+				let twisLoadPromise = read_zip_json(zip, "TWIs.json", "base_twis").then(function(content){
+					if(content == null) return;
 					try{
-						let content = JSON.parse(data);
-						
 						// update lenses array, rebuild lens functions
 						base_twis = content.base_twis; order_twis = content.order_twis;
 						selected_twi = content.selected_twi; selected_twigroup = content.selected_twigroup;
@@ -396,13 +434,18 @@ function load_zip(){
 						}
 						update_twi_colors();
 						background_changed = true; matrix_changed = true; timeline_changed = true;
-					}catch (error) { console.error(error); show_zip_load_error(error);}
-				});
+					}catch (error) { show_zip_load_error("TWIs.json", error); }
+				}).catch(function(error){ show_zip_load_error("TWIs.json", error); });
 			twisLoadPromise.then(function() {
-				return zip.file("Participants.json").async("string");
-			}).then(function (data) {
+				return read_zip_json(zip, "Participants.json", "datasets");
+			}).then(function (content) {
+					if(content == null){
+						show_zip_load_error("Participants.json", new Error("Participants.json is missing or empty - this file is required."));
+						document.getElementById("project_txt").innerHTML = '';
+						document.getElementById("load_button").disabled = false;
+						return;
+					}
 					try{
-						let content = JSON.parse(data);
 						// update datasets array
 						DATASETS = content.datasets;
 						for(let i = 0; i<DATASETS.length; i++) VIDEOS.push({});
@@ -482,9 +525,9 @@ function load_zip(){
 						if(selected_twi != -1 && document.getElementById("twi_"+selected_twi) != undefined)
 							select_twi(selected_twi);
 						update_all();
-						zip.file("notes.json").async("string").then(function (data) {
+						read_zip_json(zip, "notes.json", "base_notes").then(function(content){
+							if(content == null) return;
 							try {
-								let content = JSON.parse(data);
 								noteTypes = [];
 		
 								const list = document.getElementById("notelist");
@@ -520,15 +563,14 @@ function load_zip(){
 								updateNoteTypeDropdown();
 								document.getElementById("load_notes").disabled = false;
 							} catch (error) {
-								show_zip_load_error(error);
-								console.error("Error parsing notes:", error);
+								show_zip_load_error("notes.json", error);
 							}
-						});	
-					}catch (error) { console.error(error); show_zip_load_error(error);}
-				});
-			zip.file("settings.json").async("string").then(function (data) {
+						}).catch(function(error){ show_zip_load_error("notes.json", error); });
+					} catch (error) { show_zip_load_error("Participants.json", error); }
+				}).catch(function(error){ show_zip_load_error("Participants.json", error); });
+			read_zip_json(zip, "settings.json").then(function(content){
+					if(content == null) return;
 					try{
-						let content = JSON.parse(data);
 						cid = content.cid; //lid = content.lid;
 						// update background image
 						limit_select = content.limit_select;
@@ -673,13 +715,13 @@ function load_zip(){
 						make_note_dataset_selectors();
 						reorder_matrix(DEFAULT_SYMMETRIC_SORT);
 						background_changed = true; matrix_changed = true; timeline_changed = true;
-					}catch (error) { console.error(error); show_zip_load_error(error);}
-				});
+					}catch (error) { show_zip_load_error("settings.json", error); }
+				}).catch(function(error){ show_zip_load_error("settings.json", error); });
 			document.getElementById("project_txt").innerHTML = '';
 			document.getElementById("load_button").disabled = false;
 		}).catch(function (err) {
 			console.log('Unable to parse', err);
-			show_zip_load_error(err);
+			alert('Your zip was unable to be loaded, please check the zip format against the sample project in GitHub to identify any mismatches.');
 			document.getElementById("project_txt").innerHTML = '';
 			document.getElementById("load_button").disabled = false;
 			});
