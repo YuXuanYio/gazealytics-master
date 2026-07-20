@@ -96,7 +96,7 @@ let timelinesketch = (p) => {
 	p.mouseDragged = () => {
 		// Adjust location if being dragged
 		if(p.mouseIsPressed_timeline && TIMELINE_draggingY) {
-			TIMELINE_draggableRecty = (timeline_height-p.mouseY) + p.offsetY;			
+			TIMELINE_draggableRecty = (timeline_canvas_height-p.mouseY) + p.offsetY;			
 		}		
 	}
 	
@@ -105,8 +105,9 @@ let timelinesketch = (p) => {
 		if(TIMELINE_draggingY) {
 			TIMELINE_draggingY = false;
 			p.mouseIsPressed_timeline = false;
+			TIMELINE_draggableRecty = (timeline_canvas_height-p.mouseY) + p.offsetY;
 			let timeline_canvas_height_new = TIMELINE_draggableRecty+15;
-			SPATIAL_CANVAS_HEIGHT_PERCENTAGE = 1 - timeline_canvas_height_new / p.windowHeight - 0.1;
+			SPATIAL_CANVAS_HEIGHT_PERCENTAGE = 1 - timeline_canvas_height_new / p.windowHeight - 0.01;
 
 			SPATIAL.resizeElements(false, true);
 			p.resizeElements(false, true);

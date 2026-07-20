@@ -89,6 +89,12 @@ button {
 	z-index: 2;
 }
 
+.tool.section_help_icon .tip {
+	left: auto;
+	right: 0;
+	margin-left: 0;
+}
+
 .tooltip {
 	position: absolute;
 	padding: 10px 10px;
