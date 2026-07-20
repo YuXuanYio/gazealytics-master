@@ -41,7 +41,7 @@ Cai, M., Zheng, B., & Demmans Epp, C. (2022, July). Towards Supporting Adaptive 
 
 ## Requirements
   * This repository
-  * Python 3.5 or above (For web server scripting, 3.13 recommended)
+  * Python 3.13 or above (For web server scripting)
 
 ## Tutorial
 
@@ -215,6 +215,8 @@ Main contributors:
   * Sarah Goodwin (Monash University)
   * Yu Xuan Yio (Monash University)
   * Yidan Zhang (Monash University)
+  * Renee McMillan (Monash University)
+  * Greg Putra (Monash University)
 
 ## License
 Gazealytics is provided under the MIT License.
