@@ -271,16 +271,16 @@ function new_note(
 	// Click event for selection
 	node.onclick = function (e) {
 		var v = parseInt(this.id.split("_")[1]);
-		var e_type = e.target.id.split("_")[2];
-		if (e_type !== "content" && e_type !== "pid") {
+		var isEditableField = ["INPUT", "SELECT", "OPTION", "TEXTAREA"].includes(e.target.tagName);
+		if (isEditableField) {
 			if (selected_note !== v) {
 				select_note(v);
-			} else {
-				select_note(-1);
 			}
 		} else {
 			if (selected_note !== v) {
 				select_note(v);
+			} else {
+				select_note(-1);
 			}
 		}
 	};
