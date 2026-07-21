@@ -246,7 +246,7 @@ function compute_toi_metrics(data_id, toi_id){
 		let highest_priority_lens = metric_lenses.length; // default: not in any lens
 		for(var l=0; l<metric_lenses.length; l++){
 			
-			let valid_lens = metric_lenses[l].inside(fixs[j].x, fixs[j].y);
+			let valid_lens = metric_lenses[l].inside(fixs[j].x, fixs[j].y) && metric_lenses[l].checked;
 			let inTimeRange = metric_lenses[l].timeRanges.some(range =>
             	fixs[j].t >= range.start && fixs[j].t <= range.end
         	);
@@ -1137,7 +1137,7 @@ function compute_lensegroupings(){
 	for(v=1; v<LENS_COLOURS.length+1; v++){
 		let is_used = false;
 		for(v2=0; v2<metric_lenses.length; v2++){
-			if( metric_lenses[v2].group == v ){is_used=true;}
+			if( metric_lenses[v2].checked && metric_lenses[v2].group == v ){is_used=true;}
 		}
 
 		if(is_used){ // the value v represenets at least one active dataset

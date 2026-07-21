@@ -52,6 +52,101 @@ let videotime = 0;
 let colcolours = [];
 let rowcolours = [];
 
+function compute_sum_of_aoi_area_by_lensegroup(){
+	let sum_of_aoi_area = [];
+	for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++) sum_of_aoi_area.push(0);
+	for(let c=0; c<metric_lenses.length; c++){
+		if(!metric_lenses[c].checked) continue;
+		let group_index = ORDERLENSEGROUPID.indexOf(metric_lenses[c].group);
+		if(group_index != -1 && group_index < sum_of_aoi_area.length)
+			sum_of_aoi_area[group_index] += metric_lenses[c].area;
+	}
+	return sum_of_aoi_area;
+}
+
+function push_lensegroup_rownames(){
+	for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){
+		rownames.push("AOI G"+LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group);
+		rowcolours.push(get_lensegroup_col(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group));
+	}
+}
+
+function get_lensegroup_overlay_string(){
+	if(MATRIX_DATA_STATE == "aoiarea") return "Area in %ROW: %VAL";
+	if(MATRIX_DATA_STATE == "densitytime") return "Fixation density in %ROW: %VAL ms";
+	if(MATRIX_DATA_STATE == "densitycount") return "Fixation density in %ROW: %VAL";
+	if(MATRIX_DATA_STATE == "time") return "Fixation time in %ROW: %VAL ms";
+	if(MATRIX_DATA_STATE == "percent") return "Percentage of fixation time in %ROW: %VAL%";
+	if(MATRIX_DATA_STATE == "count") return "Fixation count in %ROW: %VAL";
+	if(MATRIX_DATA_STATE == "ratio") return "Mean fixation duration in %ROW: %VAL ms";
+	if(MATRIX_DATA_STATE == "meanfixduration") return "Mean fixation duration: %VAL ms";
+	if(MATRIX_DATA_STATE == "meansaccadelength") return "Mean saccade length: %VAL pixels";
+	if(MATRIX_DATA_STATE == "median") return "Median fixation duration in %ROW: %VAL ms";
+	if(MATRIX_DATA_STATE == "haar") return "Hit any AOI rate in %COL: %VAL%";
+	if(MATRIX_DATA_STATE == "visitcount") return "Visitation count in %ROW: %VAL";
+	if(MATRIX_DATA_STATE == "visitmean") return "Mean visitation duration in %ROW: %VAL ms";
+	return overlay_string;
+}
+
+function compute_aoi_grp_cell_value(a, b){
+	let grp = GROUPS[ORDERGROUPIDARRAYINDEX[a]];
+	let lens_id = order_lenses[b];
+	switch(MATRIX_DATA_STATE){
+		case "aoiarea":
+			return base_lenses[lens_id].area;
+		case "haar": {
+			let HAAR = {"hit": 0, "off": 0, "haar": 0};
+			aggregate_hit_any_aoi_rate_across_twi(DATASETS[VALUED[a]], HAAR);
+			let HAAR_VALUE = (HAAR.hit == 0 ? 0 : (HAAR.hit/(HAAR.hit+HAAR.off)).toFixed(2));
+			return 100 * HAAR_VALUE;
+		}
+		case "densitytime":
+			return base_lenses[lens_id].area > 0 ? grp.lenstime[b] / base_lenses[lens_id].area : 0;
+		case "densitycount":
+			return base_lenses[lens_id].area > 0 ? grp.lenscount[b] / base_lenses[lens_id].area : 0;
+		case "time":
+			return grp.lenstime[b];
+		case "percent":
+			return grp.totaltime > 0 ? 100 * grp.lenstime[b] / grp.totaltime : 0;
+		case "count":
+			return grp.lenscount[b];
+		case "ratio":
+			return grp.lenscount[b] > 0 ? grp.lenstime[b] / grp.lenscount[b] : 0;
+		case "meanfixduration":
+			return grp.totalcount > 0 ? grp.totaltime / grp.totalcount : 0;
+		case "meansaccadelength":
+			return grp.number_saccades > 0 ? grp.total_saccadelength / grp.number_saccades : 0;
+		case "median":
+			return (grp.lenscount[b] > 0 && grp.lensmedian != undefined) ? grp.lensmedian[b] : 0;
+		case "visitcount":
+			return grp.visit_durations[b].length;
+		case "visitmean":
+			return grp.visit_durations[b].length > 0 ? grp.visit_totals[b] / grp.visit_durations[b].length : 0;
+		default:
+			return 0;
+	}
+}
+
+function get_aoi_grp_overlay_string(){
+	switch(MATRIX_DATA_STATE){
+		case "aoiarea": return "Area in AOI %ROW: %VAL";
+		case "haar": return "Hit any AOI rate in %COL: %VAL%";
+		case "densitytime": return "Fixation density in %ROW: %VAL ms";
+		case "densitycount": return "Fixation density in %ROW: %VAL";
+		case "time": return "Fixation time in %ROW: %VAL ms";
+		case "percent": return "Percentage of fixation time in %ROW: %VAL%";
+		case "count": return "Fixation count in %ROW: %VAL";
+		case "ratio": return "Mean fixation duration in %ROW: %VAL ms";
+		case "meanfixduration": return "Mean fixation duration: %VAL ms";
+		case "meansaccadelength": return "Mean saccade length: %VAL pixels";
+		case "median": return "Median fixation duration in %ROW: %VAL ms";
+		case "visitcount": return "Visitation count in %ROW: %VAL";
+		case "visitmean": return "Mean visitation duration in %ROW: %VAL ms";
+		default: return overlay_string;
+	}
+}
+
+
 let matrixsketch = (p) => {
 	let f = {
 		"fontName": "Arial",
@@ -1708,21 +1803,12 @@ let load_data = () => {
 		}
 	}else if( MATRIX_VIEW_STATE == "lensegroup_dat" || MATRIX_VIEW_STATE == "dat_lensegroup" ){
 		if( VALUED.length == 0 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
-		for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){ rownames.push("AOI G"+LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group); rowcolours.push(get_lensegroup_col(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group));}
+		push_lensegroup_rownames();
 		for(let a=0; a<VALUED.length; a++){ colnames.push(DATASETS[VALUED[a]].name); colcolours.push(get_dat_col(VALUED[a]));}
 		colspecial = VALUED.indexOf(selected_data); rowspecial = ORDERLENSEGROUPID.indexOf(selected_lensegroup);
 		
 		if(MATRIX_DATA_STATE == "aoiarea") {					
-			let sum_of_aoi_area = [];
-			for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++)
-				sum_of_aoi_area.push(0);
-
-			for(let c=0; c<metric_lenses.length; c++) {
-				let group_num = base_lenses[order_lenses[c]].group;
-				let group_index = ORDERLENSEGROUPID.indexOf(group_num);
-				if(group_index != -1 && group_index < sum_of_aoi_area.length)
-					sum_of_aoi_area[group_index] += base_lenses[order_lenses[c]].area;
-			}				
+			let sum_of_aoi_area = compute_sum_of_aoi_area_by_lensegroup();				
 
 			for(let a=0; a<VALUED.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
@@ -1744,18 +1830,7 @@ let load_data = () => {
 			}
 		}
 		else {
-			let sum_of_aoi_area = [];
-			for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++)
-				sum_of_aoi_area.push(0);
-
-			if(MATRIX_DATA_STATE.indexOf("density") > -1) {
-				for(let c=0; c<metric_lenses.length; c++) {
-					let group_num = base_lenses[order_lenses[c]].group;
-					let group_index = ORDERLENSEGROUPID.indexOf(group_num);
-					if(group_index != -1 && group_index < sum_of_aoi_area.length)
-						sum_of_aoi_area[group_index] += base_lenses[order_lenses[c]].area;
-				}
-			}			
+			let sum_of_aoi_area = compute_sum_of_aoi_area_by_lensegroup();		
 
 			for(let a=0; a<VALUED.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
@@ -1765,33 +1840,7 @@ let load_data = () => {
 			}
 		}
 		
-		if(MATRIX_DATA_STATE == "aoiarea") {
-			overlay_string = "Area in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "densitytime" ){
-			overlay_string = "Fixation density in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "densitycount" ){
-			overlay_string = "Fixation density in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "time" ){
-			overlay_string = "Fixation time in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "percent" ){
-			overlay_string = "Percentage of fixation time in %ROW: %VAL%";
-		}else if( MATRIX_DATA_STATE == "count" ){
-			overlay_string = "Fixation count in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "ratio" ){
-			overlay_string = "Mean fixation duration in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "meanfixduration" ) {
-			overlay_string = "Mean fixation duration: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "meansaccadelength" ) {
-			overlay_string = "Mean saccade length: %VAL pixels";		
-		}else if( MATRIX_DATA_STATE == "median" ){
-			overlay_string = "Median fixation duration in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "haar" ){
-			overlay_string = "Hit any AOI rate in %COL: %VAL%";
-		}else if( MATRIX_DATA_STATE == "visitcount" ){
-			overlay_string = "Visitation count in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "visitmean" ){
-			overlay_string = "Mean visitation duration in %ROW: %VAL ms";
-		}
+		overlay_string = get_lensegroup_overlay_string();
 	}else if( MATRIX_VIEW_STATE == "aoi_dat" || MATRIX_VIEW_STATE == "dat_aoi" ){
 	if( VALUED.length == 0 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 		
@@ -1884,53 +1933,18 @@ let load_data = () => {
 			}
 		}
 		
-		// Overlay strings remain the same
-		if(MATRIX_DATA_STATE == "aoiarea") {
-			overlay_string = "Area in AOI %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "densitytime" ){
-			overlay_string = "Fixation density in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "densitycount" ){
-			overlay_string = "Fixation density in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "time" ){
-			overlay_string = "Fixation time in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "percent" ){
-			overlay_string = "Percentage of fixation time in %ROW: %VAL%";
-		}else if( MATRIX_DATA_STATE == "count" ){
-			overlay_string = "Fixation count in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "ratio" ){
-			overlay_string = "Mean fixation duration in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "meanfixduration" ) {
-			overlay_string = "Mean fixation duration: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "meansaccadelength" ) {
-			overlay_string = "Mean saccade length: %VAL pixels";
-		}else if( MATRIX_DATA_STATE == "median" ){
-			overlay_string = "Median fixation duration in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "haar" ){
-			overlay_string = "Hit any AOI rate in %COL: %VAL%";
-		}else if( MATRIX_DATA_STATE == "visitcount" ){
-			overlay_string = "Visitation count in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "visitmean" ){
-			overlay_string = "Mean visitation duration in %ROW: %VAL ms";
-		}
+		overlay_string = get_lensegroup_overlay_string();
+
 	}else if( MATRIX_VIEW_STATE == "lensegroup_toi" || MATRIX_VIEW_STATE == "toi_lensegroup" ){
 		if((DAT_MODE == 2 && VALUED.indexOf(selected_data) == -1) || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 		if( DAT_MODE == 1 && ORDERGROUPID.indexOf(selected_grp) == -1 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 
-		for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){ rownames.push("AOI G"+LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group); rowcolours.push(get_lensegroup_col(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group)); }
+		push_lensegroup_rownames();
 		for(let a=0; a<order_twis.length; a++){ colnames.push(base_twis[order_twis[a]].name); colcolours.push(get_twi_col(order_twis[a]));}
 		colspecial = order_twis.indexOf(selected_twi); rowspecial = ORDERLENSEGROUPID.indexOf(selected_lensegroup);
 
 		if(MATRIX_DATA_STATE == "aoiarea") {					
-			let sum_of_aoi_area = [];
-			for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++)
-				sum_of_aoi_area.push(0);
-
-			for(let c=0; c<metric_lenses.length; c++) {
-				let group_num = base_lenses[order_lenses[c]].group;
-				let group_index = ORDERLENSEGROUPID.indexOf(group_num);
-				if(group_index != -1 && group_index < sum_of_aoi_area.length)
-					sum_of_aoi_area[group_index] += base_lenses[order_lenses[c]].area;
-			}				
+			let sum_of_aoi_area = compute_sum_of_aoi_area_by_lensegroup();				
 
 			for(let a=0; a<order_twis.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
@@ -1953,18 +1967,7 @@ let load_data = () => {
 			}
 		}
 		else {
-			let sum_of_aoi_area = [];
-			for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++)
-				sum_of_aoi_area.push(0);
-
-			if(MATRIX_DATA_STATE.indexOf("density") > -1) {
-				for(let c=0; c<metric_lenses.length; c++) {
-					let group_num = base_lenses[order_lenses[c]].group;
-					let group_index = ORDERLENSEGROUPID.indexOf(group_num);
-					if(group_index != -1 && group_index < sum_of_aoi_area.length)
-						sum_of_aoi_area[group_index] += base_lenses[order_lenses[c]].area;
-				}
-			}					
+			let sum_of_aoi_area = compute_sum_of_aoi_area_by_lensegroup();					
 
 			for(let a=0; a<order_twis.length; a++){ 
 				matrix_values.push([]); matrix_colours.push([]);
@@ -1974,54 +1977,20 @@ let load_data = () => {
 			}
 		}
 		// fixation time
-		if(MATRIX_DATA_STATE == "aoiarea") {
-			overlay_string = "Area in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "densitytime" ){
-			overlay_string = "Fixation density in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "densitycount" ){
-			overlay_string = "Fixation density in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "time" ){
-			overlay_string = "Fixation time in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "percent" ){
-			overlay_string = "Percentage of fixation time in %ROW: %VAL%";
-		}else if( MATRIX_DATA_STATE == "count" ){
-			overlay_string = "Fixation count in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "ratio" ){
-			overlay_string = "Mean fixation duration in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "meanfixduration" ) {
-			overlay_string = "Mean fixation duration: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "meansaccadelength" ) {
-			overlay_string = "Mean saccade length: %VAL pixels";
-		}else if( MATRIX_DATA_STATE == "median" ){
-			overlay_string = "Median fixation duration in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "haar" ){
-			overlay_string = "Hit any AOI rate in %COL: %VAL%";
-		}else if( MATRIX_DATA_STATE == "visitcount" ){
-			overlay_string = "Visitation count in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "visitmean" ){
-			overlay_string = "Mean visitation duration in %ROW: %VAL ms";
-		}
+		overlay_string = get_lensegroup_overlay_string();
+
 	}else if( MATRIX_VIEW_STATE == "lensegroup_twigroup" || MATRIX_VIEW_STATE == "twigroup_lensegroup" ){
 		if((DAT_MODE == 2 && VALUED.indexOf(selected_data) == -1) || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 		if( DAT_MODE == 1 && ORDERGROUPID.indexOf(selected_grp) == -1 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 		if(ORDERTWIGROUPIDARRAYINDEX.indexOf(-1) != -1) return;
 
-		for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){ rownames.push("AOI G"+LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group); rowcolours.push(get_lensegroup_col(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group)); }
+		push_lensegroup_rownames();
 		for(let a=0; a<ORDERTWIGROUPIDARRAYINDEX.length; a++){ colnames.push("TWI G"+TWIGROUPS[ORDERTWIGROUPIDARRAYINDEX[a]].group); 
 			colcolours.push(get_twigroup_col(TWIGROUPS[ORDERTWIGROUPIDARRAYINDEX[a]].group)); }
 		colspecial = ORDERTWIGROUPID.indexOf(selected_twigroup);  rowspecial = ORDERLENSEGROUPID.indexOf(selected_lensegroup);
 
 		if(MATRIX_DATA_STATE == "aoiarea") {					
-			let sum_of_aoi_area = [];
-			for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++)
-				sum_of_aoi_area.push(0);
-
-			for(let c=0; c<metric_lenses.length; c++) {
-				let group_num = base_lenses[order_lenses[c]].group;
-				let group_index = ORDERLENSEGROUPID.indexOf(group_num);
-				if(group_index != -1 && group_index < sum_of_aoi_area.length)
-					sum_of_aoi_area[group_index] += base_lenses[order_lenses[c]].area;
-			}				
+			let sum_of_aoi_area = compute_sum_of_aoi_area_by_lensegroup();				
 
 			for(let a=0; a<ORDERTWIGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
@@ -2051,18 +2020,7 @@ let load_data = () => {
 			}
 		}
 		else {
-			let sum_of_aoi_area = [];
-			for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++)
-				sum_of_aoi_area.push(0);
-
-			if(MATRIX_DATA_STATE.indexOf("density") > -1) {
-				for(let c=0; c<metric_lenses.length; c++) {
-					let group_num = base_lenses[order_lenses[c]].group;
-					let group_index = ORDERLENSEGROUPID.indexOf(group_num);
-					if(group_index != -1 && group_index < sum_of_aoi_area.length)
-						sum_of_aoi_area[group_index] += base_lenses[order_lenses[c]].area;
-				}
-			}
+			let sum_of_aoi_area = compute_sum_of_aoi_area_by_lensegroup();
 
 			for(let a=0; a<ORDERTWIGROUPIDARRAYINDEX.length; a++){ 
 				matrix_values.push([]); matrix_colours.push([]);
@@ -2089,34 +2047,9 @@ let load_data = () => {
 				}
 			}
 		}
-		// fixation time
-		if(MATRIX_DATA_STATE == "aoiarea") {
-			overlay_string = "Area in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "densitytime" ){
-			overlay_string = "Fixation density in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "densitycount" ){
-			overlay_string = "Fixation density in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "time" ){
-			overlay_string = "Fixation time in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "percent" ){
-			overlay_string = "Percentage of fixation time in %ROW: %VAL%";
-		}else if( MATRIX_DATA_STATE == "count" ){
-			overlay_string = "Fixation count in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "ratio" ){
-			overlay_string = "Mean fixation duration in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "meanfixduration" ) {
-			overlay_string = "Mean fixation duration: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "meansaccadelength" ) {
-			overlay_string = "Mean saccade length: %VAL pixels";
-		}else if( MATRIX_DATA_STATE == "median" ){
-			overlay_string = "Median fixation duration in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "haar" ){
-			overlay_string = "Hit any AOI rate in %COL: %VAL%";
-		}else if( MATRIX_DATA_STATE == "visitcount" ){
-			overlay_string = "Visitation count in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "visitmean" ){
-			overlay_string = "Mean visitation duration in %ROW: %VAL ms";
-		}
+		
+		overlay_string = get_lensegroup_overlay_string();
+
 	}else if( MATRIX_VIEW_STATE == "aoi_toi" || MATRIX_VIEW_STATE == "toi_aoi" ){
 		if((DAT_MODE == 2 && VALUED.indexOf(selected_data) == -1) || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 		if( DAT_MODE == 1 && ORDERGROUPID.indexOf(selected_grp) == -1 || metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
@@ -2190,34 +2123,8 @@ let load_data = () => {
 			}
 		}
 		
-		// fixation time
-		if(MATRIX_DATA_STATE == "aoiarea") {
-			overlay_string = "Area in AOI %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "densitytime" ){
-			overlay_string = "Fixation density in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "densitycount" ){
-			overlay_string = "Fixation density in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "time" ){
-			overlay_string = "Fixation time in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "percent" ){
-			overlay_string = "Percentage of fixation time in %ROW: %VAL%";
-		}else if( MATRIX_DATA_STATE == "count" ){
-			overlay_string = "Fixation count in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "ratio" ){
-			overlay_string = "Mean fixation duration in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "meanfixduration" ) {
-			overlay_string = "Mean fixation duration: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "meansaccadelength" ) {
-			overlay_string = "Mean saccade length: %VAL pixels";
-		}else if( MATRIX_DATA_STATE == "median" ){
-			overlay_string = "Median fixation duration in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "haar" ){
-			overlay_string = "Hit any AOI rate in %COL: %VAL%";
-		}else if( MATRIX_DATA_STATE == "visitcount" ){
-			overlay_string = "Visitation count in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "visitmean" ){
-			overlay_string = "Mean visitation duration in %ROW: %VAL ms";
-		}
+		overlay_string = get_lensegroup_overlay_string();
+
 	}else if( MATRIX_VIEW_STATE == "aoi_twigroup" || MATRIX_VIEW_STATE == "twigroup_aoi" ){
 		if((DAT_MODE == 2 && VALUED.indexOf(selected_data) == -1) || lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 		if( DAT_MODE == 1 && ORDERGROUPID.indexOf(selected_grp) == -1 || lenses.length == 0 ){ return; } // metric is meaningless without these conditions
@@ -2300,51 +2207,16 @@ let load_data = () => {
 				}
 			}
 		}
-		// fixation time
-		if(MATRIX_DATA_STATE == "aoiarea") {
-			overlay_string = "Area in AOI %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "densitytime" ){
-			overlay_string = "Fixation density in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "densitycount" ){
-			overlay_string = "Fixation density in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "time" ){
-			overlay_string = "Fixation time in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "percent" ){
-			overlay_string = "Percentage of fixation time in %ROW: %VAL%";
-		}else if( MATRIX_DATA_STATE == "count" ){
-			overlay_string = "Fixation count in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "ratio" ){
-			overlay_string = "Mean fixation duration in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "meanfixduration" ) {
-			overlay_string = "Mean fixation duration: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "meansaccadelength" ) {
-			overlay_string = "Mean saccade length: %VAL pixels";
-		}else if( MATRIX_DATA_STATE == "median" ){
-			overlay_string = "Median fixation duration in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "haar" ){
-			overlay_string = "Hit any AOI rate in %COL: %VAL%";
-		}else if( MATRIX_DATA_STATE == "visitcount" ){
-			overlay_string = "Visitation count in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "visitmean" ){
-			overlay_string = "Mean visitation duration in %ROW: %VAL ms";
-		}
+		overlay_string = get_lensegroup_overlay_string();
+
 	}else if( MATRIX_VIEW_STATE == "lensegroup_grp" || MATRIX_VIEW_STATE == "grp_lensegroup" ){
 		if( metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
-		for(let a=0; a<ORDERLENSEGROUPIDARRAYINDEX.length; a++){ rownames.push("AOI G"+LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group); rowcolours.push(get_lensegroup_col(LENSEGROUPS[ORDERLENSEGROUPIDARRAYINDEX[a]].group));}
+		push_lensegroup_rownames();
 		for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){ colnames.push("Sample G"+GROUPS[ORDERGROUPIDARRAYINDEX[a]].group+''); colcolours.push(get_grp_col(GROUPS[ORDERGROUPIDARRAYINDEX[a]].group));}
 		colspecial = ORDERGROUPID.indexOf(selected_grp); rowspecial = ORDERLENSEGROUPID.indexOf(selected_lensegroup);
 
 		if(MATRIX_DATA_STATE == "aoiarea") {					
-			let sum_of_aoi_area = [];
-			for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++)
-				sum_of_aoi_area.push(0);
-
-			for(let c=0; c<metric_lenses.length; c++) {
-				let group_num = base_lenses[order_lenses[c]].group;
-				let group_index = ORDERLENSEGROUPID.indexOf(group_num);
-				if(group_index != -1 && group_index < sum_of_aoi_area.length)
-					sum_of_aoi_area[group_index] += base_lenses[order_lenses[c]].area;
-			}				
+			let sum_of_aoi_area = compute_sum_of_aoi_area_by_lensegroup();				
 
 			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
 				matrix_values.push([]); matrix_colours.push([]);
@@ -2366,18 +2238,7 @@ let load_data = () => {
 			overlay_string = "Hit any AOI rate in %COL: %VAL%";
 		}else {
 			//Since GROUPS data is already filtered by TWI_MODE (see compute_groupings), we need not call aggregate_aoi_metrics_across_twi
-			let sum_of_aoi_area = [];
-			for(let b=0; b<ORDERLENSEGROUPIDARRAYINDEX.length; b++)
-				sum_of_aoi_area.push(0);
-
-			if(MATRIX_DATA_STATE.indexOf("density") > -1) {
-				for(let c=0; c<metric_lenses.length; c++) {
-					let group_num = base_lenses[order_lenses[c]].group;
-					let group_index = ORDERLENSEGROUPID.indexOf(group_num);
-					if(group_index != -1 && group_index < sum_of_aoi_area.length)
-						sum_of_aoi_area[group_index] += base_lenses[order_lenses[c]].area;
-				}
-			}
+			let sum_of_aoi_area = compute_sum_of_aoi_area_by_lensegroup();
 			
 			// fixation time
 			if(MATRIX_DATA_STATE == "densitytime") {
@@ -2495,7 +2356,6 @@ let load_data = () => {
 				overlay_string = "Mean visitation duration in %ROW: %VAL ms";
 			}
 		}
-		
 	}else if( MATRIX_VIEW_STATE == "aoi_grp" || MATRIX_VIEW_STATE == "grp_aoi" ){
 		if( metric_lenses.length == 0 ){ return; } // metric is meaningless without these conditions
 		
@@ -2509,140 +2369,15 @@ let load_data = () => {
 		}
 		colspecial = ORDERGROUPID.indexOf(selected_grp); rowspecial = order_lenses.indexOf(selected_lens);
 		//Since GROUPS data is already filtered by TWI_MODE (see compute_groupings), we need not call aggregate_aoi_metrics_across_twi
-		// fixation time
-		if(MATRIX_DATA_STATE == "aoiarea") {
-			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<metric_lenses.length; b++){
-					matrix_values[a].push( base_lenses[order_lenses[b]].area );
-				}
-			}
-			overlay_string = "Area in AOI %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "haar" ){
-			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				let HAAR = {"hit": 0, "off": 0, "haar": 0};
-				aggregate_hit_any_aoi_rate_across_twi(DATASETS[VALUED[a]], HAAR);
-				let HAAR_VALUE = (HAAR.hit == 0 ? 0 : (HAAR.hit/(HAAR.hit+HAAR.off)).toFixed(2));
-				for(let b=0; b<metric_lenses.length; b++){
-					matrix_values[a].push(100 * HAAR_VALUE);
-				}	
-			}
-			overlay_string = "Hit any AOI rate in %COL: %VAL%";
-		
-		}else if(MATRIX_DATA_STATE == "densitytime") {
-			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<metric_lenses.length; b++){
-					if(base_lenses[order_lenses[b]].area > 0)
-						matrix_values[a].push( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenstime[b] / base_lenses[order_lenses[b]].area);
-					else
-						matrix_values[a].push(0);
-				}
-			}
-			overlay_string = "Fixation density in %ROW: %VAL ms";
-		}else if(MATRIX_DATA_STATE == "densitycount") {
-			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<metric_lenses.length; b++){
-					if(base_lenses[order_lenses[b]].area > 0)
-						matrix_values[a].push( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenscount[b] / base_lenses[order_lenses[b]].area);
-					else
-						matrix_values[a].push(0);
-				}
-			}
-			overlay_string = "Fixation density in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "time" ){
-			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<metric_lenses.length; b++){
-					matrix_values[a].push( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenstime[b] );
-				}
-			}
-			overlay_string = "Fixation time in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "percent" ){
-			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<metric_lenses.length; b++){
-					if(GROUPS[ORDERGROUPIDARRAYINDEX[a]].totaltime > 0)
-						matrix_values[a].push( 100 * GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenstime[b] / GROUPS[ORDERGROUPIDARRAYINDEX[a]].totaltime );
-					else
-						matrix_values[a].push(0);
-				}
-			}
-			overlay_string = "Percentage of fixation time in %ROW: %VAL%";
-		}else if( MATRIX_DATA_STATE == "count" ){
-			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<metric_lenses.length; b++){
-					matrix_values[a].push( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenscount[b] );
-				}
-			}
-			overlay_string = "Fixation count in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "ratio" ){
-			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<metric_lenses.length; b++){
-					if ( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenscount[b] > 0 ){
-						matrix_values[a].push( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenstime[b] / GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenscount[b] );
-					}else{ matrix_values[a].push( 0 ); }
-				}
-			}
-			overlay_string = "Mean fixation duration in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "meanfixduration" ) {
-			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				let mean_fix_duration = 0; 
-				if(GROUPS[ORDERGROUPIDARRAYINDEX[a]].totalcount > 0)
-					mean_fix_duration = GROUPS[ORDERGROUPIDARRAYINDEX[a]].totaltime / GROUPS[ORDERGROUPIDARRAYINDEX[a]].totalcount;
 
-				for(let b=0; b<metric_lenses.length; b++){
-					matrix_values[a].push( mean_fix_duration );					
-				}
+		for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
+			matrix_values.push([]); matrix_colours.push([]);
+			for(let b=0; b<order_lenses.length; b++){
+				matrix_values[a].push( compute_aoi_grp_cell_value(a, b) );
 			}
-			overlay_string = "Mean fixation duration: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "meansaccadelength" ) {
-			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				let mean_saccade_length = 0; 
-				if(GROUPS[ORDERGROUPIDARRAYINDEX[a]].number_saccades > 0)
-					mean_saccade_length = GROUPS[ORDERGROUPIDARRAYINDEX[a]].total_saccadelength / GROUPS[ORDERGROUPIDARRAYINDEX[a]].number_saccades;
-
-				for(let b=0; b<metric_lenses.length; b++){
-					matrix_values[a].push( mean_saccade_length );					
-				}
-			}
-			overlay_string = "Mean saccade length: %VAL pixels";
-		}else if( MATRIX_DATA_STATE == "median" ){
-			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<metric_lenses.length; b++){
-					if ( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lenscount[b] > 0 && GROUPS[ORDERGROUPIDARRAYINDEX[a]].lensmedian != undefined){
-						matrix_values[a].push( GROUPS[ORDERGROUPIDARRAYINDEX[a]].lensmedian[b] );
-					}else{ matrix_values[a].push( 0 ); }
-				}
-			}
-			overlay_string = "Median fixation duration in %ROW: %VAL ms";
-		}else if( MATRIX_DATA_STATE == "visitcount" ){
-			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<metric_lenses.length; b++){
-					matrix_values[a].push( GROUPS[ORDERGROUPIDARRAYINDEX[a]].visit_durations[b].length );
-				}
-			}
-			overlay_string = "Visitation count in %ROW: %VAL";
-		}else if( MATRIX_DATA_STATE == "visitmean" ){
-			for(let a=0; a<ORDERGROUPIDARRAYINDEX.length; a++){
-				matrix_values.push([]); matrix_colours.push([]);
-				for(let b=0; b<metric_lenses.length; b++){
-					if(GROUPS[ORDERGROUPIDARRAYINDEX[a]].visit_durations[b].length > 0)
-						matrix_values[a].push( GROUPS[ORDERGROUPIDARRAYINDEX[a]].visit_totals[b]/GROUPS[ORDERGROUPIDARRAYINDEX[a]].visit_durations[b].length );
-					else
-						matrix_values[a].push(0);
-				}
-			}
-			overlay_string = "Mean visitation duration in %ROW: %VAL ms";
 		}
+		overlay_string = get_aoi_grp_overlay_string();
+
 	}else if( MATRIX_VIEW_STATE == "toi_dat" || MATRIX_VIEW_STATE == "dat_toi" ){ 
 		for(let a=0; a<order_twis.length; a++){ colnames.push(base_twis[order_twis[a]].name); colcolours.push(get_twi_col(order_twis[a]));}
 		for(let a=0; a<VALUED.length; a++){ rownames.push(DATASETS[VALUED[a]].name); rowcolours.push(get_dat_col(VALUED[a]));}
@@ -3338,6 +3073,9 @@ let get_twigroup_col = (group) => {
 };
 let get_dat_col = (id) => {return GROUPINGS[ (DATASETS[id].group-1) % GROUPINGS.length ];};
 let get_aoi_col = (lens) => {return lens.col(95)};
+
+
+
 let get_lensegroup_col = (lens_group) => {
 	let lgc;
 	for(let l=0; l<lenses.length; l++){
