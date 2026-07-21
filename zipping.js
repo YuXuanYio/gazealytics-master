@@ -496,7 +496,7 @@ function load_zip(){
 										true, // isPreloaded
 										note.locked
 									);
-									if (!noteTypes.includes(note.type)) {
+									if (note.type !== undefined && !noteTypes.includes(note.type)) {
 										noteTypes.push(note.type);
 									}
 								});

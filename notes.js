@@ -31,11 +31,11 @@ function new_note(
 	Y,
 	content,
 	noteBelongTo,
-	type,
+	type = "N/A",
 	timestamp,
 	timestampMs,
-	occuredTimestamp,
-	observer,
+	occuredTimestamp = "00:00:00:00",
+	observer = "N/A",
 	visibleOnCanvas = true,
 	visibleOnTimeline = true,
 	isPreloaded = false,
@@ -725,7 +725,7 @@ function loadNotesIntoDatasets() {
 	base_notes.forEach((note) => {
 		if (note.pid !== currentPid) {
 			currentPid = note.pid;
-			DATASETS[currentPid].notes.events = [];
+			DATASETS[currentPid].notes = { events: [] };
 		}
 		DATASETS[note.pid].notes.events.push(note);
 	});
