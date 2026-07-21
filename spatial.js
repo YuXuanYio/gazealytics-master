@@ -499,7 +499,7 @@ let spatialsketch = (p) => {
 		if(height_changed) {
 			//update height
 			document.getElementById('pj1').style.height = Math.floor(spatial_height)+'px';
-			document.getElementById('canvas_box').style.height = Math.floor(p.windowHeight * CANVAS_BOX_HEIGHT_PERCENTAGE)+'px';
+			document.getElementById('canvas_box').style.height = Math.floor(spatial_height + timeline_canvas_height)+'px';
 		}
 		
 		p.resizeCanvas(Math.floor(spatial_width), Math.floor(spatial_height));		
