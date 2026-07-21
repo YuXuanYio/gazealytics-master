@@ -47,6 +47,9 @@ function addBookmarkButton(data, h2top, h2, canvas, toi_bookmark) {
     }
 
     let sorted_timestamps = Object.keys(grouped_events).map(Number).sort((a, b) => a - b);
+	if (sorted_timestamps.length === 0) {
+        return;
+    }
 
     let currentGroup = [];
     let currentStartTimestamp = sorted_timestamps[0];

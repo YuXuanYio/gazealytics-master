@@ -321,6 +321,7 @@ let timelinesketch = (p) => {
 					if(bFilteredIn) {
 						h = timeline_height/TIMELINE_CANVAS.num_of_rows*row;
 						toi = data.tois[ w ];
+						
 						p.strokeWeight(0);
 						if(p.textAscent(s)<d){
 							p.text(s.substring(0,9), 4, h+p.textAscent()+(.1*d));
@@ -878,17 +879,21 @@ let draw_time_all = (canvas) => {
 					if(bFilteredIn) {
 						h2top = h2*row;		
 						toi = data.tois[ w ];
+						row++;
 						
 						//find out tmax and tmin of TWIs of this sample
 						if( !USE_RELATIVE ){ toi_longest_duration = (toi.tmax-toi.tmin); }
+						
+						if (data.notes) {
+							addBookmarkButton(data, h2top, h2, canvas, toi);
+						}
+						
 						// grey backing layer
 						if(data.fixs.length == 0){
 							continue;					
 						}
 
-						if (data.notes) {
-							addBookmarkButton(data, h2top, h2, canvas, toi);
-						}
+
 					
 						for(let j = toi.j_min; j < toi.j_max; j++){
 							if(data.fixs[j] != undefined && (data.fixs[j].t - toi.tmin)/toi_longest_duration < TIME_ANIMATE) {
@@ -943,8 +948,6 @@ let draw_time_all = (canvas) => {
 								}
 							}					
 						}
-						row++;
-						// }
 					}	
 				}
 			}
