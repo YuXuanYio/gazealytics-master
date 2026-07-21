@@ -476,15 +476,17 @@ function compute_toi_metrics(data_id, toi_id){
 	// fill grid transitions table
 	toi.grid_transitions = []; toi.grid_density = [];
 	for(i=0; i<GRID_N**2; i++){ toi.grid_density.push(0); toi.grid_transitions.push([]); for(j=0; j<GRID_N**2; j++){ toi.grid_transitions[i].push(0); } }
-	for(j=0; j<fixs.length && fixs[j].t < tmax; j++){
-		if( fixs[j].t > tmin ){
-			vx1 = Math.floor( (fixs[j].x * GRID_N)/WIDTH );
-			vy1 = Math.floor( (fixs[j].y * GRID_N)/HEIGHT );
-			toi.grid_density[ vx1 * GRID_N + vy1 ] += fixs[j].dt;
-			if( j < fixs.length - 1 && fixs[j+1].t < tmax ){
-				vx2 = Math.floor( (fixs[j+1].x * GRID_N)/WIDTH );
-				vy2 = Math.floor( (fixs[j+1].y * GRID_N)/HEIGHT );
-				if( vx1 != vx2 || vy1 != vy2){ toi.grid_transitions[ vx1 * GRID_N + vy1 ][ vx2 * GRID_N + vy2 ] += fixs[j].dt; }
+	if(WIDTH > 0 && HEIGHT > 0){
+		for(j=0; j<fixs.length && fixs[j].t < tmax; j++){
+			if( fixs[j].t > tmin ){
+				vx1 = Math.min(GRID_N-1, Math.max(0, Math.floor( (fixs[j].x * GRID_N)/WIDTH )));
+				vy1 = Math.min(GRID_N-1, Math.max(0, Math.floor( (fixs[j].y * GRID_N)/HEIGHT )));
+				toi.grid_density[ vx1 * GRID_N + vy1 ] += fixs[j].dt;
+				if( j < fixs.length - 1 && fixs[j+1].t < tmax ){
+					vx2 = Math.min(GRID_N-1, Math.max(0, Math.floor( (fixs[j+1].x * GRID_N)/WIDTH )));
+					vy2 = Math.min(GRID_N-1, Math.max(0, Math.floor( (fixs[j+1].y * GRID_N)/HEIGHT )));
+					if( vx1 != vx2 || vy1 != vy2){ toi.grid_transitions[ vx1 * GRID_N + vy1 ][ vx2 * GRID_N + vy2 ] += fixs[j].dt; }
+				}
 			}
 		}
 	}
