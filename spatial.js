@@ -96,7 +96,7 @@ let spatialsketch = (p) => {
 				find_note(p, X, Y);
 				if(selected_note == -1){
 					view_panel(4);
-					new_note(X+OFFSET_X, Y+OFFSET_Y, "", "", "N/A" , "N/A", "N/A", "00:00:00:00", "N/A", true, true);
+					new_note(X+OFFSET_X, Y+OFFSET_Y, "", "", "N/A" , "00:00:00:00", 0, "00:00:00:00", "N/A", true, true);
 				}				
 			}else{
 				find_lens(X, Y);
@@ -499,7 +499,7 @@ let spatialsketch = (p) => {
 		if(height_changed) {
 			//update height
 			document.getElementById('pj1').style.height = Math.floor(spatial_height)+'px';
-			document.getElementById('canvas_box').style.height = Math.floor(p.windowHeight * CANVAS_BOX_HEIGHT_PERCENTAGE)+'px';
+			document.getElementById('canvas_box').style.height = Math.floor(spatial_height + timeline_canvas_height)+'px';
 		}
 		
 		p.resizeCanvas(Math.floor(spatial_width), Math.floor(spatial_height));		

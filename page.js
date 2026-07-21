@@ -1257,6 +1257,8 @@ function reorder_matrix(sort_type){
 	if(sort_type != 'No_sort'){sort_selected_name = '';}
 	else
 		return;
+	if(matrix_values.length < 2 || matrix_values[0].length < 2){
+		return; }
 	var perm = [], row_perm = [], col_perm = [];
 	if(sort_type == 'optimal_leaf_order'){
 		var transpose = reorder.transpose(matrix_values),

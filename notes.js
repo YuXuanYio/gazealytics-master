@@ -31,11 +31,11 @@ function new_note(
 	Y,
 	content,
 	noteBelongTo,
-	type,
-	timestamp,
-	timestampMs,
-	occuredTimestamp,
-	observer,
+	type = "N/A",
+	timestamp = "00:00:00:00",
+	timestampMs = 0,
+	occuredTimestamp = "00:00:00:00",
+	observer = "N/A",
 	visibleOnCanvas = true,
 	visibleOnTimeline = true,
 	isPreloaded = false,
@@ -271,16 +271,16 @@ function new_note(
 	// Click event for selection
 	node.onclick = function (e) {
 		var v = parseInt(this.id.split("_")[1]);
-		var e_type = e.target.id.split("_")[2];
-		if (e_type !== "content" && e_type !== "pid") {
+		var isEditableField = ["INPUT", "SELECT", "OPTION", "TEXTAREA"].includes(e.target.tagName);
+		if (isEditableField) {
 			if (selected_note !== v) {
 				select_note(v);
-			} else {
-				select_note(-1);
 			}
 		} else {
 			if (selected_note !== v) {
 				select_note(v);
+			} else {
+				select_note(-1);
 			}
 		}
 	};
@@ -725,7 +725,7 @@ function loadNotesIntoDatasets() {
 	base_notes.forEach((note) => {
 		if (note.pid !== currentPid) {
 			currentPid = note.pid;
-			DATASETS[currentPid].notes.events = [];
+			DATASETS[currentPid].notes = { events: [] };
 		}
 		DATASETS[note.pid].notes.events.push(note);
 	});

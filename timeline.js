@@ -49,7 +49,7 @@ let timelinesketch = (p) => {
 
 	p.setup = () => {
 		// put setup code here		
-		timeline_canvas_height = p.windowHeight * (1-SPATIAL_CANVAS_HEIGHT_PERCENTAGE-0.04);		
+		timeline_canvas_height = p.windowHeight * CANVAS_BOX_HEIGHT_PERCENTAGE - spatial_height;		
 		document.getElementById('pj2').style.height = Math.floor(timeline_canvas_height)+'px';
 		TIMELINE_CANVAS = p.createCanvas(Math.floor(spatial_width), Math.floor(timeline_canvas_height));
 		
@@ -107,7 +107,7 @@ let timelinesketch = (p) => {
 			p.mouseIsPressed_timeline = false;
 			TIMELINE_draggableRecty = (timeline_canvas_height-p.mouseY) + p.offsetY;
 			let timeline_canvas_height_new = TIMELINE_draggableRecty+15;
-			SPATIAL_CANVAS_HEIGHT_PERCENTAGE = 1 - timeline_canvas_height_new / p.windowHeight - 0.01;
+			SPATIAL_CANVAS_HEIGHT_PERCENTAGE = CANVAS_BOX_HEIGHT_PERCENTAGE - timeline_canvas_height_new / p.windowHeight;
 
 			SPATIAL.resizeElements(false, true);
 			p.resizeElements(false, true);
@@ -321,6 +321,7 @@ let timelinesketch = (p) => {
 					if(bFilteredIn) {
 						h = timeline_height/TIMELINE_CANVAS.num_of_rows*row;
 						toi = data.tois[ w ];
+						
 						p.strokeWeight(0);
 						if(p.textAscent(s)<d){
 							p.text(s.substring(0,9), 4, h+p.textAscent()+(.1*d));
@@ -535,8 +536,9 @@ let timelinesketch = (p) => {
 	};
 
 	p.resizeElements = (width_changed, height_changed) => {
-		timeline_canvas_height = p.windowHeight * (1-SPATIAL_CANVAS_HEIGHT_PERCENTAGE-0.01);
-		
+		timeline_canvas_height = p.windowHeight * CANVAS_BOX_HEIGHT_PERCENTAGE - spatial_height;
+		document.getElementById('pj2').style.height = Math.floor(timeline_canvas_height)+'px';
+		document.getElementById('canvas_box').style.height = Math.floor(spatial_height + timeline_canvas_height)+'px';
 
 		p.resizeCanvas(Math.floor(spatial_width), Math.floor(timeline_canvas_height));		
 		p.initConfig(p.windowWidth, p.windowHeight);
@@ -878,16 +880,18 @@ let draw_time_all = (canvas) => {
 					if(bFilteredIn) {
 						h2top = h2*row;		
 						toi = data.tois[ w ];
+						row++;
 						
 						//find out tmax and tmin of TWIs of this sample
 						if( !USE_RELATIVE ){ toi_longest_duration = (toi.tmax-toi.tmin); }
+						
+						if (data.notes) {
+							addBookmarkButton(data, h2top, h2, canvas, toi);
+						}
+						
 						// grey backing layer
 						if(data.fixs.length == 0){
 							continue;					
-						}
-
-						if (data.notes) {
-							addBookmarkButton(data, h2top, h2, canvas, toi);
 						}
 					
 						for(let j = toi.j_min; j < toi.j_max; j++){
@@ -943,8 +947,6 @@ let draw_time_all = (canvas) => {
 								}
 							}					
 						}
-						row++;
-						// }
 					}	
 				}
 			}
