@@ -4,6 +4,7 @@ let TIMELINE_draggableRecty = 0;
 let TIMELINE_draggingY = false; // Is the object being dragged?
 let datname;
 let canvasWidth; 
+let hovered_toi = null;
 
 function is_toi_visible_row(twi_id){
 	if(twi_id == undefined || twi_id >= base_twis.length || !base_twis[twi_id].included || !base_twis[twi_id].checked) {
@@ -449,6 +450,7 @@ let timelinesketch = (p) => {
 									data = rowdata;
 									datname = rowdata.name;
 									toiname = base_twis[toi.twi_id].name;
+									hovered_toi = toi;
 									found = true;
 								}
 								row++;
@@ -460,8 +462,11 @@ let timelinesketch = (p) => {
 					datname = lenses[l].name;
 				}
 
-				t = (p.mouseX - 200)/(p.width-300) * (data.tmax - data.tmin) + data.tmin;
-				if(USE_RELATIVE){ t = (p.mouseX - 200)/(p.width-300) * longest_duration + data.tmin; }
+				let scale_min = (hovered_toi != null) ? hovered_toi.tmin : data.tmin;
+				let scale_max = (hovered_toi != null) ? hovered_toi.tmax : data.tmax;
+
+				t = (p.mouseX - 200)/(p.width-300) * (scale_max - scale_min) + scale_min;
+				if(USE_RELATIVE){ t = (p.mouseX - 200)/(p.width-300) * longest_duration + scale_min; }
 				if( TIME_DATA=='data'||TIME_DATA=='all'||TIME_DATA=='group')
 					tstr = format_time(t/1000) + '   (' + datname+' - '+toiname+')';
 				else 
@@ -479,11 +484,11 @@ let timelinesketch = (p) => {
 				p.stroke( cy(90, data.group) );
 
 				// Storing the required data so that the saccades drawn in Spatial match the timespan denoted by the timeline highlight
-				TIMELINE_HIGHLIGHT.tmin = data.tmin;
-				TIMELINE_HIGHLIGHT.tmax = data.tmax;
+				TIMELINE_HIGHLIGHT.tmin = scale_min;
+				TIMELINE_HIGHLIGHT.tmax = scale_max;
 				TIMELINE_HIGHLIGHT.fixs = data.fixs;
 
-				const cursor_pixel_width = (TIMELINE_MOUSEOVER_WINDOW*1000)/(data.tmax-data.tmin) * (spatial_width-300);
+				const cursor_pixel_width = (TIMELINE_MOUSEOVER_WINDOW*1000)/(scale_max-scale_min) * (spatial_width-300);
 				const left = Math.max(200, Math.min(p.mouseX - cursor_pixel_width/2, 200 + (spatial_width-300) - cursor_pixel_width));
 				const right = Math.min(left + cursor_pixel_width, p.width - 100);
 				
