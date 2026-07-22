@@ -74,7 +74,7 @@
 					image</span>
 			</div><br>
 			<script>noUiSlider.create(document.getElementById('back_sl'), { start: [0.5], step: 0.001, range: { 'min': 0.01, 'max': 0.99 } });</script>
-			<br>
+			
 			<div class="text_pattern">Dispersion-based fixation identification (I-DT):</div>
 			<div class="tool2">
 				<div class="text_pattern">Max Cluster Distance:</div>
@@ -100,14 +100,14 @@
 			<div class="tool">
 				<table>
 					<tr>
-						<th>scale:</th>
+						<th>Scale:</th>
 						<th><input type="number" class="num2" id='SCALE_X' step=0.01 value=1.00
 								onchange="SCALE_X=this.value;rebuild_clustering();background_changed=true;"></th>
 						<th><input type="number" class="num2" id='SCALE_Y' step=0.01 value=1.00
 								onchange="SCALE_Y=this.value;rebuild_clustering();background_changed=true;"></th>
 					<tr>
 					<tr>
-						<th>offset:</th>
+						<th>Offset:</th>
 						<th><input type="number" class="num2" id='offset_xdata' step=10 value=0
 								onchange="offset_xdata=this.value;data_resize()"></th>
 						<th><input type="number" class="num2" id='offset_ydata' step=10 value=0
@@ -133,14 +133,14 @@
 				<br>
 				<table>
 					<tr>
-						<th>from:</th>
+						<th>From:</th>
 						<th><input type="number" class="num2" id='OFFSET_X' step=10 value=0 onchange="crop_resize()">
 						</th>
 						<th><input type="number" class="num2" id='OFFSET_Y' step=10 value=0 onchange="crop_resize()">
 						</th>
 					</tr>
 					<tr>
-						<th>span:</th>
+						<th>Span:</th>
 						<th><input type="number" class="num2" id='WIDTH' step=1 value=0 onchange="crop_resize()"></th>
 						<th><input type="number" class="num2" id='HEIGHT' step=1 value=0 onchange="crop_resize()"></th>
 					<tr>
@@ -161,18 +161,18 @@
 			<div id='fix_controls' style="display:block">
 				<br>
 				<div class="tool2">Fixation size:<div id="fix_size_sl" class="slider"></div>
-					<script>noUiSlider.create(document.getElementById('fix_size_sl'), { start: [0], step: 0.01, range: { 'min': -3, 'max': 3 } });</script>
+					<script>noUiSlider.create(document.getElementById('fix_size_sl'), { start: [0], step: 0.01, range: { 'min': -3, 'max': 2.4 } });</script>
 					<span class="tip">Controls the size of fixation marks</span>
 				</div>
 				<br>
 				<div class="tool2">Fixation opacity:<div id="fix_alpha_sl" class="slider"></div><br />
-					<div class="tool">Fixation sequence
-						<input type="checkbox" id="fixs_saturation" checked="true"
-							onclick="FIXS_SATURATION=this.checked;background_changed=true;">
-						<span class="tip">Toggles showing fixation sequence</span>
-					</div><br>
-					<script>noUiSlider.create(document.getElementById('fix_alpha_sl'), { start: [-3], step: 0.1, range: { 'min': -6, 'max': 0 } });</script>
+					<script>noUiSlider.create(document.getElementById('fix_alpha_sl'), { start: [-3], step: 0.1, range: { 'min': -5.4, 'max': 0 } });</script>
 					<span class="tip">Controls the opacity of fixation marks</span>
+				</div>
+				<div class="tool">
+					<input type="checkbox" id="fixs_saturation" checked="true"
+						onclick="FIXS_SATURATION=this.checked;background_changed=true;">Show fixation sequence
+					<span class="tip">Saccades must be enabled, will display the order of Fixations over the top of the Saccades</span>
 				</div>
 			</div>
 			<hr>
@@ -247,6 +247,11 @@
 					<script>noUiSlider.create(document.getElementById('sacc_blur_sl'), { start: [0], step: 0.1, range: { 'min': 0, 'max': 6 } });</script>
 					<span class="tip">Controls the blur of saccade lines, helps to blend them when bundling</span>
 				</div>
+				<div class="tool">
+					<input type="checkbox" id="sac_saturation" checked="true"
+						onclick="SACC_SATURATION=this.checked;midground_changed=true;">Show Saccade Sequence
+						<span class="tip">Displays the view order for fixations over the top of the Saccades. Recommended to also enable 'Show Fixation Sequence' in Fixations.</span>
+				</div><br>
 				<hr>
 				<div class="tool">
 					AOI Filter:
@@ -263,11 +268,7 @@
 				<div class="tool">
 					Data Colouring Mode:<br>
 					<input type="radio" name="Colour" id="group" value="group" checked="checked"><label for="group">By
-						Sample Group</label>
-					<div class="tool">
-						<input type="checkbox" id="sac_saturation" checked="true"
-							onclick="SACC_SATURATION=this.checked;midground_changed=true;">Saccade sequence
-					</div><br>
+						Sample Group</label><br>
 					<input type="radio" name="Colour" id="direction" value="direction"><label for="direction">By
 						Direction</label><br>
 					<input type="radio" name="Colour" id="type" value="type"><label for="type">Glance Type</label>
