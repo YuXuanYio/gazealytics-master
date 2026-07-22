@@ -74,7 +74,7 @@
 					image</span>
 			</div><br>
 			<script>noUiSlider.create(document.getElementById('back_sl'), { start: [0.5], step: 0.001, range: { 'min': 0.01, 'max': 0.99 } });</script>
-			<br>
+			
 			<div class="text_pattern">Dispersion-based fixation identification (I-DT):</div>
 			<div class="tool2">
 				<div class="text_pattern">Max Cluster Distance:</div>
@@ -100,14 +100,14 @@
 			<div class="tool">
 				<table>
 					<tr>
-						<th>scale:</th>
+						<th>Scale:</th>
 						<th><input type="number" class="num2" id='SCALE_X' step=0.01 value=1.00
 								onchange="SCALE_X=this.value;rebuild_clustering();background_changed=true;"></th>
 						<th><input type="number" class="num2" id='SCALE_Y' step=0.01 value=1.00
 								onchange="SCALE_Y=this.value;rebuild_clustering();background_changed=true;"></th>
 					<tr>
 					<tr>
-						<th>offset:</th>
+						<th>Offset:</th>
 						<th><input type="number" class="num2" id='offset_xdata' step=10 value=0
 								onchange="offset_xdata=this.value;data_resize()"></th>
 						<th><input type="number" class="num2" id='offset_ydata' step=10 value=0
@@ -133,14 +133,14 @@
 				<br>
 				<table>
 					<tr>
-						<th>from:</th>
+						<th>From:</th>
 						<th><input type="number" class="num2" id='OFFSET_X' step=10 value=0 onchange="crop_resize()">
 						</th>
 						<th><input type="number" class="num2" id='OFFSET_Y' step=10 value=0 onchange="crop_resize()">
 						</th>
 					</tr>
 					<tr>
-						<th>span:</th>
+						<th>Span:</th>
 						<th><input type="number" class="num2" id='WIDTH' step=1 value=0 onchange="crop_resize()"></th>
 						<th><input type="number" class="num2" id='HEIGHT' step=1 value=0 onchange="crop_resize()"></th>
 					<tr>
