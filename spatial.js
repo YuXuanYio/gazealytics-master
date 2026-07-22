@@ -537,18 +537,19 @@ let draw_fixs_by_twi = (canvas, data, group, twi, fixs) => {
 	for(let j = twi.j_min, seq=0; j<twi.j_max && (fixs[j].t - twi.tmin)/longest_duration < TIME_ANIMATE; j++,seq++){
 		if(fixs[j] != undefined && (fixs[j].t - twi.tmin)/longest_duration < TIME_ANIMATE){
 			let size = Math.exp(FIX_SIZE);
+			let baseAlpha = 100*Math.exp(FIX_ALPHA);
 			if(FIXS_SATURATION && legval == -1 || legval == group-1) {
-				let val = 75.5*seq/max_val + 30.0; //interpolation of transparency (saliency) in desired alpha range (30.0, 105.5)  
+				let val = baseAlpha * (0.3 + 0.7*seq/max_val); //scales the sequence gradient by the opacity slider instead of a fixed range
 				canvas.noStroke();
 				if(seq == 0)
-					canvas.fill( cy(105.5, 5)); 
+					canvas.fill( cy(Math.min(baseAlpha*1.05, 100), 5)); 
 				else if(seq == max_val)
-					canvas.fill( cy(val, 14)); 			 
+					canvas.fill( cy(val, 14)); 	 
 				else
 					canvas.fill( cy(val, group)); 
 			}
 			else {
-				canvas.fill(cy(100*Math.exp(FIX_ALPHA), group)); canvas.noStroke();
+				canvas.fill(cy(baseAlpha, group)); canvas.noStroke();
 			}
 			
 			canvas.ellipse(fixs[j].x * pos_ratio + ground_x, fixs[j].y * pos_ratio + ground_y,
@@ -831,8 +832,8 @@ let draw_saccade_by_twi = (canvas, sacs, data, group, toi, longest_duration, new
 					canvas.noFill(); canvas.strokeWeight(coef_splat[splat]);
 					if(COLOUR_MODE == "group"){ 
 						if(SACC_SATURATION && legval == -1 || legval == group-1) {
-							canvas.strokeWeight(3);							
-							let val = 25.5*seq/max_val + 3.0; //interpolation of transparency (saliency) in desired alpha range (3.0, 25.5)  
+							canvas.strokeWeight(coef_splat[splat] * 0.5);
+							let val = Math.min(coef_weight[splat] * (1.1 + 0.4*seq/max_val), 100);
 							canvas.stroke( cy(val, group)); 
 						}
 						else {
@@ -864,7 +865,7 @@ let draw_saccade_by_twi = (canvas, sacs, data, group, toi, longest_duration, new
 		for(let j = toi.j_min, seq=0; j<toi.j_max && (data.fixs[j].t - toi.tmin)/longest_duration < TIME_ANIMATE; j++,seq++){
 			if(data.fixs[j] != undefined && (data.fixs[j].t - toi.tmin)/longest_duration < TIME_ANIMATE){				
 	
-				if(FIXS_SATURATION && legval == -1 || legval == group-1) {
+				if( legval == -1 || legval == group-1) {
 					//draw text label
 					canvas.strokeWeight(0);
 					canvas.fill(black(100));
@@ -883,6 +884,7 @@ let draw_saccade_by_twi = (canvas, sacs, data, group, toi, longest_duration, new
 		}
 	}
 };
+
 let draw_sacs = (canvas) => {
 	filter_saccades();
 	coef_weight = [];
